@@ -1,0 +1,13 @@
+{
+  "name": "@betterlms/common",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.30.1",
+    "zod": "^4.1.11"
+  }
+}
