@@ -4,7 +4,7 @@
 		"paths": {
 			"@/*": ["src/*"]
 		},
-		"moduleResolution": "Node",
+		"moduleResolution": "NodeNext",
 		"target": "ES2022",
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"module": "ESNext",

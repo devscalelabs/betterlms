@@ -1,5 +1,8 @@
 {
 	"extends": "@betterlms/typescript/base-react.json",
+	"compilerOptions": {
+		"module": "NodeNext"
+	},
 	"include": ["**/*.ts", "**/*.tsx"],
 	"exclude": ["node_modules", "dist"]
 }
