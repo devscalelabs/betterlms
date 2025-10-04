@@ -1,3 +1,5 @@
+import { getRelativeTime } from "@betterlms/common/date";
+import { getUserInitials } from "@betterlms/common/strings";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@betterlms/ui";
 import type { Post } from "../types";
 
@@ -6,32 +8,6 @@ interface PostCardProps {
 }
 
 export const PostCard = ({ post }: PostCardProps) => {
-	const formatDate = (dateString: string) => {
-		const date = new Date(dateString);
-		const now = new Date();
-		const diffInHours = Math.floor(
-			(now.getTime() - date.getTime()) / (1000 * 60 * 60),
-		);
-
-		if (diffInHours < 1) {
-			return "now";
-		} else if (diffInHours < 24) {
-			return `${diffInHours}h`;
-		} else {
-			const diffInDays = Math.floor(diffInHours / 24);
-			return `${diffInDays}d`;
-		}
-	};
-
-	const getUserInitials = (name: string) => {
-		return name
-			.split(" ")
-			.map((n) => n[0])
-			.join("")
-			.toUpperCase()
-			.slice(0, 2);
-	};
-
 	return (
 		<article className="border-b border-border p-4 hover:bg-muted/50 transition-colors">
 			<div className="flex gap-3">
@@ -58,7 +34,7 @@ export const PostCard = ({ post }: PostCardProps) => {
 						</span>
 						<span className="text-muted-foreground text-sm">·</span>
 						<span className="text-muted-foreground text-sm">
-							{formatDate(post.createdAt)}
+							{getRelativeTime(post.createdAt)}
 						</span>
 					</div>
 

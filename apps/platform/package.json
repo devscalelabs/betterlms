@@ -10,6 +10,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@betterlms/common": "workspace:*",
 		"@betterlms/ui": "workspace:*",
 		"@hugeicons/core-free-icons": "^1.1.0",
 		"@hugeicons/react": "^1.1.1",

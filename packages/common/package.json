@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
-  "keywords": [],
+  "exports": {
+    "./strings": "./src/strings.ts",
+    "./date": "./src/date.ts"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
