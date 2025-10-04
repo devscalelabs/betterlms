@@ -1,9 +1,23 @@
 {
   "name": "@betterlms/storages",
   "version": "1.0.0",
-  "description": "",
+  "description": "Modular media upload to S3 storage",
   "main": "index.ts",
-  "keywords": [],
+  "keywords": [
+    "s3",
+    "storage",
+    "upload",
+    "media"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.901.0",
+    "@aws-sdk/s3-request-presigner": "^3.901.0"
+  },
+  "devDependencies": {
+    "@betterlms/typescript": "workspace:*",
+    "@types/node": "^24.6.2",
+    "typescript": "^5.9.3"
+  }
 }

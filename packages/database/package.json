@@ -16,12 +16,12 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@betterlms/typescript": "workspace:*",
 		"@prisma/client": "^6.16.3",
 		"dotenv": "^17.2.3",
 		"prisma": "^6.16.3"
 	},
 	"devDependencies": {
+		"@betterlms/typescript": "workspace:*",
 		"@types/node": "^24.6.2",
 		"typescript": "^5.9.3"
 	}
