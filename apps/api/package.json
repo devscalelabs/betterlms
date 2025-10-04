@@ -16,6 +16,7 @@
     "elysia": "^1.4.9"
   },
   "devDependencies": {
+    "@betterlms/typescript": "workspace:*",
     "@types/node": "^24.6.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
