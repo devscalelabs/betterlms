@@ -1,0 +1,11 @@
+{
+	"name": "@betterlms/typescript",
+	"version": "1.0.0",
+	"description": "",
+	"author": "",
+	"files": [
+		"base.json",
+		"base-react.json"
+	],
+	"license": "ISC"
+}
