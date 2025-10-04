@@ -2,7 +2,10 @@
 	"name": "ui",
 	"version": "1.0.0",
 	"description": "",
-	"main": "index.js",
+	"main": "src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
 	"scripts": {
 		"dev": "tailwindcss -i ./src/globals.css -o ./dist/globals.css --watch"
 	},
