@@ -1,0 +1,194 @@
+---
+globs: *.tsx
+alwaysApply: false
+---
+# Component-Hooks Pattern
+
+This document explains the component-hooks pattern used in the BetterLMS platform frontend application.
+
+## Overview
+
+The application follows a **component-hooks pattern** where business logic is separated from UI components using custom React hooks. This creates a clean separation between presentation and logic.
+
+## Pattern Structure
+
+```
+features/
+├── feature-name/
+│   ├── components/       # UI components (presentation)
+│   ├── hooks/           # Custom hooks (business logic)
+│   └── types/           # TypeScript types
+```
+
+## How It Works
+
+### 1. Components Handle UI Only
+
+Components focus purely on rendering and user interactions:
+
+```tsx
+// features/auth/components/login.tsx
+export const LoginDialog = () => {
+  const { formData, setFormData, login, isLoggingIn } = useLogin();
+  
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>Login</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form onSubmit={(e) => { e.preventDefault(); login(); }}>
+          <Input
+            placeholder="Email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          />
+          <Button type="submit" disabled={isLoggingIn}>
+            Login
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+### 2. Hooks Handle Business Logic
+
+Custom hooks contain all the business logic, state management, and API calls:
+
+```tsx
+// features/auth/hooks/use-login.ts
+export const useLogin = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const { mutate: login, isPending: isLoggingIn } = useMutation({
+    mutationFn: async () => {
+      const response = await api.post<LoginResponse>("api/v1/auth/login", {
+        json: formData,
+      }).json();
+
+      localStorage.setItem("token", response.token);
+      return response;
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  return {
+    formData,
+    setFormData,
+    login,
+    isLoggingIn,
+  };
+};
+```
+
+## Hook Types
+
+### 1. Query Hooks (Data Fetching)
+
+For reading data from the server:
+
+```tsx
+// features/account/hooks/use-account.ts
+export const useAccount = () => {
+  const { data: account, isLoading } = useQuery({
+    enabled: !!localStorage.getItem("token"),
+    queryKey: ["account"],
+    queryFn: () => api.get<AccountResponse>("api/v1/account/").json(),
+  });
+
+  return { account, isLoading };
+};
+```
+
+### 2. Mutation Hooks (Data Updates)
+
+For creating, updating, or deleting data:
+
+```tsx
+// features/auth/hooks/use-register.ts
+export const useRegister = () => {
+  const [formData, setFormData] = useState<RegisterSchema>({
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const { mutate: register, isPending: isRegistering } = useMutation({
+    mutationFn: async () => {
+      registerSchema.parse(formData);
+      
+      const response = await api.post("api/v1/auth/register", {
+        json: formData,
+      }).json();
+      return response;
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  return {
+    formData,
+    setFormData,
+    register,
+    isRegistering,
+  };
+};
+```
+
+## Benefits
+
+1. **Separation of Concerns**: UI components focus on rendering, hooks handle logic
+2. **Reusability**: Hooks can be used across multiple components
+3. **Testability**: Business logic can be tested independently
+4. **Maintainability**: Changes to logic don't affect UI and vice versa
+5. **Type Safety**: Full TypeScript support for both components and hooks
+
+## Usage Pattern
+
+```tsx
+// 1. Import the hook
+import { useLogin } from "../hooks/use-login";
+
+// 2. Use the hook in component
+export const LoginForm = () => {
+  const { formData, setFormData, login, isLoggingIn } = useLogin();
+  
+  // 3. Use returned values in JSX
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); login(); }}>
+      <input 
+        value={formData.email}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+      />
+      <button disabled={isLoggingIn}>
+        {isLoggingIn ? "Logging in..." : "Login"}
+      </button>
+    </form>
+  );
+};
+```
+
+## File Organization
+
+```
+features/auth/
+├── components/
+│   └── login.tsx          # UI component
+├── hooks/
+│   ├── use-login.ts       # Login logic
+│   └── use-register.ts    # Registration logic
+└── types/
+    └── index.ts           # Type definitions
+```
+
+This pattern ensures clean, maintainable, and testable code by keeping UI and business logic separate.

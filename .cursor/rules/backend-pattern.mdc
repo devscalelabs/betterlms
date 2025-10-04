@@ -1,0 +1,235 @@
+---
+alwaysApply: false
+---
+
+# Router Pattern
+
+This document explains the router pattern used in the BetterLMS platform backend API application.
+
+## Overview
+
+The application follows a **router pattern** where route handlers contain both HTTP handling and business logic in a single layer. This is a straightforward approach using Elysia framework.
+
+## Pattern Structure
+
+```
+src/
+├── index.ts              # Application setup and main router
+└── v1/
+    └── router/           # Route definitions with inline logic
+        ├── account.ts    # Account routes
+        └── auth.ts       # Authentication routes
+```
+
+## How It Works
+
+### 1. Routers Handle Everything
+
+Routers handle both HTTP concerns and business logic in the same place:
+
+```tsx
+// v1/router/auth.ts
+export const authRouter = new Elysia({ prefix: "/auth" })
+  .decorate("db", prisma)
+  .post(
+    "/register",
+    async ({ body, db, status }) => {
+      const { name, username, email, password } = body;
+
+      // Check if user exists
+      const getUser = await db.user.findUnique({
+        where: { email },
+      });
+
+      if (getUser) {
+        return status(409, { error: "User already exists" });
+      }
+
+      // Hash password and create user
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await db.user.create({
+        data: { name, username, email, password: hashedPassword },
+      });
+
+      return status(201, { user });
+    },
+    {
+      body: t.Object({
+        name: t.String({ minLength: 3 }),
+        username: t.String({ minLength: 4 }),
+        email: t.String({ format: "email" }),
+        password: t.String({ minLength: 8 }),
+      }),
+    },
+  );
+```
+
+### 2. Inline Business Logic
+
+All business logic is contained within the route handler functions:
+
+```tsx
+// v1/router/auth.ts - Login handler
+.post("/login", async ({ body, db, status }) => {
+  const { email, password } = body;
+
+  // Find user
+  const user = await db.user.findUnique({ where: { email } });
+
+  if (!user) {
+    return status(401, { error: "Invalid credentials" });
+  }
+
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.password!);
+  
+  if (!isPasswordValid) {
+    return status(401, { error: "Invalid credentials" });
+  }
+
+  // Generate JWT token
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const token = await new jose.SignJWT({ id: user.id })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(secret);
+
+  return { token };
+});
+```
+
+## Router Types
+
+### 1. Resource Routers (CRUD Operations)
+
+For managing resources:
+
+```tsx
+// v1/router/account.ts
+export const accountRouter = new Elysia({ prefix: "/account" })
+  .decorate("db", prisma)
+  .get("/", async ({ db, headers, status }) => {
+    const token = headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return status(401, { error: "Unauthorized" });
+    }
+
+    // Verify JWT token
+    const decoded = await jose.jwtVerify(
+      token,
+      new TextEncoder().encode(process.env.JWT_SECRET),
+    );
+
+    // Get user data
+    const user = await db.user.findUnique({
+      where: { id: decoded.payload.id as string },
+    });
+
+    return {
+      user: {
+        id: user?.id,
+        name: user?.name,
+        username: user?.username,
+        email: user?.email,
+        bio: user?.bio,
+        imageUrl: user?.imageUrl,
+        role: user?.role,
+      },
+    };
+  });
+```
+
+### 2. Action Routers (Business Operations)
+
+For specific business operations:
+
+```tsx
+// v1/router/auth.ts
+export const authRouter = new Elysia({ prefix: "/auth" })
+  .decorate("db", prisma)
+  .post("/login", async ({ body, db, status }) => {
+    const { email, password } = body;
+
+    // Business logic for authentication
+    const user = await db.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return status(401, { error: "Invalid credentials" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password!);
+    
+    if (!isPasswordValid) {
+      return status(401, { error: "Invalid credentials" });
+    }
+
+    // JWT generation logic
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const token = await new jose.SignJWT({ id: user.id })
+      .setProtectedHeader({ alg: "HS256" })
+      .setExpirationTime("1h")
+      .sign(secret);
+
+    return { token };
+  });
+```
+
+## Benefits
+
+1. **Simplicity**: Everything in one place - easy to understand
+2. **Direct**: No abstraction layers - straightforward request to response
+3. **Fast Development**: Quick to write and modify
+4. **Type Safety**: Full TypeScript support with Elysia
+5. **Validation**: Built-in request/response validation with TypeBox
+
+## Usage Pattern
+
+```tsx
+// 1. Create router with prefix
+export const authRouter = new Elysia({ prefix: "/auth" })
+  .decorate("db", prisma)  // Inject database
+  .post("/endpoint", async ({ body, db, status }) => {
+    // 2. Handle request
+    const { data } = body;
+    
+    // 3. Business logic inline
+    const result = await db.someModel.create({ data });
+    
+    // 4. Return response
+    return status(201, { result });
+  });
+```
+
+## File Organization
+
+```
+src/
+├── index.ts                    # Main app setup
+└── v1/
+    └── router/                 # All route definitions
+        ├── auth.ts            # Auth routes
+        └── account.ts         # Account routes
+```
+
+## Application Setup
+
+```tsx
+// src/index.ts
+export const app = new Elysia({ adapter: node() })
+  .use(cors({ origin: "http://localhost:3000" }))
+  .group("/api/v1", (app) => app.use(authRouter).use(accountRouter))
+  .get("/", () => "Hello Elysia")
+  .listen(PORT);
+```
+
+## Key Technologies
+
+- **Elysia** - Web framework
+- **TypeScript** - Type safety
+- **Prisma** - Database ORM
+- **Jose** - JWT handling
+- **Bcrypt** - Password hashing
+- **Elysia TypeBox** - Request/response validation
+
+This pattern provides a simple, direct approach to building APIs with everything contained in the router handlers.
