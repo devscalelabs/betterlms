@@ -18,9 +18,18 @@ import type { Channel } from "@/features/channels/types";
 export const PostForm = () => {
 	const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 	const { channels } = useChannels();
+	const [maxLength, setMaxLength] = useState(400);
+
+	function handleMaxLength(event: React.ChangeEvent<HTMLTextAreaElement>) {
+		setMaxLength(event.target.value.length);
+	}
+
 	return (
 		<InputGroup className="border-none shadow-none bg-muted rounded-none ">
-			<InputGroupTextarea placeholder="Ask, Search or Chat..." />
+			<InputGroupTextarea
+				placeholder="Ask, Search or Chat..."
+				onChange={handleMaxLength}
+			/>
 			<InputGroupAddon align="block-end">
 				<InputGroupButton
 					variant="outline"
@@ -50,7 +59,7 @@ export const PostForm = () => {
 						))}
 					</DropdownMenuContent>
 				</DropdownMenu>
-				<InputGroupText className="ml-auto">52% used</InputGroupText>
+				<InputGroupText className="ml-auto">{maxLength}/400</InputGroupText>
 				<Separator orientation="vertical" className="!h-4" />
 				<Button>Post</Button>
 			</InputGroupAddon>

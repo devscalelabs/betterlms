@@ -9,7 +9,7 @@ export const SidebarRight = () => {
 	return (
 		<aside className="w-80 border-r border-border">
 			<HeadingBox>
-				<div>SidebarRight</div>
+				<div />
 				{account ? <AccountCard account={account.user} /> : <LoginDialog />}
 			</HeadingBox>
 		</aside>
