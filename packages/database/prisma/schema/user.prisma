@@ -1,0 +1,28 @@
+enum UserRole {
+  ADMIN
+  MENTOR
+  USER
+}
+
+model User {
+  id String @id @default(cuid())
+
+  name String?
+  username String @unique
+  email String @unique
+  password String?
+  bio String?
+
+  isEmailVerified Boolean?
+  imageUrl String?
+  role UserRole @default(USER)
+
+  isSuspended Boolean @default(false)
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([username])
+}
