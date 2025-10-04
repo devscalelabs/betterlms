@@ -1,16 +1,10 @@
 import { prisma } from "@betterlms/database";
-import { jwt } from "@elysiajs/jwt";
 import bcrypt from "bcrypt";
 import { Elysia, t } from "elysia";
+import * as jose from "jose";
 
 export const authRouter = new Elysia({ prefix: "/auth" })
 	.decorate("db", prisma)
-	.use(
-		jwt({
-			name: "jwt",
-			secret: "Fischl von Luftschloss Narfidort",
-		}),
-	)
 	.post(
 		"/register",
 		async ({ body, db, status }) => {
@@ -81,9 +75,13 @@ export const authRouter = new Elysia({ prefix: "/auth" })
 				});
 			}
 
-			return status(200, {
-				user,
-			});
+			const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+			const token = await new jose.SignJWT({ id: user.id })
+				.setProtectedHeader({ alg: "HS256" })
+				.setExpirationTime("1h")
+				.sign(secret);
+
+			return { token };
 		},
 		{
 			body: t.Object({
