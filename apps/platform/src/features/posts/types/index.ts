@@ -1,0 +1,37 @@
+export type Post = {
+	id: string;
+	title: string | null;
+	content: string;
+	likeCount: number;
+	replyCount: number;
+	channelId: string | null;
+	userId: string | null;
+	parentId: string | null;
+	isDeleted: boolean;
+	createdAt: string;
+	updatedAt: string;
+	user: {
+		id: string;
+		name: string;
+		username: string;
+		imageUrl: string | null;
+	} | null;
+	channel: {
+		id: string;
+		name: string;
+	} | null;
+};
+
+export type PostsResponse = {
+	posts: Post[];
+};
+
+export type CreatePostRequest = {
+	title?: string;
+	content: string;
+	channelId?: string;
+};
+
+export type CreatePostResponse = {
+	post: Post;
+};
