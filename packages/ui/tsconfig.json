@@ -1,11 +1,5 @@
 {
 	"extends": "@betterlms/typescript/base-react.json",
-	"compilerOptions": {
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["src/*"]
-		}
-	},
 	"include": ["**/*.ts", "**/*.tsx"],
 	"exclude": ["node_modules", "dist"]
 }
