@@ -10,3 +10,4 @@ export * from "./components/empty";
 export * from "./components/hover-card";
 export * from "./components/separator";
 export * from "./components/dropdown-menu";
+export * from "./components/avatar";

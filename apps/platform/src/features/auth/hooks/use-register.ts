@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod/v4";
-import { apiClient } from "@/utils/api-client";
+import { api } from "@/utils/api-client";
 
 const registerSchema = z
 	.object({
@@ -31,7 +31,7 @@ export const useRegister = () => {
 		mutationFn: async () => {
 			registerSchema.parse(formData);
 
-			const response = await apiClient
+			const response = await api
 				.post("api/v1/auth/register", {
 					json: formData,
 				})
