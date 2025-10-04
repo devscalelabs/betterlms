@@ -35,3 +35,7 @@ export type CreatePostRequest = {
 export type CreatePostResponse = {
 	post: Post;
 };
+
+export type DeletePostResponse = {
+	message: string;
+};
