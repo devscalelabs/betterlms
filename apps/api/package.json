@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@elysiajs/cors": "^1.4.0",
     "@elysiajs/node": "^1.4.1",
     "elysia": "^1.4.9"
   },

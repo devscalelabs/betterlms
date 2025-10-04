@@ -14,6 +14,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@elysiajs/cors':
+        specifier: ^1.4.0
+        version: 1.4.0(elysia@1.4.9(@sinclair/typebox@0.34.41)(exact-mirror@0.2.2(@sinclair/typebox@0.34.41))(openapi-types@12.1.3)(typescript@5.9.3))
       '@elysiajs/node':
         specifier: ^1.4.1
         version: 1.4.1(elysia@1.4.9(@sinclair/typebox@0.34.41)(exact-mirror@0.2.2(@sinclair/typebox@0.34.41))(openapi-types@12.1.3)(typescript@5.9.3))
@@ -342,6 +345,11 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
+
+  '@elysiajs/cors@1.4.0':
+    resolution: {integrity: sha512-pb0SCzBfFbFSYA/U40HHO7R+YrcXBJXOWgL20eSViK33ol1e20ru2/KUaZYo5IMUn63yaTJI/bQERuQ+77ND8g==}
+    peerDependencies:
+      elysia: '>= 1.4.0'
 
   '@elysiajs/node@1.4.1':
     resolution: {integrity: sha512-2wAALwHK3IYi1XJPnxfp1xJsvps5FqqcQqe+QXjYlGQvsmSG+vI5wNDIuvIlB+6p9NE/laLbqV0aFromf3X7yg==}
@@ -2466,6 +2474,10 @@ snapshots:
 
   '@biomejs/cli-win32-x64@2.2.5':
     optional: true
+
+  '@elysiajs/cors@1.4.0(elysia@1.4.9(@sinclair/typebox@0.34.41)(exact-mirror@0.2.2(@sinclair/typebox@0.34.41))(openapi-types@12.1.3)(typescript@5.9.3))':
+    dependencies:
+      elysia: 1.4.9(@sinclair/typebox@0.34.41)(exact-mirror@0.2.2(@sinclair/typebox@0.34.41))(openapi-types@12.1.3)(typescript@5.9.3)
 
   '@elysiajs/node@1.4.1(elysia@1.4.9(@sinclair/typebox@0.34.41)(exact-mirror@0.2.2(@sinclair/typebox@0.34.41))(openapi-types@12.1.3)(typescript@5.9.3))':
     dependencies:

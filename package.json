@@ -4,8 +4,9 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"dev": "pnpm platform:dev",
+		"dev": "pnpm --parallel dev",
 		"platform:dev": "pnpm --filter platform dev",
+		"api:dev": "pnpm --filter api dev",
 		"db:generate": "pnpm --filter @betterlms/database db:generate",
 		"db:migrate": "pnpm --filter @betterlms/database db:migrate",
 		"db:reset": "pnpm --filter @betterlms/database db:reset",
