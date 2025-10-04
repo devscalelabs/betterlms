@@ -1,0 +1,14 @@
+import { Button } from "@betterlms/ui";
+import type React from "react";
+
+export const MenuItem = ({ children }: { children: React.ReactNode }) => {
+	return (
+		<Button
+			type="button"
+			variant="ghost"
+			className="w-full justify-start text-base"
+		>
+			{children}
+		</Button>
+	);
+};
