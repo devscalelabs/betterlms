@@ -1,15 +1,18 @@
 {
-  "name": "better-openlms",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@biomejs/biome": "2.2.5"
-  }
+	"name": "better-openlms",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"db:generate": "pnpm --filter @betterlms/database db:generate",
+		"db:migrate": "pnpm --filter @betterlms/database db:migrate",
+		"db:reset": "pnpm --filter @betterlms/database db:reset",
+		"db:studio": "pnpm --filter @betterlms/database db:studio"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "2.2.5"
+	}
 }

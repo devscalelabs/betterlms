@@ -6,8 +6,9 @@
 	"scripts": {
 		"db:generate": "pnpm with-env prisma migrate dev --create-only",
 		"db:migrate": "pnpm with-env prisma migrate dev",
+		"db:reset": "pnpm with-env prisma migrate reset",
 		"db:studio": "pnpm with-env prisma studio",
-		"with-env": "dotenv -e ../../.env -- prisma"
+		"with-env": "dotenv -e ../../.env --"
 	},
 	"author": "",
 	"license": "ISC",
