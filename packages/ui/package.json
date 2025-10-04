@@ -1,10 +1,11 @@
 {
-	"name": "ui",
+	"name": "@betterlms/ui",
 	"version": "1.0.0",
 	"description": "",
 	"main": "src/index.ts",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./globals.css": "./dist/globals.css"
 	},
 	"scripts": {
 		"dev": "tailwindcss -i ./src/globals.css -o ./dist/globals.css --watch"
