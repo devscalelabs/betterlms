@@ -1,4 +1,4 @@
-import { Button } from "@betterlms/ui";
+import { LoginDialog } from "@/features/auth/components/login";
 import { HeadingBox } from "./shared/heading-box";
 
 export const SidebarRight = () => {
@@ -6,7 +6,7 @@ export const SidebarRight = () => {
 		<aside className="w-80 border-r border-border">
 			<HeadingBox>
 				<div>SidebarRight</div>
-				<Button size="sm">Login</Button>
+				<LoginDialog />
 			</HeadingBox>
 		</aside>
 	);
