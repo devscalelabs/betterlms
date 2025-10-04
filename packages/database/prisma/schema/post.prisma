@@ -1,0 +1,30 @@
+model Post {
+  id String @id @default(cuid())
+
+  title String?
+  content String
+
+  likeCount Int @default(0)
+  replyCount Int @default(0)
+
+  channelId String?
+  channel Channel? @relation(fields: [channelId], references: [id])
+
+  userId String?
+  user User? @relation(fields: [userId], references: [id])
+
+  parentId String?
+  parent Post? @relation("ParentPost", fields: [parentId], references: [id])
+  children Post[] @relation("ParentPost")
+
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@index([channelId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+}
