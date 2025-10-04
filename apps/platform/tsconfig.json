@@ -1,5 +1,5 @@
 {
 	"extends": "@betterlms/typescript/base-react.json",
-	"include": ["**/*.ts", "**/*.tsx"],
+	"include": ["src/**/*.ts", "src/**/*.tsx"],
 	"exclude": ["node_modules", "dist"]
 }

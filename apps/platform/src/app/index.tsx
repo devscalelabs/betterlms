@@ -1,9 +1,13 @@
 import { Providers } from "./providers";
+import { Button } from "@betterlms/ui";
 
 export const App = () => {
 	return (
 		<Providers>
-			<div>App</div>
+			<div>
+					<div>Hello!</div>
+				<Button>Hello!</Button>
+			</div>
 		</Providers>
 	);
 };

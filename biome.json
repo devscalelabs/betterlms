@@ -7,10 +7,11 @@
 	},
 	"files": {
 		"includes": [
-			"src/**/*.ts",
-			"src/**/*.tsx",
-			"!packages/ui/src/**/*.ts",
-			"!packages/ui/src/**/*.tsx"
+			"**/*.tsx",
+			"**/*.ts",
+			"!packages/ui/**/*.ts",
+			"!packages/ui/**/*.tsx",
+			"!packages/database/**/*.ts"
 		],
 		"ignoreUnknown": false
 	},
