@@ -7,6 +7,7 @@ import {
 	ZapFreeIcons,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { ChannelsList } from "@/features/channels/components/channels-list";
 import { MenuItem } from "./shared/menu-item";
 
 export const SidebarLeft = () => {
@@ -41,6 +42,9 @@ export const SidebarLeft = () => {
 						<p>Settings</p>
 					</MenuItem>
 				</nav>
+				<div className="pt-2">
+					<ChannelsList />
+				</div>
 			</section>
 			<section className="space-y-2">
 				<div className="ml-2 flex flex-wrap gap-2 text-sm font-medium">

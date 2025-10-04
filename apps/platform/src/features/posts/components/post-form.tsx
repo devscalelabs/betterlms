@@ -11,8 +11,13 @@ import {
 	InputGroupTextarea,
 	Separator,
 } from "@betterlms/ui";
+import { useState } from "react";
+import { useChannels } from "@/features/channels/hooks/use-channels";
+import type { Channel } from "@/features/channels/types";
 
 export const PostForm = () => {
+	const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+	const { channels } = useChannels();
 	return (
 		<InputGroup className="border-none shadow-none bg-muted rounded-none ">
 			<InputGroupTextarea placeholder="Ask, Search or Chat..." />
@@ -26,16 +31,23 @@ export const PostForm = () => {
 				</InputGroupButton>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<InputGroupButton variant="ghost">General</InputGroupButton>
+						<InputGroupButton variant="ghost">
+							{selectedChannel?.name || "General"}
+						</InputGroupButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
 						side="top"
 						align="start"
 						className="[--radius:0.95rem]"
 					>
-						<DropdownMenuItem>Auto</DropdownMenuItem>
-						<DropdownMenuItem>Agent</DropdownMenuItem>
-						<DropdownMenuItem>Manual</DropdownMenuItem>
+						{channels.map((channel) => (
+							<DropdownMenuItem
+								key={channel.id}
+								onClick={() => setSelectedChannel(channel)}
+							>
+								{channel.name}
+							</DropdownMenuItem>
+						))}
 					</DropdownMenuContent>
 				</DropdownMenu>
 				<InputGroupText className="ml-auto">52% used</InputGroupText>
