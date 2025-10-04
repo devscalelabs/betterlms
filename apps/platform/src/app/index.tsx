@@ -1,3 +1,9 @@
+import { Providers } from "./providers";
+
 export const App = () => {
-	return <div>App</div>;
+	return (
+		<Providers>
+			<div>App</div>
+		</Providers>
+	);
 };
