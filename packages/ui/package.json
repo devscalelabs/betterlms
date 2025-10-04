@@ -3,9 +3,10 @@
 	"version": "1.0.0",
 	"description": "",
 	"type": "module",
-	"main": "src/index.tsx",
+	"main": "src/index.ts",
 	"exports": {
-		".": "./src/index.tsx",
+		".": "./src/index.ts",
+		"./utils": "./src/lib/utils.ts",
 		"./globals.css": "./dist/globals.css"
 	},
 	"scripts": {
