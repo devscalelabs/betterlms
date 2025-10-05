@@ -13,24 +13,30 @@ export const accountRouter = new Elysia({ prefix: "/account" })
 			});
 		}
 
-		const decoded = await jose.jwtVerify(
-			token,
-			new TextEncoder().encode(process.env.JWT_SECRET),
-		);
+		try {
+			const decoded = await jose.jwtVerify(
+				token,
+				new TextEncoder().encode(process.env.JWT_SECRET),
+			);
 
-		const user = await db.user.findUnique({
-			where: { id: decoded.payload.id as string },
-		});
+			const user = await db.user.findUnique({
+				where: { id: decoded.payload.id as string },
+			});
 
-		return {
-			user: {
-				id: user?.id,
-				name: user?.name,
-				username: user?.username,
-				email: user?.email,
-				bio: user?.bio,
-				imageUrl: user?.imageUrl,
-				role: user?.role,
-			},
-		};
+			return {
+				user: {
+					id: user?.id,
+					name: user?.name,
+					username: user?.username,
+					email: user?.email,
+					bio: user?.bio,
+					imageUrl: user?.imageUrl,
+					role: user?.role,
+				},
+			};
+		} catch (error) {
+			return status(401, {
+				error: `${error}`,
+			});
+		}
 	});
