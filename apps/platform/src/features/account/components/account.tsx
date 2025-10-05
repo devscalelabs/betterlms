@@ -10,9 +10,12 @@ import {
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@betterlms/ui";
+import { useNavigate } from "react-router";
 import type { Account } from "../types";
 
 export const AccountCard = ({ account }: { account: Account }) => {
+	const navigate = useNavigate();
+
 	return (
 		<main className="flex items-center justify-between gap-2">
 			<div>
@@ -29,7 +32,11 @@ export const AccountCard = ({ account }: { account: Account }) => {
 				<DropdownMenuContent className="w-56" align="end">
 					<DropdownMenuLabel>My Account</DropdownMenuLabel>
 					<DropdownMenuGroup>
-						<DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => {
+								navigate(`/profile/${account.username}`);
+							}}
+						>
 							Profile
 							<DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
 						</DropdownMenuItem>
@@ -42,10 +49,6 @@ export const AccountCard = ({ account }: { account: Account }) => {
 							<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem>GitHub</DropdownMenuItem>
-					<DropdownMenuItem>Support</DropdownMenuItem>
-					<DropdownMenuItem disabled>API</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem>
 						Log out
