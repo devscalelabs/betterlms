@@ -11,3 +11,7 @@ export interface Profile {
 export interface ProfileResponse {
 	user: Profile;
 }
+
+export interface ProfilesResponse {
+	users: Profile[];
+}

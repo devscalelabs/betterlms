@@ -19,6 +19,7 @@ import { useLikePost } from "@/features/likes/hooks/use-like-post";
 import { useUnlikePost } from "@/features/likes/hooks/use-unlike-post";
 import { useDeletePost } from "../hooks/use-delete-post";
 import type { Post } from "../types";
+import { parseContent } from "../utils/parse-content";
 import { CommentPreview } from "./comment-preview";
 import { PostMedia } from "./post-media";
 
@@ -185,7 +186,7 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 
 					{/* Content */}
 					<div className="text-sm leading-relaxed mb-3 whitespace-pre-line">
-						{post.content}
+						{parseContent(post.content)}
 					</div>
 
 					{/* Media */}

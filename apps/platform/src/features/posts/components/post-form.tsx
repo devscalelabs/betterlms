@@ -19,6 +19,8 @@ import { useAccount } from "@/features/account/hooks/use-account";
 import { loginDialogAtom } from "@/features/auth/atoms/login-dialog-atom";
 import { useChannels } from "@/features/channels/hooks/use-channels";
 import type { Channel } from "@/features/channels/types";
+import { MentionDropdown } from "@/features/mentions/components/mention-dropdown";
+import { useMention } from "@/features/mentions/hooks/use-mention";
 import { useCreatePost } from "../hooks/use-create-post";
 
 type PostFormProps = {
@@ -29,6 +31,7 @@ type PostFormProps = {
 export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
 	const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const { account } = useAccount();
 	const { channels } = useChannels();
 	const setLoginDialog = useSetAtom(loginDialogAtom);
@@ -45,16 +48,49 @@ export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
 		...(onSuccess && { onSuccess }),
 	});
 
+	const {
+		showMentionDropdown,
+		mentionSearch,
+		cursorCoordinates,
+		handleMentionSelect,
+		handleContentChange: handleMentionContentChange,
+		setShowMentionDropdown,
+		setCursorCoordinates,
+	} = useMention();
+
 	const maxLength = formData.content.length;
 
 	function handleContentChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-		setFormData({ ...formData, content: event.target.value });
+		const newContent = event.target.value;
+		const cursorPosition = event.target.selectionStart;
+
+		setFormData({ ...formData, content: newContent });
+		handleMentionContentChange(
+			newContent,
+			cursorPosition,
+			textareaRef.current,
+			(content) => setFormData({ ...formData, content }),
+		);
+	}
+
+	function handleMentionSelectWrapper(username: string) {
+		handleMentionSelect(username, formData.content, (content) =>
+			setFormData({ ...formData, content }),
+		);
+		textareaRef.current?.focus();
 	}
 
 	function handleTextareaClick() {
 		if (!account) {
 			setLoginDialog(true);
 		}
+	}
+
+	function handleTextareaBlur() {
+		setTimeout(() => {
+			setShowMentionDropdown(false);
+			setCursorCoordinates(null);
+		}, 200);
 	}
 
 	function handleImageSelect() {
@@ -92,12 +128,21 @@ export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
 				onChange={handleFileChange}
 				className="hidden"
 			/>
-			<InputGroup className="border-none shadow-none bg-muted rounded-none ">
+			<InputGroup className="border-none shadow-none bg-muted rounded-none relative">
+				{showMentionDropdown && (
+					<MentionDropdown
+						search={mentionSearch}
+						onSelect={handleMentionSelectWrapper}
+						coordinates={cursorCoordinates}
+					/>
+				)}
 				<InputGroupTextarea
+					ref={textareaRef}
 					placeholder="Ask, Search or Chat..."
 					value={formData.content}
 					onChange={handleContentChange}
 					onClick={handleTextareaClick}
+					onBlur={handleTextareaBlur}
 				/>
 				<div className="w-full">
 					{selectedImages.length > 0 && (
