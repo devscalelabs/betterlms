@@ -260,14 +260,13 @@ export const UsersPage = () => {
 	return (
 		<DashboardLayout>
 			<div className="space-y-6">
-				<div className="flex items-center justify-between">
+				<div className="flex items-center">
 					<div>
 						<h2 className="text-2xl font-bold text-gray-900">Users</h2>
 						<p className="text-sm text-gray-600 mt-1">
 							Manage all users in the platform ({profiles.length} total)
 						</p>
 					</div>
-					<Button>Add New User</Button>
 				</div>
 
 				<Card className="p-6">
