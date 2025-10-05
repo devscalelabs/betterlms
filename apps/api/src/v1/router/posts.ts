@@ -10,12 +10,26 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 		async ({ db, query }) => {
 			// Get all public posts (not deleted)
 			// If parentId query param is provided, get replies for that post
+			// If username query param is provided, get posts by that user
 			// Otherwise, get top-level posts only
+			const whereClause: any = {
+				isDeleted: false,
+			};
+
+			if (query.parentId) {
+				whereClause.parentId = query.parentId;
+			} else if (!query.username) {
+				whereClause.parentId = null;
+			}
+
+			if (query.username) {
+				whereClause.user = {
+					username: query.username,
+				};
+			}
+
 			const posts = await db.post.findMany({
-				where: {
-					isDeleted: false,
-					parentId: query.parentId || null,
-				},
+				where: whereClause,
 				include: {
 					user: {
 						select: {
@@ -50,6 +64,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 		{
 			query: t.Object({
 				parentId: t.Optional(t.String()),
+				username: t.Optional(t.String()),
 			}),
 		},
 	)

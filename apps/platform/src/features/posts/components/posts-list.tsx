@@ -1,8 +1,10 @@
 import { usePosts } from "../hooks/use-posts";
+import { usePostsFilter } from "../hooks/use-posts-filter";
 import { PostCard } from "./post-card";
 
 export const PostsList = () => {
-	const { posts, isLoadingPosts } = usePosts();
+	const filters = usePostsFilter();
+	const { posts, isLoadingPosts } = usePosts(filters);
 
 	if (isLoadingPosts) {
 		return (

@@ -1,13 +1,20 @@
 import { getUserInitials } from "@betterlms/common/strings";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@betterlms/ui";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { HeadingBox } from "@/components/shared/heading-box";
+import { PostCard } from "@/features/posts/components/post-card";
+import { usePosts } from "@/features/posts/hooks/use-posts";
+import { usePostsFilter } from "@/features/posts/hooks/use-posts-filter";
 import { useProfile } from "../hooks/use-profile";
 
 export const ProfileDetail = () => {
 	const navigate = useNavigate();
 	const { username } = useParams<{ username: string }>();
 	const { profile, isProfileLoading, error } = useProfile(username || "");
+	const filters = usePostsFilter({ username: username || "" });
+	const { posts, isLoadingPosts } = usePosts(filters);
+	const [activeTab, setActiveTab] = useState<"posts" | "replies">("posts");
 
 	if (isProfileLoading) {
 		return (
@@ -27,13 +34,16 @@ export const ProfileDetail = () => {
 
 	const user = profile.user;
 
+	const userPosts = posts.filter((post) => !post.parentId);
+	const userReplies = posts.filter((post) => post.parentId);
+
 	return (
 		<div>
 			<HeadingBox>
 				<Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
 					Back
 				</Button>
-				<div></div>
+				<div />
 			</HeadingBox>
 			{/* Profile Header */}
 			<div className="border-b border-border p-6">
@@ -59,6 +69,65 @@ export const ProfileDetail = () => {
 						</div>
 					</div>
 				</div>
+			</div>
+
+			{/* Tabs */}
+			<div className="border-b border-border">
+				<div className="flex">
+					<button
+						type="button"
+						onClick={() => setActiveTab("posts")}
+						className={`flex-1 py-4 text-sm font-medium transition-colors ${
+							activeTab === "posts"
+								? "border-b-2 border-primary text-foreground"
+								: "text-muted-foreground hover:text-foreground"
+						}`}
+					>
+						Posts
+					</button>
+					<button
+						type="button"
+						onClick={() => setActiveTab("replies")}
+						className={`flex-1 py-4 text-sm font-medium transition-colors ${
+							activeTab === "replies"
+								? "border-b-2 border-primary text-foreground"
+								: "text-muted-foreground hover:text-foreground"
+						}`}
+					>
+						Replies
+					</button>
+				</div>
+			</div>
+
+			{/* Tab Content */}
+			<div>
+				{isLoadingPosts ? (
+					<div className="flex items-center justify-center p-8">
+						<p className="text-muted-foreground">Loading...</p>
+					</div>
+				) : activeTab === "posts" ? (
+					userPosts.length > 0 ? (
+						<div>
+							{userPosts.map((post) => (
+								<PostCard key={post.id} post={post} />
+							))}
+						</div>
+					) : (
+						<div className="flex items-center justify-center p-8">
+							<p className="text-muted-foreground">No posts yet</p>
+						</div>
+					)
+				) : userReplies.length > 0 ? (
+					<div>
+						{userReplies.map((reply) => (
+							<PostCard key={reply.id} post={reply} />
+						))}
+					</div>
+				) : (
+					<div className="flex items-center justify-center p-8">
+						<p className="text-muted-foreground">No replies yet</p>
+					</div>
+				)}
 			</div>
 		</div>
 	);

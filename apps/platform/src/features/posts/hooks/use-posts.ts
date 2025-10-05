@@ -2,13 +2,23 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/utils/api-client";
 import type { PostsResponse } from "../types";
 
-export const usePosts = (parentId?: string) => {
+interface UsePostsFilters {
+	parentId?: string;
+	username?: string;
+}
+
+export const usePosts = (filters?: UsePostsFilters) => {
 	const { data: postsData, isLoading: isLoadingPosts } = useQuery({
-		queryKey: ["posts", parentId],
+		queryKey: ["posts", filters],
 		queryFn: () => {
-			const url = parentId
-				? `api/v1/posts/?parentId=${parentId}`
+			const params = new URLSearchParams();
+			if (filters?.parentId) params.append("parentId", filters.parentId);
+			if (filters?.username) params.append("username", filters.username);
+
+			const url = params.toString()
+				? `api/v1/posts/?${params.toString()}`
 				: "api/v1/posts/";
+
 			return api.get<PostsResponse>(url).json();
 		},
 	});

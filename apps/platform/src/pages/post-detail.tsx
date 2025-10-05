@@ -20,12 +20,15 @@ import { PostMedia } from "@/features/posts/components/post-media";
 import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
 import { usePost } from "@/features/posts/hooks/use-post";
 import { usePosts } from "@/features/posts/hooks/use-posts";
+import { usePostsFilter } from "@/features/posts/hooks/use-posts-filter";
 
 export const PostDetail = () => {
 	const navigate = useNavigate();
 	const { id } = useParams<{ id: string }>();
 	const { post, isLoading } = usePost(id || "");
-	const { posts: replies, isLoadingPosts: isLoadingReplies } = usePosts(id);
+	const filters = usePostsFilter(id ? { parentId: id } : undefined);
+	const { posts: replies, isLoadingPosts: isLoadingReplies } =
+		usePosts(filters);
 	const { account } = useAccount();
 	const { deletePost, isDeletingPost } = useDeletePost();
 	const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
