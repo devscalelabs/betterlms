@@ -29,6 +29,7 @@ export type PostsResponse = {
 export type CreatePostRequest = {
 	title?: string;
 	content: string;
+	images?: File[];
 	channelId?: string;
 };
 
