@@ -2,13 +2,17 @@
   "name": "@betterlms/storages",
   "version": "1.0.0",
   "description": "Modular media upload to S3 storage",
-  "main": "index.ts",
+  "type": "module",
+  "main": "src/index.ts",
   "keywords": [
     "s3",
     "storage",
     "upload",
     "media"
   ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

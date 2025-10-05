@@ -13,6 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+     "@betterlms/database": "workspace:*",
+     "@betterlms/storages": "workspace:*",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/node": "^1.4.1",
@@ -21,7 +23,6 @@
     "jose": "^6.1.0"
   },
   "devDependencies": {
-    "@betterlms/database": "workspace:*",
     "@betterlms/typescript": "workspace:*",
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^24.6.2",

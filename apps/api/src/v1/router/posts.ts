@@ -1,6 +1,7 @@
 import { prisma } from "@betterlms/database";
 import { Elysia, t } from "elysia";
 import * as jose from "jose";
+import { uploadImageToS3 } from "../../utils/upload-files";
 
 export const postsRouter = new Elysia({ prefix: "/posts" })
 	.decorate("db", prisma)
@@ -23,6 +24,14 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 					select: {
 						id: true,
 						name: true,
+					},
+				},
+				Media: {
+					select: {
+						id: true,
+						url: true,
+						type: true,
+						createdAt: true,
 					},
 				},
 			},
@@ -50,20 +59,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			);
 
 			const { title, content, channelId, images } = body;
-
-			// Log images info
-			if (images && images.length > 0) {
-				console.log(`Received ${images.length} image(s):`);
-				images.forEach((image, index) => {
-					console.log(`  Image ${index + 1}:`, {
-						name: image.name,
-						type: image.type,
-						size: `${(image.size / 1024).toFixed(2)} KB`,
-					});
-				});
-			} else {
-				console.log("No images received");
-			}
+			const userId = decoded.payload.id as string;
 
 			// Create post
 			const post = await db.post.create({
@@ -71,7 +67,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 					title: title || null,
 					content,
 					channelId: channelId || null,
-					userId: decoded.payload.id as string,
+					userId,
 				},
 				include: {
 					user: {
@@ -88,8 +84,70 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 							name: true,
 						},
 					},
+					Media: {
+						select: {
+							id: true,
+							url: true,
+							type: true,
+							createdAt: true,
+						},
+					},
 				},
 			});
+
+			// Upload images and create media records
+			if (images && images.length > 0) {
+				console.log(`Uploading ${images.length} image(s) to S3...`);
+
+				const mediaRecords = await Promise.all(
+					images.map(async (image) => {
+						const url = await uploadImageToS3(image, userId);
+						console.log(`Uploaded: ${image.name} -> ${url}`);
+
+						return db.media.create({
+							data: {
+								url,
+								type: "IMAGE",
+								userId,
+								postId: post.id,
+							},
+						});
+					}),
+				);
+
+				console.log(`Created ${mediaRecords.length} media record(s)`);
+
+				// Refetch post with media
+				const postWithMedia = await db.post.findUnique({
+					where: { id: post.id },
+					include: {
+						user: {
+							select: {
+								id: true,
+								name: true,
+								username: true,
+								imageUrl: true,
+							},
+						},
+						channel: {
+							select: {
+								id: true,
+								name: true,
+							},
+						},
+						Media: {
+							select: {
+								id: true,
+								url: true,
+								type: true,
+								createdAt: true,
+							},
+						},
+					},
+				});
+
+				return status(201, { post: postWithMedia });
+			}
 
 			return status(201, { post });
 		},

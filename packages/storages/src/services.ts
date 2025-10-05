@@ -22,6 +22,7 @@ export async function uploadObject({ key, body, contentType }: UploadParams) {
 		Key: key,
 		Body: normalizeBody(body),
 		ContentType: contentType,
+		ACL: "public-read",
 	});
 	await s3.send(command);
 	return { key };
