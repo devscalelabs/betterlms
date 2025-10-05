@@ -10,6 +10,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@betterlms/ui";
+import { useNavigate } from "react-router";
 import { useAccount } from "@/features/account/hooks/use-account";
 import { useDeletePost } from "../hooks/use-delete-post";
 import type { Post } from "../types";
@@ -17,9 +18,11 @@ import { PostMedia } from "./post-media";
 
 interface PostCardProps {
 	post: Post;
+	isDetailView?: boolean;
 }
 
-export const PostCard = ({ post }: PostCardProps) => {
+export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
+	const navigate = useNavigate();
 	const { account } = useAccount();
 	const { deletePost, isDeletingPost } = useDeletePost();
 	const isCurrentUser = account?.user?.id === post.user?.id;
@@ -32,8 +35,37 @@ export const PostCard = ({ post }: PostCardProps) => {
 		console.log("Report post:", post.id);
 	};
 
+	const handleCardClick = (e: React.MouseEvent) => {
+		// Don't navigate if clicking on dialog overlay or dialog-related elements
+		const target = e.target as HTMLElement;
+		if (
+			target.hasAttribute("data-radix-portal") ||
+			target.closest("[data-radix-portal]") ||
+			target.hasAttribute("data-state")
+		) {
+			return;
+		}
+
+		if (!isDetailView) {
+			navigate(`/post/${post.id}`);
+		}
+	};
+
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (!isDetailView && (e.key === "Enter" || e.key === " ")) {
+			e.preventDefault();
+			navigate(`/post/${post.id}`);
+		}
+	};
+
 	return (
-		<article className="border-b border-border p-4 hover:bg-muted/50 transition-colors">
+		<article
+			className={`border-b border-border p-4 transition-colors ${!isDetailView ? "hover:bg-muted/50 cursor-pointer" : ""}`}
+			onClick={handleCardClick}
+			onKeyDown={handleKeyDown}
+			role={!isDetailView ? "button" : undefined}
+			tabIndex={!isDetailView ? 0 : undefined}
+		>
 			<div className="flex gap-3">
 				{/* Avatar */}
 				<Avatar className="size-10">
@@ -70,6 +102,7 @@ export const PostCard = ({ post }: PostCardProps) => {
 									variant="ghost"
 									size="sm"
 									className="text-muted-foreground hover:text-foreground h-6 w-6 p-0"
+									onClick={(e) => e.stopPropagation()}
 								>
 									<span className="text-xs">⋯</span>
 								</Button>
@@ -114,6 +147,7 @@ export const PostCard = ({ post }: PostCardProps) => {
 							variant="ghost"
 							size="sm"
 							className="text-muted-foreground hover:text-primary"
+							onClick={(e) => e.stopPropagation()}
 						>
 							<span className="text-xs">Reply</span>
 						</Button>
@@ -121,6 +155,7 @@ export const PostCard = ({ post }: PostCardProps) => {
 							variant="ghost"
 							size="sm"
 							className="text-muted-foreground hover:text-red-500"
+							onClick={(e) => e.stopPropagation()}
 						>
 							<span className="text-xs">Like</span>
 							{post.likeCount > 0 && (

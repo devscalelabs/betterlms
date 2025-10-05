@@ -42,6 +42,46 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 
 		return { posts };
 	})
+	.get("/:id", async ({ params, db, status }) => {
+		const post = await db.post.findUnique({
+			where: {
+				id: params.id,
+				isDeleted: false,
+			},
+			include: {
+				user: {
+					select: {
+						id: true,
+						name: true,
+						username: true,
+						imageUrl: true,
+					},
+				},
+				channel: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				Media: {
+					select: {
+						id: true,
+						url: true,
+						type: true,
+						createdAt: true,
+					},
+				},
+			},
+		});
+
+		if (!post) {
+			return status(404, {
+				error: "Post not found",
+			});
+		}
+
+		return { post };
+	})
 	.post(
 		"/",
 		async ({ body, db, headers, status }) => {

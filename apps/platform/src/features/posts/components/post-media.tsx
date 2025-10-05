@@ -19,12 +19,16 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 
 	if (imageMedia.length === 0) return null;
 
-	const handleImageClick = (url: string) => {
+	const handleImageClick = (url: string, e: React.MouseEvent) => {
+		e.stopPropagation();
 		setSelectedImage(url);
 		setIsOpen(true);
 	};
 
-	const handleCloseDialog = (open: boolean) => {
+	const handleCloseDialog = (open: boolean, event?: Event) => {
+		if (event) {
+			event.stopPropagation();
+		}
 		setIsOpen(open);
 		if (!open) {
 			// Delay clearing the image to allow dialog close animation to complete
@@ -41,9 +45,9 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 					<button
 						type="button"
 						className="rounded-lg overflow-hidden border border-border cursor-pointer w-full text-left p-0"
-						onClick={() => {
+						onClick={(e) => {
 							if (imageMedia[0]) {
-								handleImageClick(imageMedia[0].url);
+								handleImageClick(imageMedia[0].url, e);
 							}
 						}}
 					>
@@ -62,7 +66,7 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 								key={item.id}
 								type="button"
 								className="border border-border rounded-lg overflow-hidden cursor-pointer p-0"
-								onClick={() => handleImageClick(item.url)}
+								onClick={(e) => handleImageClick(item.url, e)}
 							>
 								<img
 									src={item.url}
@@ -79,9 +83,9 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 						<button
 							type="button"
 							className="col-span-2 border border-border rounded-lg overflow-hidden cursor-pointer p-0"
-							onClick={() => {
+							onClick={(e) => {
 								if (imageMedia[0]) {
-									handleImageClick(imageMedia[0].url);
+									handleImageClick(imageMedia[0].url, e);
 								}
 							}}
 						>
@@ -96,7 +100,7 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 								key={item.id}
 								type="button"
 								className="border border-border rounded-lg overflow-hidden cursor-pointer p-0"
-								onClick={() => handleImageClick(item.url)}
+								onClick={(e) => handleImageClick(item.url, e)}
 							>
 								<img
 									src={item.url}
@@ -115,7 +119,7 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 								key={item.id}
 								type="button"
 								className="border border-border rounded-lg overflow-hidden relative cursor-pointer p-0"
-								onClick={() => handleImageClick(item.url)}
+								onClick={(e) => handleImageClick(item.url, e)}
 							>
 								<img
 									src={item.url}
@@ -137,7 +141,11 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 
 			{/* Fullscreen Image Dialog */}
 			<Dialog open={isOpen} onOpenChange={handleCloseDialog}>
-				<DialogContent className="!max-w-[95vw] !w-auto h-[90vh] p-0 overflow-hidden">
+				<DialogContent
+					className="!max-w-[95vw] !w-auto h-[90vh] p-0 overflow-hidden"
+					onPointerDownOutside={(e) => e.stopPropagation()}
+					onInteractOutside={(e) => e.stopPropagation()}
+				>
 					<div className="h-full flex items-center justify-center">
 						{selectedImage && (
 							<img
