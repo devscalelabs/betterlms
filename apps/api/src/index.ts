@@ -5,6 +5,7 @@ import { accountRouter } from "./v1/router/account";
 import { authRouter } from "./v1/router/auth";
 import { channelsRouter } from "./v1/router/channels";
 import { postsRouter } from "./v1/router/posts";
+import { profileRouter } from "./v1/router/profile";
 
 const PORT = process.env.BACKEND_PORT || 8000;
 
@@ -17,7 +18,12 @@ export const app = new Elysia({ adapter: node() })
 		}),
 	)
 	.group("/api/v1", (app) =>
-		app.use(authRouter).use(accountRouter).use(channelsRouter).use(postsRouter),
+		app
+			.use(authRouter)
+			.use(accountRouter)
+			.use(channelsRouter)
+			.use(postsRouter)
+			.use(profileRouter),
 	)
 	.get("/", () => "Hello Elysia")
 	.listen(PORT, ({ hostname, port }) => {

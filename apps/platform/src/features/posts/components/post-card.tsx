@@ -60,6 +60,13 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 		}
 	};
 
+	const handleUsernameClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (post.user?.username) {
+			navigate(`/profile/${post.user.username}`);
+		}
+	};
+
 	return (
 		<article
 			className={`border-b border-border p-4 transition-colors ${!isDetailView ? "hover:bg-muted/50 cursor-pointer" : ""}`}
@@ -85,12 +92,20 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 					{/* Header */}
 					<div className="flex items-center justify-between mb-1">
 						<div className="flex items-center gap-2">
-							<span className="font-semibold text-sm">
+							<button
+								type="button"
+								onClick={handleUsernameClick}
+								className="font-semibold text-sm hover:underline"
+							>
 								{post.user?.name || "Unknown"}
-							</span>
-							<span className="text-muted-foreground text-sm">
+							</button>
+							<button
+								type="button"
+								onClick={handleUsernameClick}
+								className="text-muted-foreground text-sm hover:underline"
+							>
 								@{post.user?.username || "unknown"}
-							</span>
+							</button>
 							<span className="text-muted-foreground text-sm">·</span>
 							<span className="text-muted-foreground text-sm">
 								{getRelativeTime(post.createdAt)}

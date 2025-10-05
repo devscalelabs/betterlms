@@ -46,6 +46,12 @@ export const PostDetail = () => {
 		setIsReplyFormOpen(!isReplyFormOpen);
 	};
 
+	const handleUsernameClick = () => {
+		if (post?.user?.username) {
+			navigate(`/profile/${post.user.username}`);
+		}
+	};
+
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center p-8">
@@ -85,12 +91,20 @@ export const PostDetail = () => {
 						</AvatarFallback>
 					</Avatar>
 					<div className="flex-1">
-						<div className="font-semibold text-sm">
+						<button
+							type="button"
+							onClick={handleUsernameClick}
+							className="font-semibold text-sm hover:underline"
+						>
 							{post.user?.name || "Unknown"}
-						</div>
-						<div className="text-muted-foreground text-sm">
+						</button>
+						<button
+							type="button"
+							onClick={handleUsernameClick}
+							className="text-muted-foreground text-sm hover:underline block"
+						>
 							@{post.user?.username || "unknown"}
-						</div>
+						</button>
 					</div>
 					{/* Dropdown Menu */}
 					<DropdownMenu>
