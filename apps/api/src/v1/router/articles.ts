@@ -15,7 +15,7 @@ import {
 	incrementPostLikeCount,
 } from "../services/posts";
 
-export const postsRouter = new Elysia({ prefix: "/posts" })
+export const articlesRouter = new Elysia({ prefix: "/articles" })
 	.get(
 		"/",
 		async ({ query, headers }) => {
@@ -31,19 +31,19 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 				}
 			}
 
-			const posts = await findPosts({
+			const articles = await findPosts({
 				parentId: query.parentId,
 				username: query.username,
 				channelSlug: query.channelSlug,
-				excludeArticles: query.excludeArticles !== "false", // Default to true unless explicitly set to false
+				articlesOnly: true, // Only return articles (posts with titles)
 			});
 
-			// Process posts to get unique commenters (first 3) and check if user liked
-			const postsWithCommentPreview = await Promise.all(
-				posts.map(async (post) => {
+			// Process articles to get unique commenters (first 3) and check if user liked
+			const articlesWithCommentPreview = await Promise.all(
+				articles.map(async (article) => {
 					const uniqueCommenters = new Map();
 
-					for (const child of post.children) {
+					for (const child of article.children) {
 						if (
 							child.user &&
 							child.userId &&
@@ -54,34 +54,33 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 						}
 					}
 
-					// Check if current user has liked this post
+					// Check if current user has liked this article
 					let isLiked = false;
 					if (userId) {
-						const like = await findPostLike(userId, post.id);
+						const like = await findPostLike(userId, article.id);
 						isLiked = !!like;
 					}
 
-					const { children: _children, ...postData } = post;
+					const { children: _children, ...articleData } = article;
 
 					return {
-						...postData,
+						...articleData,
 						isLiked,
 						commentPreview: {
 							users: Array.from(uniqueCommenters.values()),
-							totalCount: post.replyCount,
+							totalCount: article.replyCount,
 						},
 					};
 				}),
 			);
 
-			return { posts: postsWithCommentPreview };
+			return { articles: articlesWithCommentPreview };
 		},
 		{
 			query: t.Object({
 				parentId: t.Optional(t.String()),
 				username: t.Optional(t.String()),
 				channelSlug: t.Optional(t.String()),
-				excludeArticles: t.Optional(t.String()),
 			}),
 		},
 	)
@@ -98,43 +97,50 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			}
 		}
 
-		const post = await findPostById(params.id);
+		const article = await findPostById(params.id);
 
-		if (!post) {
+		if (!article) {
 			return status(404, {
-				error: "Post not found",
+				error: "Article not found",
 			});
 		}
 
-		// Process post to get unique commenters (first 3)
+		// Check if it's actually an article (has title)
+		if (!article.title) {
+			return status(404, {
+				error: "Article not found",
+			});
+		}
+
+		// Process article to get unique commenters (first 3)
 		const uniqueCommenters = new Map();
 
-		for (const child of post.children) {
+		for (const child of article.children) {
 			if (child.user && child.userId && !uniqueCommenters.has(child.userId)) {
 				uniqueCommenters.set(child.userId, child.user);
 				if (uniqueCommenters.size === 3) break;
 			}
 		}
 
-		// Check if current user has liked this post
+		// Check if current user has liked this article
 		let isLiked = false;
 		if (userId) {
-			const like = await findPostLike(userId, post.id);
+			const like = await findPostLike(userId, article.id);
 			isLiked = !!like;
 		}
 
-		const { children: _children, ...postData } = post;
+		const { children: _children, ...articleData } = article;
 
-		const postWithCommentPreview = {
-			...postData,
+		const articleWithCommentPreview = {
+			...articleData,
 			isLiked,
 			commentPreview: {
 				users: Array.from(uniqueCommenters.values()),
-				totalCount: post.replyCount,
+				totalCount: article.replyCount,
 			},
 		};
 
-		return { post: postWithCommentPreview };
+		return { article: articleWithCommentPreview };
 	})
 	.post(
 		"/",
@@ -148,10 +154,17 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			}
 
 			const userId = await verifyToken(token);
-			const { content, channelId, parentId, images } = body;
+			const { title, content, channelId, parentId, images } = body;
 
-			const post = await createPost({
-				title: null, // Explicitly set to null for posts
+			// Ensure title is provided for articles
+			if (!title || title.trim().length === 0) {
+				return status(400, {
+					error: "Title is required for articles",
+				});
+			}
+
+			const article = await createPost({
+				title,
 				content,
 				channelId,
 				parentId,
@@ -166,21 +179,22 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 						const url = await uploadImageToS3(image, userId);
 						console.log(`Uploaded: ${image.name} -> ${url}`);
 
-						return createMedia(url, userId, post.id);
+						return createMedia(url, userId, article.id);
 					}),
 				);
 
 				console.log(`Created ${mediaRecords.length} media record(s)`);
 
-				const postWithMedia = await findPostWithMedia(post.id);
+				const articleWithMedia = await findPostWithMedia(article.id);
 
-				return status(201, { post: postWithMedia });
+				return status(201, { article: articleWithMedia });
 			}
 
-			return status(201, { post });
+			return status(201, { article });
 		},
 		{
 			body: t.Object({
+				title: t.String({ minLength: 1, maxLength: 200 }),
 				content: t.String({ minLength: 1, maxLength: 5000 }),
 				channelId: t.Optional(t.String()),
 				parentId: t.Optional(t.String()),
@@ -198,23 +212,30 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 		}
 
 		const userId = await verifyToken(token);
-		const post = await findPostById(params.id);
+		const article = await findPostById(params.id);
 
-		if (!post) {
+		if (!article) {
 			return status(404, {
-				error: "Post not found",
+				error: "Article not found",
 			});
 		}
 
-		if (post.userId !== userId) {
+		// Check if it's actually an article (has title)
+		if (!article.title) {
+			return status(404, {
+				error: "Article not found",
+			});
+		}
+
+		if (article.userId !== userId) {
 			return status(403, {
-				error: "Forbidden - You can only delete your own posts",
+				error: "Forbidden - You can only delete your own articles",
 			});
 		}
 
 		await deletePost(params.id);
 
-		return { message: "Post deleted successfully" };
+		return { message: "Article deleted successfully" };
 	})
 	.post("/:id/like", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
@@ -226,11 +247,18 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 		}
 
 		const userId = await verifyToken(token);
-		const post = await findPostById(params.id);
+		const article = await findPostById(params.id);
 
-		if (!post) {
+		if (!article) {
 			return status(404, {
-				error: "Post not found",
+				error: "Article not found",
+			});
+		}
+
+		// Check if it's actually an article (has title)
+		if (!article.title) {
+			return status(404, {
+				error: "Article not found",
 			});
 		}
 
@@ -238,14 +266,14 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 
 		if (existingLike) {
 			return status(409, {
-				error: "Post already liked",
+				error: "Article already liked",
 			});
 		}
 
 		await createPostLike(userId, params.id);
 		await incrementPostLikeCount(params.id);
 
-		return status(201, { message: "Post liked successfully" });
+		return status(201, { message: "Article liked successfully" });
 	})
 	.delete("/:id/like", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
@@ -257,6 +285,21 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 		}
 
 		const userId = await verifyToken(token);
+		const article = await findPostById(params.id);
+
+		if (!article) {
+			return status(404, {
+				error: "Article not found",
+			});
+		}
+
+		// Check if it's actually an article (has title)
+		if (!article.title) {
+			return status(404, {
+				error: "Article not found",
+			});
+		}
+
 		const existingLike = await findPostLike(userId, params.id);
 
 		if (!existingLike) {
@@ -268,5 +311,5 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 		await deletePostLike(userId, params.id);
 		await decrementPostLikeCount(params.id);
 
-		return { message: "Post unliked successfully" };
+		return { message: "Article unliked successfully" };
 	});

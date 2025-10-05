@@ -96,7 +96,7 @@ export const useCreateArticle = ({
 			}
 
 			const response = await api
-				.post<CreateArticleResponse>("api/v1/posts/", {
+				.post<CreateArticleResponse>("api/v1/articles/", {
 					body: formDataToSend,
 				})
 				.json();

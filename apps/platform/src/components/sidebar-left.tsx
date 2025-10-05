@@ -42,7 +42,7 @@ export const SidebarLeft = () => {
 						<HugeiconsIcon icon={ZapFreeIcons} strokeWidth={2} />
 						<p>Timeline</p>
 					</MenuItem>
-					<MenuItem>
+					<MenuItem onClick={() => navigate("/articles")}>
 						<HugeiconsIcon icon={TissuePaperFreeIcons} strokeWidth={2} />
 						<p>Articles</p>
 					</MenuItem>
