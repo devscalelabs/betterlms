@@ -23,7 +23,7 @@ model Post {
   updatedAt DateTime @updatedAt
 
   Media Media[]
-
+  likes PostLike[]
 
   @@index([channelId])
   @@index([userId])

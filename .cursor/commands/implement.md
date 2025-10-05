@@ -5,6 +5,7 @@ I'd like to you to implement the following feature:
 - Use my own pattern and code structure.
 - Keep it simple and easy to understand.
 - Code Readability is important more than clever code.
+- Do not create barrel files for frontend.
 </guidelines>
 
 Now implement the feature.

@@ -9,13 +9,17 @@ import {
 	Input,
 	Separator,
 } from "@betterlms/ui";
+import { useAtom } from "jotai";
+import { loginDialogAtom } from "../atoms/login-dialog-atom";
 import { useLogin } from "../hooks/use-login";
 
 export const LoginDialog = () => {
 	const { formData, setFormData, login, isLoggingIn } = useLogin();
+	const [isOpen, setIsOpen] = useAtom(loginDialogAtom);
+
 	return (
 		<div>
-			<Dialog>
+			<Dialog open={isOpen} onOpenChange={setIsOpen}>
 				<DialogTrigger asChild>
 					<Button>Login</Button>
 				</DialogTrigger>

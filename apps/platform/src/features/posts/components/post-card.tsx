@@ -10,8 +10,13 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@betterlms/ui";
+import { useSetAtom } from "jotai";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAccount } from "@/features/account/hooks/use-account";
+import { loginDialogAtom } from "@/features/auth/atoms/login-dialog-atom";
+import { useLikePost } from "@/features/likes/hooks/use-like-post";
+import { useUnlikePost } from "@/features/likes/hooks/use-unlike-post";
 import { useDeletePost } from "../hooks/use-delete-post";
 import type { Post } from "../types";
 import { PostMedia } from "./post-media";
@@ -25,7 +30,15 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 	const navigate = useNavigate();
 	const { account } = useAccount();
 	const { deletePost, isDeletingPost } = useDeletePost();
+	const { likePost, isLikingPost } = useLikePost();
+	const { unlikePost, isUnlikingPost } = useUnlikePost();
+	const setLoginDialog = useSetAtom(loginDialogAtom);
 	const isCurrentUser = account?.user?.id === post.user?.id;
+
+	const [isLiked, setIsLiked] = useState(false);
+	const [optimisticLikeCount, setOptimisticLikeCount] = useState(
+		post.likeCount,
+	);
 
 	const handleDelete = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -35,6 +48,25 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 	const handleReport = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		console.log("Report post:", post.id);
+	};
+
+	const handleLike = (e: React.MouseEvent) => {
+		e.stopPropagation();
+
+		if (!account) {
+			setLoginDialog(true);
+			return;
+		}
+
+		if (isLiked) {
+			setIsLiked(false);
+			setOptimisticLikeCount((prev) => prev - 1);
+			unlikePost(post.id);
+		} else {
+			setIsLiked(true);
+			setOptimisticLikeCount((prev) => prev + 1);
+			likePost(post.id);
+		}
 	};
 
 	const handleCardClick = (e: React.MouseEvent) => {
@@ -171,12 +203,19 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 						<Button
 							variant="ghost"
 							size="sm"
-							className="text-muted-foreground hover:text-red-500"
-							onClick={(e) => e.stopPropagation()}
+							className={`${
+								isLiked && account
+									? "text-red-500 hover:text-red-600"
+									: "text-muted-foreground hover:text-red-500"
+							}`}
+							onClick={handleLike}
+							disabled={account ? isLikingPost || isUnlikingPost : false}
 						>
-							<span className="text-xs">Like</span>
-							{post.likeCount > 0 && (
-								<span className="ml-1">{post.likeCount}</span>
+							<span className="text-xs">
+								{account && isLiked ? "Unlike" : "Like"}
+							</span>
+							{optimisticLikeCount > 0 && (
+								<span className="ml-1">{optimisticLikeCount}</span>
 							)}
 						</Button>
 					</div>

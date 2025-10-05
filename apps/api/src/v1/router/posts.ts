@@ -279,4 +279,119 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 		});
 
 		return { message: "Post deleted successfully" };
+	})
+	.post("/:id/like", async ({ params, db, headers, status }) => {
+		const token = headers.authorization?.split(" ")[1];
+
+		if (!token) {
+			return status(401, {
+				error: "Unauthorized",
+			});
+		}
+
+		const decoded = await jose.jwtVerify(
+			token,
+			new TextEncoder().encode(process.env.JWT_SECRET),
+		);
+
+		const userId = decoded.payload.id as string;
+
+		// Check if post exists
+		const post = await db.post.findUnique({
+			where: { id: params.id },
+		});
+
+		if (!post) {
+			return status(404, {
+				error: "Post not found",
+			});
+		}
+
+		// Check if user already liked the post
+		const existingLike = await db.postLike.findUnique({
+			where: {
+				userId_postId: {
+					userId,
+					postId: params.id,
+				},
+			},
+		});
+
+		if (existingLike) {
+			return status(409, {
+				error: "Post already liked",
+			});
+		}
+
+		// Create like and update like count
+		await db.postLike.create({
+			data: {
+				userId,
+				postId: params.id,
+			},
+		});
+
+		await db.post.update({
+			where: { id: params.id },
+			data: {
+				likeCount: {
+					increment: 1,
+				},
+			},
+		});
+
+		return status(201, { message: "Post liked successfully" });
+	})
+	.delete("/:id/like", async ({ params, db, headers, status }) => {
+		const token = headers.authorization?.split(" ")[1];
+
+		if (!token) {
+			return status(401, {
+				error: "Unauthorized",
+			});
+		}
+
+		const decoded = await jose.jwtVerify(
+			token,
+			new TextEncoder().encode(process.env.JWT_SECRET),
+		);
+
+		const userId = decoded.payload.id as string;
+
+		// Check if like exists
+		const existingLike = await db.postLike.findUnique({
+			where: {
+				userId_postId: {
+					userId,
+					postId: params.id,
+				},
+			},
+		});
+
+		if (!existingLike) {
+			return status(404, {
+				error: "Like not found",
+			});
+		}
+
+		// Delete like and update like count
+		await db.postLike.delete({
+			where: {
+				userId_postId: {
+					userId,
+					postId: params.id,
+				},
+			},
+		});
+
+		await db.post.update({
+			where: { id: params.id },
+			data: {
+				likeCount: {
+					decrement: 1,
+				},
+			},
+		});
+
+		return { message: "Post unliked successfully" };
 	});

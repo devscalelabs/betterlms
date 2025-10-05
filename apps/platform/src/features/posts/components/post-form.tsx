@@ -13,7 +13,10 @@ import {
 } from "@betterlms/ui";
 import { Image01FreeIcons } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useSetAtom } from "jotai";
 import { useRef, useState } from "react";
+import { useAccount } from "@/features/account/hooks/use-account";
+import { loginDialogAtom } from "@/features/auth/atoms/login-dialog-atom";
 import { useChannels } from "@/features/channels/hooks/use-channels";
 import type { Channel } from "@/features/channels/types";
 import { useCreatePost } from "../hooks/use-create-post";
@@ -26,7 +29,9 @@ type PostFormProps = {
 export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
 	const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const { account } = useAccount();
 	const { channels } = useChannels();
+	const setLoginDialog = useSetAtom(loginDialogAtom);
 	const {
 		formData,
 		setFormData,
@@ -46,12 +51,28 @@ export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
 		setFormData({ ...formData, content: event.target.value });
 	}
 
+	function handleTextareaClick() {
+		if (!account) {
+			setLoginDialog(true);
+		}
+	}
+
 	function handleImageSelect() {
+		if (!account) {
+			setLoginDialog(true);
+			return;
+		}
 		fileInputRef.current?.click();
 	}
 
 	function handleSubmit(event: React.FormEvent) {
 		event.preventDefault();
+
+		if (!account) {
+			setLoginDialog(true);
+			return;
+		}
+
 		if (formData.content.trim()) {
 			const params: { channelId?: string } = {};
 			if (selectedChannel?.id) {
@@ -76,6 +97,7 @@ export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
 					placeholder="Ask, Search or Chat..."
 					value={formData.content}
 					onChange={handleContentChange}
+					onClick={handleTextareaClick}
 				/>
 				<div className="w-full">
 					{selectedImages.length > 0 && (
