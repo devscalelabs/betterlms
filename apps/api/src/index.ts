@@ -9,7 +9,13 @@ import { postsRouter } from "./v1/router/posts";
 const PORT = process.env.BACKEND_PORT || 8000;
 
 export const app = new Elysia({ adapter: node() })
-	.use(cors({ origin: "http://localhost:3000" }))
+	.use(
+		cors({
+			origin: "http://localhost:3000",
+			allowedHeaders: ["Content-Type", "Authorization"],
+			methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		}),
+	)
 	.group("/api/v1", (app) =>
 		app.use(authRouter).use(accountRouter).use(channelsRouter).use(postsRouter),
 	)

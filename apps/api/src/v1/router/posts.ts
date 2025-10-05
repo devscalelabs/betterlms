@@ -49,7 +49,21 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 				new TextEncoder().encode(process.env.JWT_SECRET),
 			);
 
-			const { title, content, channelId } = body;
+			const { title, content, channelId, images } = body;
+
+			// Log images info
+			if (images && images.length > 0) {
+				console.log(`Received ${images.length} image(s):`);
+				images.forEach((image, index) => {
+					console.log(`  Image ${index + 1}:`, {
+						name: image.name,
+						type: image.type,
+						size: `${(image.size / 1024).toFixed(2)} KB`,
+					});
+				});
+			} else {
+				console.log("No images received");
+			}
 
 			// Create post
 			const post = await db.post.create({
@@ -84,6 +98,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 				title: t.Optional(t.String({ maxLength: 200 })),
 				content: t.String({ minLength: 1, maxLength: 5000 }),
 				channelId: t.Optional(t.String()),
+				images: t.Optional(t.Files()),
 			}),
 		},
 	)
