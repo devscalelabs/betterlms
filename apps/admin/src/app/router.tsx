@@ -3,7 +3,9 @@ import { ProtectedRoute } from "../components/protected-route";
 import { ArticlesPage } from "../pages/articles";
 import { CoursesPage } from "../pages/courses";
 import { CreateArticlePage } from "../pages/create-article";
+import { CreateCoursePage } from "../pages/create-course";
 import { DashboardPage } from "../pages/dashboard";
+import { EditCoursePage } from "../pages/edit-course";
 import { LoginPage } from "../pages/login";
 import { UsersPage } from "../pages/users";
 
@@ -49,6 +51,22 @@ export const AppRouter = () => {
 					element={
 						<ProtectedRoute>
 							<CoursesPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/courses/create"
+					element={
+						<ProtectedRoute>
+							<CreateCoursePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/courses/:courseId/edit"
+					element={
+						<ProtectedRoute>
+							<EditCoursePage />
 						</ProtectedRoute>
 					}
 				/>
