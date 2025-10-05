@@ -10,10 +10,14 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@betterlms/ui";
-import { useState } from "react";
+import { useSetAtom } from "jotai";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { HeadingBox } from "@/components/shared/heading-box";
 import { useAccount } from "@/features/account/hooks/use-account";
+import { loginDialogAtom } from "@/features/auth/atoms/login-dialog-atom";
+import { useLikePost } from "@/features/likes/hooks/use-like-post";
+import { useUnlikePost } from "@/features/likes/hooks/use-unlike-post";
 import { PostCard } from "@/features/posts/components/post-card";
 import { PostForm } from "@/features/posts/components/post-form";
 import { PostMedia } from "@/features/posts/components/post-media";
@@ -32,9 +36,30 @@ export const PostDetail = () => {
 		usePosts(filters);
 	const { account } = useAccount();
 	const { deletePost, isDeletingPost } = useDeletePost();
+	const { likePost, isLikingPost } = useLikePost();
+	const { unlikePost, isUnlikingPost } = useUnlikePost();
+	const setLoginDialog = useSetAtom(loginDialogAtom);
 	const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
+	const [isLiked, setIsLiked] = useState(post?.isLiked ?? false);
+	const [optimisticLikeCount, setOptimisticLikeCount] = useState(
+		post?.likeCount ?? 0,
+	);
 
 	const isCurrentUser = account?.user?.id === post?.user?.id;
+
+	// Sync isLiked state when post prop changes
+	useEffect(() => {
+		if (post) {
+			setIsLiked(post.isLiked);
+		}
+	}, [post]);
+
+	// Sync optimisticLikeCount when post.likeCount changes
+	useEffect(() => {
+		if (post) {
+			setOptimisticLikeCount(post.likeCount);
+		}
+	}, [post]);
 
 	const handleDelete = () => {
 		if (post) {
@@ -48,6 +73,25 @@ export const PostDetail = () => {
 
 	const handleToggleReplyForm = () => {
 		setIsReplyFormOpen(!isReplyFormOpen);
+	};
+
+	const handleLike = () => {
+		if (!account) {
+			setLoginDialog(true);
+			return;
+		}
+
+		if (!post) return;
+
+		if (isLiked) {
+			setIsLiked(false);
+			setOptimisticLikeCount((prev) => prev - 1);
+			unlikePost(post.id);
+		} else {
+			setIsLiked(true);
+			setOptimisticLikeCount((prev) => prev + 1);
+			likePost(post.id);
+		}
 	};
 
 	const handleUsernameClick = () => {
@@ -158,7 +202,11 @@ export const PostDetail = () => {
 					<Button
 						variant="ghost"
 						size="sm"
-						className="text-muted-foreground hover:text-primary"
+						className={`${
+							isReplyFormOpen
+								? "text-primary"
+								: "text-muted-foreground hover:text-primary"
+						}`}
 						onClick={handleToggleReplyForm}
 					>
 						<span className="text-xs">Reply</span>
@@ -166,11 +214,19 @@ export const PostDetail = () => {
 					<Button
 						variant="ghost"
 						size="sm"
-						className="text-muted-foreground hover:text-red-500"
+						className={`${
+							isLiked && account
+								? "text-red-500 hover:text-red-600"
+								: "text-muted-foreground hover:text-red-500"
+						}`}
+						onClick={handleLike}
+						disabled={account ? isLikingPost || isUnlikingPost : false}
 					>
-						<span className="text-xs">Like</span>
-						{post.likeCount > 0 && (
-							<span className="ml-1">{post.likeCount}</span>
+						<span className="text-xs">
+							{account && isLiked ? "Unlike" : "Like"}
+						</span>
+						{optimisticLikeCount > 0 && (
+							<span className="ml-1">{optimisticLikeCount}</span>
 						)}
 					</Button>
 					<div className="text-muted-foreground text-xs ml-2">
