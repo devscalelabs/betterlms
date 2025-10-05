@@ -1,0 +1,23 @@
+{
+  "name": "@betterlms/email",
+  "version": "1.0.0",
+  "description": "Email service using SMTP for BetterLMS",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["email", "smtp", "nodemailer"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "nodemailer": "^6.9.15"
+  },
+  "devDependencies": {
+    "@betterlms/typescript": "workspace:*",
+    "@types/node": "^24.6.2",
+    "@types/nodemailer": "^6.4.16",
+    "typescript": "^5.9.3"
+  }
+}

@@ -15,6 +15,7 @@
 		"seed:content": "pnpm --filter scripts seed:content",
 		"seed:all": "pnpm --filter scripts seed:all",
 		"reset:db": "pnpm --filter scripts reset:db",
+		"test:email": "pnpm --filter scripts test:email",
 		"format": "pnpm exec biome format --write",
 		"lint": "pnpm exec biome lint",
 		"lint:fix": "pnpm exec biome lint --write --unsafe"
