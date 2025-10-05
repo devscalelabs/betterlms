@@ -1,4 +1,5 @@
 import { Color } from "@tiptap/extension-color";
+import Heading from "@tiptap/extension-heading";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -66,7 +67,15 @@ export const ArticleEditor = ({
 	const imageUploadId = useId();
 	const editor = useEditor({
 		extensions: [
-			StarterKit,
+			StarterKit.configure({
+				heading: false, // Disable default heading to use our custom one
+			}),
+			Heading.configure({
+				levels: [1, 2, 3, 4, 5, 6],
+				HTMLAttributes: {
+					class: "font-bold",
+				},
+			}),
 			Placeholder.configure({
 				placeholder,
 			}),
@@ -87,7 +96,7 @@ export const ArticleEditor = ({
 		editorProps: {
 			attributes: {
 				class:
-					"prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[400px] p-4",
+					"prose prose-gray max-w-none focus:outline-none min-h-[400px] p-6 prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-strong:font-semibold",
 			},
 		},
 	});
@@ -127,24 +136,28 @@ export const ArticleEditor = ({
 					<ToolbarButton
 						onClick={() => editor.chain().focus().toggleBold().run()}
 						isActive={editor.isActive("bold")}
+						disabled={!editor.can().toggleBold()}
 					>
 						<Bold className="h-4 w-4" />
 					</ToolbarButton>
 					<ToolbarButton
 						onClick={() => editor.chain().focus().toggleItalic().run()}
 						isActive={editor.isActive("italic")}
+						disabled={!editor.can().toggleItalic()}
 					>
 						<Italic className="h-4 w-4" />
 					</ToolbarButton>
 					<ToolbarButton
 						onClick={() => editor.chain().focus().toggleStrike().run()}
 						isActive={editor.isActive("strike")}
+						disabled={!editor.can().toggleStrike()}
 					>
 						<Strikethrough className="h-4 w-4" />
 					</ToolbarButton>
 					<ToolbarButton
 						onClick={() => editor.chain().focus().toggleCode().run()}
 						isActive={editor.isActive("code")}
+						disabled={!editor.can().toggleCode()}
 					>
 						<Code className="h-4 w-4" />
 					</ToolbarButton>
@@ -157,6 +170,7 @@ export const ArticleEditor = ({
 							editor.chain().focus().toggleHeading({ level: 1 }).run()
 						}
 						isActive={editor.isActive("heading", { level: 1 })}
+						disabled={!editor.can().toggleHeading({ level: 1 })}
 					>
 						<Heading1 className="h-4 w-4" />
 					</ToolbarButton>
@@ -165,6 +179,7 @@ export const ArticleEditor = ({
 							editor.chain().focus().toggleHeading({ level: 2 }).run()
 						}
 						isActive={editor.isActive("heading", { level: 2 })}
+						disabled={!editor.can().toggleHeading({ level: 2 })}
 					>
 						<Heading2 className="h-4 w-4" />
 					</ToolbarButton>
@@ -173,6 +188,7 @@ export const ArticleEditor = ({
 							editor.chain().focus().toggleHeading({ level: 3 }).run()
 						}
 						isActive={editor.isActive("heading", { level: 3 })}
+						disabled={!editor.can().toggleHeading({ level: 3 })}
 					>
 						<Heading3 className="h-4 w-4" />
 					</ToolbarButton>
@@ -183,18 +199,21 @@ export const ArticleEditor = ({
 					<ToolbarButton
 						onClick={() => editor.chain().focus().toggleBulletList().run()}
 						isActive={editor.isActive("bulletList")}
+						disabled={!editor.can().toggleBulletList()}
 					>
 						<List className="h-4 w-4" />
 					</ToolbarButton>
 					<ToolbarButton
 						onClick={() => editor.chain().focus().toggleOrderedList().run()}
 						isActive={editor.isActive("orderedList")}
+						disabled={!editor.can().toggleOrderedList()}
 					>
 						<ListOrdered className="h-4 w-4" />
 					</ToolbarButton>
 					<ToolbarButton
 						onClick={() => editor.chain().focus().toggleBlockquote().run()}
 						isActive={editor.isActive("blockquote")}
+						disabled={!editor.can().toggleBlockquote()}
 					>
 						<Quote className="h-4 w-4" />
 					</ToolbarButton>
