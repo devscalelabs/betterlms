@@ -221,8 +221,26 @@ export async function findPostWithMedia(postId: string) {
 }
 
 export async function deletePost(id: string) {
-	return await prisma.post.delete({
-		where: { id },
+	return await prisma.$transaction(async (tx) => {
+		// First, delete all likes associated with this post
+		await tx.postLike.deleteMany({
+			where: { postId: id },
+		});
+
+		// Delete all media associated with this post
+		await tx.media.deleteMany({
+			where: { postId: id },
+		});
+
+		// Delete all child posts (comments) associated with this post
+		await tx.post.deleteMany({
+			where: { parentId: id },
+		});
+
+		// Finally, delete the post itself
+		return await tx.post.delete({
+			where: { id },
+		});
 	});
 }
 

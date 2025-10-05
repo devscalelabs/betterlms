@@ -1,4 +1,5 @@
 import { Dialog, DialogContent } from "@betterlms/ui";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 interface PostMediaProps {
@@ -10,7 +11,7 @@ interface PostMediaProps {
 }
 
 export const PostMedia = ({ media }: PostMediaProps) => {
-	const [selectedImage, setSelectedImage] = useState<string | null>(null);
+	const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 	const [isOpen, setIsOpen] = useState(false);
 
 	if (!media || media.length === 0) return null;
@@ -19,9 +20,9 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 
 	if (imageMedia.length === 0) return null;
 
-	const handleImageClick = (url: string, e: React.MouseEvent) => {
+	const handleImageClick = (index: number, e: React.MouseEvent) => {
 		e.stopPropagation();
-		setSelectedImage(url);
+		setSelectedImageIndex(index);
 		setIsOpen(true);
 	};
 
@@ -33,9 +34,23 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 		if (!open) {
 			// Delay clearing the image to allow dialog close animation to complete
 			setTimeout(() => {
-				setSelectedImage(null);
+				setSelectedImageIndex(0);
 			}, 200);
 		}
+	};
+
+	const handlePrevImage = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setSelectedImageIndex((prev) =>
+			prev === 0 ? imageMedia.length - 1 : prev - 1,
+		);
+	};
+
+	const handleNextImage = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setSelectedImageIndex((prev) =>
+			prev === imageMedia.length - 1 ? 0 : prev + 1,
+		);
 	};
 
 	return (
@@ -45,11 +60,7 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 					<button
 						type="button"
 						className="rounded-lg overflow-hidden border border-border cursor-pointer w-full text-left p-0"
-						onClick={(e) => {
-							if (imageMedia[0]) {
-								handleImageClick(imageMedia[0].url, e);
-							}
-						}}
+						onClick={(e) => handleImageClick(0, e)}
 					>
 						<img
 							src={imageMedia[0].url}
@@ -61,12 +72,12 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 
 				{imageMedia.length === 2 && (
 					<div className="grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
-						{imageMedia.map((item) => (
+						{imageMedia.map((item, index) => (
 							<button
 								key={item.id}
 								type="button"
 								className="border border-border rounded-lg overflow-hidden cursor-pointer p-0"
-								onClick={(e) => handleImageClick(item.url, e)}
+								onClick={(e) => handleImageClick(index, e)}
 							>
 								<img
 									src={item.url}
@@ -83,11 +94,7 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 						<button
 							type="button"
 							className="col-span-2 border border-border rounded-lg overflow-hidden cursor-pointer p-0"
-							onClick={(e) => {
-								if (imageMedia[0]) {
-									handleImageClick(imageMedia[0].url, e);
-								}
-							}}
+							onClick={(e) => handleImageClick(0, e)}
 						>
 							<img
 								src={imageMedia[0].url}
@@ -95,12 +102,12 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 								className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
 							/>
 						</button>
-						{imageMedia.slice(1).map((item) => (
+						{imageMedia.slice(1).map((item, index) => (
 							<button
 								key={item.id}
 								type="button"
 								className="border border-border rounded-lg overflow-hidden cursor-pointer p-0"
-								onClick={(e) => handleImageClick(item.url, e)}
+								onClick={(e) => handleImageClick(index + 1, e)}
 							>
 								<img
 									src={item.url}
@@ -119,7 +126,7 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 								key={item.id}
 								type="button"
 								className="border border-border rounded-lg overflow-hidden relative cursor-pointer p-0"
-								onClick={(e) => handleImageClick(item.url, e)}
+								onClick={(e) => handleImageClick(index, e)}
 							>
 								<img
 									src={item.url}
@@ -127,7 +134,7 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 									className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
 								/>
 								{index === 3 && imageMedia.length > 4 && (
-									<div className="absolute inset-0 bg-black/60 flex items-center justify-center pointer-events-none">
+									<div className="absolute inset-0 flex items-center justify-center pointer-events-none">
 										<span className="text-white text-2xl font-semibold">
 											+{imageMedia.length - 4}
 										</span>
@@ -142,17 +149,47 @@ export const PostMedia = ({ media }: PostMediaProps) => {
 			{/* Fullscreen Image Dialog */}
 			<Dialog open={isOpen} onOpenChange={handleCloseDialog}>
 				<DialogContent
-					className="!max-w-[95vw] !w-auto h-[90vh] p-0 overflow-hidden"
+					className="!max-w-[95vw] !w-auto !h-[90vh] p-0 overflow-hidden"
 					onPointerDownOutside={(e) => e.stopPropagation()}
 					onInteractOutside={(e) => e.stopPropagation()}
 				>
-					<div className="h-full flex items-center justify-center">
-						{selectedImage && (
+					<div className="w-full h-full flex items-center justify-center relative p-4">
+						{imageMedia[selectedImageIndex] && (
 							<img
-								src={selectedImage}
+								src={imageMedia[selectedImageIndex].url}
 								alt="Fullscreen preview"
-								className="max-w-[95vw] max-h-full object-contain"
+								className="max-w-full max-h-full w-auto h-auto object-contain"
 							/>
+						)}
+
+						{/* Navigation Controls */}
+						{imageMedia.length > 1 && (
+							<>
+								{/* Previous Button */}
+								<button
+									type="button"
+									onClick={handlePrevImage}
+									className="absolute left-4 top-1/2 -translate-y-1/2  text-white p-3 rounded-full transition-colors z-10"
+									aria-label="Previous image"
+								>
+									<ChevronLeft className="w-6 h-6" />
+								</button>
+
+								{/* Next Button */}
+								<button
+									type="button"
+									onClick={handleNextImage}
+									className="absolute right-4 top-1/2 -translate-y-1/2  text-white p-3 rounded-full transition-colors z-10"
+									aria-label="Next image"
+								>
+									<ChevronRight className="w-6 h-6" />
+								</button>
+
+								{/* Image Counter */}
+								<div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+									{selectedImageIndex + 1} / {imageMedia.length}
+								</div>
+							</>
 						)}
 					</div>
 				</DialogContent>
