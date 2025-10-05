@@ -16,6 +16,7 @@
 		"seed:all": "pnpm --filter scripts seed:all",
 		"reset:db": "pnpm --filter scripts reset:db",
 		"test:email": "pnpm --filter scripts test:email",
+		"createsuperuser": "pnpm --filter scripts createsuperuser",
 		"format": "pnpm exec biome format --write",
 		"lint": "pnpm exec biome lint",
 		"lint:fix": "pnpm exec biome lint --write --unsafe"

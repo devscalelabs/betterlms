@@ -7,14 +7,64 @@ import {
 	generateCode,
 	markMagicLinkAsUsed,
 } from "../services/magic-link";
-import { findUserByEmail } from "../services/users";
+import {
+	findUserByEmail,
+	findUserByEmailWithPassword,
+	validatePassword,
+} from "../services/users";
 
 export const authRouter = new Elysia({ prefix: "/auth" })
 	.post(
 		"/login",
 		async ({ body, status }) => {
-			const { email } = body;
+			const { email, password } = body;
 
+			// If password is provided, use password authentication
+			if (password) {
+				const user = await findUserByEmailWithPassword(email);
+
+				if (!user) {
+					return status(401, {
+						error: "Invalid email or password",
+					});
+				}
+
+				if (!user.password) {
+					return status(401, {
+						error:
+							"Password authentication not available for this account. Please use magic link login.",
+					});
+				}
+
+				const isValidPassword = await validatePassword(password, user.password);
+				if (!isValidPassword) {
+					return status(401, {
+						error: "Invalid email or password",
+					});
+				}
+
+				if (user.isSuspended) {
+					return status(403, {
+						error:
+							"Your account has been suspended. Please contact support for assistance.",
+					});
+				}
+
+				const token = await generateToken(user.id);
+
+				return status(200, {
+					token,
+					user: {
+						id: user.id,
+						email: user.email,
+						name: user.name,
+						username: user.username,
+						role: user.role,
+					},
+				});
+			}
+
+			// If no password provided, use magic link authentication
 			const user = await findUserByEmail(email);
 
 			if (!user) {
@@ -46,6 +96,7 @@ export const authRouter = new Elysia({ prefix: "/auth" })
 		{
 			body: t.Object({
 				email: t.String({ format: "email" }),
+				password: t.Optional(t.String({ minLength: 1 })),
 			}),
 		},
 	)

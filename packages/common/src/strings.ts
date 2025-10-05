@@ -1,4 +1,6 @@
-export function getUserInitials(name: string) {
+export function getUserInitials(name?: string) {
+	if (!name) return "UN";
+
 	return name
 		.split(" ")
 		.map((n) => n[0])

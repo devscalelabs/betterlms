@@ -9,6 +9,7 @@
     "seed:content": "pnpm with-env tsx src/seed-content.ts",
     "seed:all": "pnpm with-env tsx src/seed-all.ts",
     "reset:db": "pnpm with-env tsx src/reset-db.ts",
+    "createsuperuser": "pnpm with-env tsx src/createsuperuser.ts",
     "test:email": "pnpm with-env tsx src/test-email.ts",
     "test:smtp": "pnpm with-env tsx src/test-smtp-connection.ts",
     "debug:email": "pnpm with-env tsx src/debug-email-config.ts",

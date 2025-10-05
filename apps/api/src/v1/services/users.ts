@@ -1,9 +1,35 @@
 import { prisma } from "@betterlms/database";
+import bcrypt from "bcrypt";
 
 export async function findUserByEmail(email: string) {
 	return await prisma.user.findUnique({
 		where: { email },
 	});
+}
+
+export async function findUserByEmailWithPassword(email: string) {
+	return await prisma.user.findUnique({
+		where: { email },
+		select: {
+			id: true,
+			name: true,
+			username: true,
+			email: true,
+			password: true,
+			bio: true,
+			imageUrl: true,
+			role: true,
+			isSuspended: true,
+			isEmailVerified: true,
+		},
+	});
+}
+
+export async function validatePassword(
+	plainPassword: string,
+	hashedPassword: string,
+): Promise<boolean> {
+	return await bcrypt.compare(plainPassword, hashedPassword);
 }
 
 export async function findUserById(id: string) {

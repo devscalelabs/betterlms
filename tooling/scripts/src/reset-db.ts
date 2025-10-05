@@ -36,6 +36,14 @@ async function resetDatabase() {
 
 	try {
 		// Delete in order to respect foreign key constraints
+		console.log("Deleting post likes...");
+		const likesCount = await prisma.postLike.deleteMany();
+		console.log(`✅ Deleted ${likesCount.count} post likes`);
+
+		console.log("Deleting user follows...");
+		const followsCount = await prisma.userFollow.deleteMany();
+		console.log(`✅ Deleted ${followsCount.count} user follows`);
+
 		console.log("Deleting media...");
 		const mediaCount = await prisma.media.deleteMany();
 		console.log(`✅ Deleted ${mediaCount.count} media records`);

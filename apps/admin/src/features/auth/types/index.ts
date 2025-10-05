@@ -1,13 +1,15 @@
 export interface LoginResponse {
-	message: string;
-}
-
-export interface VerifyResponse {
 	token: string;
 	user: {
 		id: string;
 		email: string;
 		name: string;
 		username: string;
+		role: string;
 	};
+}
+
+export interface LoginRequest {
+	email: string;
+	password: string;
 }

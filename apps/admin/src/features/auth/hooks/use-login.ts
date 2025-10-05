@@ -2,66 +2,58 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "@/utils/api-client";
-import type { LoginResponse, VerifyResponse } from "../types";
+import type { LoginRequest, LoginResponse } from "../types";
 
 export const useLogin = () => {
 	const navigate = useNavigate();
 	const [email, setEmail] = useState("");
-	const [code, setCode] = useState("");
-	const [step, setStep] = useState<"email" | "code">("email");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState<string | null>(null);
 
-	const { mutate: requestMagicLink, isPending: isRequestingLink } = useMutation(
-		{
-			mutationFn: async () => {
-				const response = await api
-					.post<LoginResponse>("api/v1/auth/login", {
-						json: { email },
-					})
-					.json();
-				return response;
-			},
-			onSuccess: () => {
-				setStep("code");
-			},
-			onError: (error) => {
-				console.error("Failed to request magic link:", error);
-			},
-		},
-	);
-
-	const { mutate: verifyCode, isPending: isVerifying } = useMutation({
-		mutationFn: async () => {
+	const { mutate: login, isPending: isLoggingIn } = useMutation({
+		mutationFn: async (credentials: LoginRequest) => {
 			const response = await api
-				.post<VerifyResponse>("api/v1/auth/verify", {
-					json: { email, code },
+				.post<LoginResponse>("api/v1/auth/login", {
+					json: credentials,
 				})
 				.json();
 			return response;
 		},
 		onSuccess: (data) => {
 			localStorage.setItem("token", data.token);
+			localStorage.setItem("user", JSON.stringify(data.user));
+			setError(null);
 			navigate("/dashboard");
 		},
-		onError: (error) => {
-			console.error("Failed to verify code:", error);
+		onError: (error: unknown) => {
+			console.error("Failed to login:", error);
+			const errorMessage =
+				(error as { response?: { json?: { error?: string } } })?.response?.json
+					?.error || "Login failed. Please try again.";
+			setError(errorMessage);
 		},
 	});
 
-	const resetFlow = () => {
-		setStep("email");
-		setCode("");
+	const handleLogin = () => {
+		if (!email || !password) {
+			setError("Please enter both email and password");
+			return;
+		}
+		login({ email, password });
+	};
+
+	const clearError = () => {
+		setError(null);
 	};
 
 	return {
 		email,
 		setEmail,
-		code,
-		setCode,
-		step,
-		requestMagicLink,
-		isRequestingLink,
-		verifyCode,
-		isVerifying,
-		resetFlow,
+		password,
+		setPassword,
+		error,
+		login: handleLogin,
+		isLoggingIn,
+		clearError,
 	};
 };
