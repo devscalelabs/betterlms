@@ -1,61 +1,40 @@
 import { Button, Card, Input } from "@betterlms/ui";
-import { ArrowLeft, Eye, Save } from "lucide-react";
-import { useId, useState } from "react";
+import { ArrowLeft, Eye, Upload, X } from "lucide-react";
+import { useId } from "react";
 import { useNavigate } from "react-router";
 import { ArticleEditor } from "../components/article-editor";
 import { DashboardLayout } from "../components/dashboard-layout";
+import { useCreateArticle } from "../features/articles/hooks/use-create-article";
 
 export const CreateArticlePage = () => {
 	const navigate = useNavigate();
 	const titleId = useId();
-	const excerptId = useId();
-	const slugId = useId();
-	const draftId = useId();
-	const [title, setTitle] = useState("");
-	const [slug, setSlug] = useState("");
-	const [excerpt, setExcerpt] = useState("");
-	const [content, setContent] = useState("");
-	const [isDraft, setIsDraft] = useState(true);
-	const [isSaving, setIsSaving] = useState(false);
+	const channelId = useId();
+	const imageUploadId = useId();
 
-	const handleSave = async (asDraft: boolean) => {
-		setIsSaving(true);
-		try {
-			// TODO: Implement API call to save article
-			console.log("Saving article:", {
-				title,
-				slug,
-				excerpt,
-				content,
-				isDraft: asDraft,
-			});
-
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-
-			// Navigate back to articles list
+	const {
+		formData,
+		channels,
+		isLoadingChannels,
+		handleTitleChange,
+		handleContentChange,
+		handleChannelChange,
+		handleFileChange,
+		removeImage,
+		createArticle,
+		isCreatingArticle,
+		isFormValid,
+		generateSlug,
+		selectedImages,
+		handleImageUpload,
+	} = useCreateArticle({
+		onSuccess: () => {
 			navigate("/dashboard/articles");
-		} catch (error) {
-			console.error("Failed to save article:", error);
-		} finally {
-			setIsSaving(false);
-		}
-	};
+		},
+	});
 
-	const generateSlug = (title: string) => {
-		return title
-			.toLowerCase()
-			.replace(/[^a-z0-9\s-]/g, "")
-			.replace(/\s+/g, "-")
-			.replace(/-+/g, "-")
-			.trim();
-	};
-
-	const handleTitleChange = (newTitle: string) => {
-		setTitle(newTitle);
-		if (!slug || slug === generateSlug(title)) {
-			setSlug(generateSlug(newTitle));
-		}
+	const handleSave = () => {
+		createArticle();
 	};
 
 	return (
@@ -74,7 +53,7 @@ export const CreateArticlePage = () => {
 						</Button>
 						<div>
 							<h2 className="text-2xl font-bold text-gray-900">
-								{title || "Create New Article"}
+								{formData.title || "Create New Article"}
 							</h2>
 							<p className="text-sm text-gray-600 mt-1">
 								Write and publish your article
@@ -83,19 +62,11 @@ export const CreateArticlePage = () => {
 					</div>
 					<div className="flex gap-2">
 						<Button
-							variant="outline"
-							onClick={() => handleSave(true)}
-							disabled={isSaving || !title.trim()}
-						>
-							<Save className="h-4 w-4 mr-2" />
-							{isSaving ? "Saving..." : "Save as Draft"}
-						</Button>
-						<Button
-							onClick={() => handleSave(false)}
-							disabled={isSaving || !title.trim() || !content.trim()}
+							onClick={handleSave}
+							disabled={isCreatingArticle || !isFormValid}
 						>
 							<Eye className="h-4 w-4 mr-2" />
-							{isSaving ? "Publishing..." : "Publish"}
+							{isCreatingArticle ? "Publishing..." : "Publish Article"}
 						</Button>
 					</div>
 				</div>
@@ -116,23 +87,9 @@ export const CreateArticlePage = () => {
 									<Input
 										id={titleId}
 										placeholder="Enter article title..."
-										value={title}
+										value={formData.title}
 										onChange={(e) => handleTitleChange(e.target.value)}
 										className="text-lg"
-									/>
-								</div>
-								<div>
-									<label
-										htmlFor={excerptId}
-										className="block text-sm font-medium text-gray-700 mb-2"
-									>
-										Excerpt
-									</label>
-									<Input
-										id={excerptId}
-										placeholder="Brief description of the article..."
-										value={excerpt}
-										onChange={(e) => setExcerpt(e.target.value)}
 									/>
 								</div>
 								<div>
@@ -140,9 +97,10 @@ export const CreateArticlePage = () => {
 										Content *
 									</div>
 									<ArticleEditor
-										content={content}
-										onChange={setContent}
+										content={formData.content}
+										onChange={handleContentChange}
 										placeholder="Start writing your article..."
+										onImageUpload={handleImageUpload}
 									/>
 								</div>
 							</div>
@@ -159,40 +117,87 @@ export const CreateArticlePage = () => {
 							<div className="space-y-4">
 								<div>
 									<label
-										htmlFor={slugId}
+										htmlFor={channelId}
 										className="block text-sm font-medium text-gray-700 mb-2"
 									>
-										Slug
+										Channel
 									</label>
-									<Input
-										id={slugId}
-										placeholder="article-slug"
-										value={slug}
-										onChange={(e) => setSlug(e.target.value)}
-									/>
+									<select
+										id={channelId}
+										value={formData.channelId || ""}
+										onChange={(e) => handleChannelChange(e.target.value)}
+										className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+										disabled={isLoadingChannels}
+									>
+										<option value="">Select a channel (optional)</option>
+										{channels.map((channel) => (
+											<option key={channel.id} value={channel.id}>
+												{channel.name}
+											</option>
+										))}
+									</select>
 									<p className="text-xs text-gray-500 mt-1">
-										URL-friendly version of the title
+										Choose a channel to categorize your article
 									</p>
 								</div>
 								<div>
 									<label
-										htmlFor={draftId}
+										htmlFor={imageUploadId}
 										className="block text-sm font-medium text-gray-700 mb-2"
 									>
-										Status
+										Images
 									</label>
-									<div className="flex items-center gap-2">
+									<div className="space-y-2">
 										<input
-											type="checkbox"
-											id={draftId}
-											checked={isDraft}
-											onChange={(e) => setIsDraft(e.target.checked)}
-											className="rounded border-gray-300"
+											type="file"
+											id={imageUploadId}
+											multiple
+											accept="image/png,image/jpeg"
+											onChange={handleFileChange}
+											className="hidden"
 										/>
-										<label htmlFor={draftId} className="text-sm text-gray-700">
-											Save as draft
-										</label>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() =>
+												document.getElementById(imageUploadId)?.click()
+											}
+											className="w-full"
+										>
+											<Upload className="h-4 w-4 mr-2" />
+											Upload Images
+										</Button>
+										{selectedImages.length > 0 && (
+											<div className="space-y-2">
+												<p className="text-xs text-gray-500">
+													{selectedImages.length} image(s) selected
+												</p>
+												<div className="space-y-1">
+													{selectedImages.map((image, index) => (
+														<div
+															key={`${image.name}-${index}`}
+															className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm"
+														>
+															<span className="truncate flex-1 mr-2">
+																{image.name}
+															</span>
+															<Button
+																variant="outline"
+																size="sm"
+																onClick={() => removeImage(index)}
+																className="h-6 w-6 p-0"
+															>
+																<X className="h-3 w-3" />
+															</Button>
+														</div>
+													))}
+												</div>
+											</div>
+										)}
 									</div>
+									<p className="text-xs text-gray-500 mt-1">
+										Upload up to 10 images (PNG, JPEG only)
+									</p>
 								</div>
 							</div>
 						</Card>
@@ -205,26 +210,33 @@ export const CreateArticlePage = () => {
 							<div className="space-y-3">
 								<div className="text-sm">
 									<strong>Title:</strong>{" "}
-									<span className="text-gray-600">{title || "Untitled"}</span>
+									<span className="text-gray-600">
+										{formData.title || "Untitled"}
+									</span>
 								</div>
 								<div className="text-sm">
 									<strong>Slug:</strong>{" "}
 									<span className="text-gray-600">
-										{slug || "auto-generated"}
+										{formData.title
+											? generateSlug(formData.title)
+											: "auto-generated"}
 									</span>
 								</div>
 								<div className="text-sm">
-									<strong>Status:</strong>{" "}
+									<strong>Channel:</strong>{" "}
 									<span className="text-gray-600">
-										{isDraft ? "Draft" : "Published"}
+										{formData.channelId
+											? channels.find((c) => c.id === formData.channelId)
+													?.name || "Unknown"
+											: "None"}
 									</span>
 								</div>
-								{excerpt && (
-									<div className="text-sm">
-										<strong>Excerpt:</strong>{" "}
-										<span className="text-gray-600">{excerpt}</span>
-									</div>
-								)}
+								<div className="text-sm">
+									<strong>Images:</strong>{" "}
+									<span className="text-gray-600">
+										{selectedImages.length} image(s)
+									</span>
+								</div>
 							</div>
 						</Card>
 
@@ -238,7 +250,7 @@ export const CreateArticlePage = () => {
 									<span className="text-gray-600">Words:</span>
 									<span className="font-medium">
 										{
-											content
+											formData.content
 												.replace(/<[^>]*>/g, "")
 												.split(/\s+/)
 												.filter(Boolean).length
@@ -248,8 +260,12 @@ export const CreateArticlePage = () => {
 								<div className="flex justify-between">
 									<span className="text-gray-600">Characters:</span>
 									<span className="font-medium">
-										{content.replace(/<[^>]*>/g, "").length}
+										{formData.content.replace(/<[^>]*>/g, "").length}
 									</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-gray-600">Images:</span>
+									<span className="font-medium">{selectedImages.length}</span>
 								</div>
 							</div>
 						</Card>

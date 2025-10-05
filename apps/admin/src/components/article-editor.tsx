@@ -1,5 +1,6 @@
 import { Color } from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
+import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -11,6 +12,7 @@ import {
 	Heading2,
 	Heading3,
 	Highlighter,
+	Image as ImageIcon,
 	Italic,
 	List,
 	ListOrdered,
@@ -21,6 +23,7 @@ import {
 	Undo,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useId } from "react";
 
 const ToolbarButton = ({
 	onClick,
@@ -51,13 +54,16 @@ interface ArticleEditorProps {
 	content?: string;
 	onChange?: (content: string) => void;
 	placeholder?: string;
+	onImageUpload?: (file: File) => Promise<string>;
 }
 
 export const ArticleEditor = ({
 	content = "",
 	onChange,
 	placeholder = "Start writing your article...",
+	onImageUpload,
 }: ArticleEditorProps) => {
+	const imageUploadId = useId();
 	const editor = useEditor({
 		extensions: [
 			StarterKit,
@@ -68,6 +74,10 @@ export const ArticleEditor = ({
 			Color,
 			Highlight.configure({
 				multicolor: true,
+			}),
+			Image.configure({
+				inline: true,
+				allowBase64: false,
 			}),
 		],
 		content,
@@ -81,6 +91,28 @@ export const ArticleEditor = ({
 			},
 		},
 	});
+
+	const handleImageUpload = async (file: File) => {
+		if (!onImageUpload) return;
+
+		try {
+			const imageUrl = await onImageUpload(file);
+			editor.chain().focus().setImage({ src: imageUrl }).run();
+		} catch (error) {
+			console.error("Failed to upload image:", error);
+		}
+	};
+
+	const handleImageInputChange = (
+		event: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		const file = event.target.files?.[0];
+		if (file && (file.type === "image/png" || file.type === "image/jpeg")) {
+			handleImageUpload(file);
+		}
+		// Reset the input value so the same file can be selected again
+		event.target.value = "";
+	};
 
 	if (!editor) {
 		return null;
@@ -185,6 +217,24 @@ export const ArticleEditor = ({
 						<Highlighter className="h-4 w-4" />
 					</ToolbarButton>
 				</div>
+
+				{/* Image upload */}
+				{onImageUpload && (
+					<div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-2">
+						<input
+							type="file"
+							accept="image/png,image/jpeg"
+							onChange={handleImageInputChange}
+							className="hidden"
+							id={imageUploadId}
+						/>
+						<ToolbarButton
+							onClick={() => document.getElementById(imageUploadId)?.click()}
+						>
+							<ImageIcon className="h-4 w-4" />
+						</ToolbarButton>
+					</div>
+				)}
 
 				{/* Undo/Redo */}
 				<div className="flex items-center gap-1">

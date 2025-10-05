@@ -5,10 +5,21 @@ export async function findPosts(filters: {
 	parentId?: string | undefined;
 	username?: string | undefined;
 	channelSlug?: string | undefined;
+	excludeArticles?: boolean | undefined;
+	articlesOnly?: boolean | undefined;
 }) {
 	const whereClause: Prisma.PostWhereInput = {
 		isDeleted: false,
 	};
+
+	// Handle articles filtering
+	if (filters.articlesOnly) {
+		// Only return posts with titles (articles)
+		whereClause.title = { not: null };
+	} else if (filters.excludeArticles !== false) {
+		// Exclude articles (posts with titles) by default
+		whereClause.title = null;
+	}
 
 	if (filters.parentId) {
 		whereClause.parentId = filters.parentId;

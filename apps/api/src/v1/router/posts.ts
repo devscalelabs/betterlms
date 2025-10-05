@@ -35,6 +35,76 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 				parentId: query.parentId,
 				username: query.username,
 				channelSlug: query.channelSlug,
+				excludeArticles: query.excludeArticles !== "false", // Default to true unless explicitly set to false
+			});
+
+			// Process posts to get unique commenters (first 3) and check if user liked
+			const postsWithCommentPreview = await Promise.all(
+				posts.map(async (post) => {
+					const uniqueCommenters = new Map();
+
+					for (const child of post.children) {
+						if (
+							child.user &&
+							child.userId &&
+							!uniqueCommenters.has(child.userId)
+						) {
+							uniqueCommenters.set(child.userId, child.user);
+							if (uniqueCommenters.size === 3) break;
+						}
+					}
+
+					// Check if current user has liked this post
+					let isLiked = false;
+					if (userId) {
+						const like = await findPostLike(userId, post.id);
+						isLiked = !!like;
+					}
+
+					const { children: _children, ...postData } = post;
+
+					return {
+						...postData,
+						isLiked,
+						commentPreview: {
+							users: Array.from(uniqueCommenters.values()),
+							totalCount: post.replyCount,
+						},
+					};
+				}),
+			);
+
+			return { posts: postsWithCommentPreview };
+		},
+		{
+			query: t.Object({
+				parentId: t.Optional(t.String()),
+				username: t.Optional(t.String()),
+				channelSlug: t.Optional(t.String()),
+				excludeArticles: t.Optional(t.String()),
+			}),
+		},
+	)
+	.get(
+		"/articles",
+		async ({ query, headers }) => {
+			// Optionally get userId if user is authenticated
+			let userId: string | undefined;
+			const token = headers.authorization?.split(" ")[1];
+			if (token) {
+				try {
+					userId = await verifyToken(token);
+				} catch {
+					// If token is invalid, just continue without userId
+					userId = undefined;
+				}
+			}
+
+			const posts = await findPosts({
+				parentId: query.parentId,
+				username: query.username,
+				channelSlug: query.channelSlug,
+				articlesOnly: true, // Only return articles (posts with titles)
 			});
 
 			// Process posts to get unique commenters (first 3) and check if user liked
