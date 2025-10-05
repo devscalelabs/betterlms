@@ -10,6 +10,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@betterlms/ui";
+import { useState } from "react";
 import { useParams } from "react-router";
 import { useAccount } from "@/features/account/hooks/use-account";
 import { PostCard } from "@/features/posts/components/post-card";
@@ -25,6 +26,7 @@ export const PostDetail = () => {
 	const { posts: replies, isLoadingPosts: isLoadingReplies } = usePosts(id);
 	const { account } = useAccount();
 	const { deletePost, isDeletingPost } = useDeletePost();
+	const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
 
 	const isCurrentUser = account?.user?.id === post?.user?.id;
 
@@ -36,6 +38,10 @@ export const PostDetail = () => {
 
 	const handleReport = () => {
 		console.log("Report post:", post?.id);
+	};
+
+	const handleToggleReplyForm = () => {
+		setIsReplyFormOpen(!isReplyFormOpen);
 	};
 
 	if (isLoading) {
@@ -127,6 +133,7 @@ export const PostDetail = () => {
 						variant="ghost"
 						size="sm"
 						className="text-muted-foreground hover:text-primary"
+						onClick={handleToggleReplyForm}
 					>
 						<span className="text-xs">Reply</span>
 					</Button>
@@ -147,7 +154,12 @@ export const PostDetail = () => {
 			</article>
 
 			{/* Reply Form */}
-			<PostForm parentId={post.id} />
+			{isReplyFormOpen && (
+				<PostForm
+					parentId={post.id}
+					onSuccess={() => setIsReplyFormOpen(false)}
+				/>
+			)}
 
 			{/* Replies Section */}
 			<div className="mt-4">

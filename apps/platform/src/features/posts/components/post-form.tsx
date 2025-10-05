@@ -20,9 +20,10 @@ import { useCreatePost } from "../hooks/use-create-post";
 
 type PostFormProps = {
 	parentId?: string;
+	onSuccess?: () => void;
 };
 
-export const PostForm = ({ parentId }: PostFormProps) => {
+export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
 	const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const { channels } = useChannels();
@@ -34,7 +35,10 @@ export const PostForm = ({ parentId }: PostFormProps) => {
 		removeImage,
 		createPost,
 		isCreatingPost,
-	} = useCreatePost(parentId);
+	} = useCreatePost({
+		...(parentId && { parentId }),
+		...(onSuccess && { onSuccess }),
+	});
 
 	const maxLength = formData.content.length;
 

@@ -3,7 +3,15 @@ import { useState } from "react";
 import { api } from "@/utils/api-client";
 import type { CreatePostRequest, CreatePostResponse } from "../types";
 
-export const useCreatePost = (parentId?: string) => {
+type UseCreatePostOptions = {
+	parentId?: string;
+	onSuccess?: () => void;
+};
+
+export const useCreatePost = ({
+	parentId,
+	onSuccess,
+}: UseCreatePostOptions = {}) => {
 	const [formData, setFormData] = useState<CreatePostRequest>({
 		content: "",
 		images: [],
@@ -44,6 +52,7 @@ export const useCreatePost = (parentId?: string) => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
 			setFormData({ content: "", images: [] });
+			onSuccess?.();
 		},
 		onError: (error) => {
 			console.error("Failed to create post:", error);

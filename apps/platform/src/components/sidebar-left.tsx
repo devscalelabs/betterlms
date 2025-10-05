@@ -7,10 +7,12 @@ import {
 	ZapFreeIcons,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useNavigate } from "react-router";
 import { ChannelsList } from "@/features/channels/components/channels-list";
 import { MenuItem } from "./shared/menu-item";
 
 export const SidebarLeft = () => {
+	const navigate = useNavigate();
 	return (
 		<aside className="sticky top-0 h-screen w-52 pr-4 flex flex-col justify-between pb-4">
 			<section className="space-y-2">
@@ -21,7 +23,7 @@ export const SidebarLeft = () => {
 					<div>BetterLMS</div>
 				</header>
 				<nav>
-					<MenuItem>
+					<MenuItem onClick={() => navigate("/")}>
 						<HugeiconsIcon icon={ZapFreeIcons} strokeWidth={2} />
 						<p>Timeline</p>
 					</MenuItem>
