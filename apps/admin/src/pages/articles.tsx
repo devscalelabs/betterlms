@@ -1,7 +1,10 @@
 import { Button, Card, Input } from "@betterlms/ui";
+import { useNavigate } from "react-router";
 import { DashboardLayout } from "../components/dashboard-layout";
 
 export const ArticlesPage = () => {
+	const navigate = useNavigate();
+
 	return (
 		<DashboardLayout>
 			<div className="space-y-6">
@@ -12,7 +15,9 @@ export const ArticlesPage = () => {
 							Manage all articles and content
 						</p>
 					</div>
-					<Button>Create Article</Button>
+					<Button onClick={() => navigate("/dashboard/articles/create")}>
+						Create Article
+					</Button>
 				</div>
 
 				<Card className="p-6">
