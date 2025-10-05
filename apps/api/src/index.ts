@@ -4,6 +4,7 @@ import { Elysia } from "elysia";
 import { accountRouter } from "./v1/router/account";
 import { authRouter } from "./v1/router/auth";
 import { channelsRouter } from "./v1/router/channels";
+import { linkPreviewRouter } from "./v1/router/link-preview";
 import { postsRouter } from "./v1/router/posts";
 import { profileRouter } from "./v1/router/profile";
 
@@ -23,7 +24,8 @@ export const app = new Elysia({ adapter: node() })
 			.use(accountRouter)
 			.use(channelsRouter)
 			.use(postsRouter)
-			.use(profileRouter),
+			.use(profileRouter)
+			.use(linkPreviewRouter),
 	)
 	.get("/", () => "Hello Elysia")
 	.listen(PORT, ({ hostname, port }) => {
