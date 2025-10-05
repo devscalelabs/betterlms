@@ -1,5 +1,10 @@
 import { Elysia, t } from "elysia";
 import { uploadImageToS3 } from "../../utils/upload-files";
+import {
+	createUserFollow,
+	deleteUserFollow,
+	findUserFollow,
+} from "../services/follows";
 import { verifyToken } from "../services/jwt";
 import {
 	findAllUsers,
@@ -15,7 +20,7 @@ export const profileRouter = new Elysia({ prefix: "/profile" })
 			users,
 		};
 	})
-	.get("/:username", async ({ params, status }) => {
+	.get("/:username", async ({ params, headers, status }) => {
 		const { username } = params;
 
 		const user = await findUserByUsername(username);
@@ -26,8 +31,25 @@ export const profileRouter = new Elysia({ prefix: "/profile" })
 			});
 		}
 
+		let isFollowing = false;
+
+		const token = headers.authorization?.split(" ")[1];
+		if (token) {
+			try {
+				const userId = await verifyToken(token);
+				const follow = await findUserFollow(userId, user.id);
+				isFollowing = !!follow;
+			} catch {
+				// Token is invalid or expired, treat as not authenticated
+				isFollowing = false;
+			}
+		}
+
 		return {
-			user,
+			user: {
+				...user,
+				isFollowing,
+			},
 		};
 	})
 	.put(
@@ -71,4 +93,74 @@ export const profileRouter = new Elysia({ prefix: "/profile" })
 				avatar: t.Optional(t.File()),
 			}),
 		},
-	);
+	)
+	.post("/:username/follow", async ({ params, headers, status }) => {
+		const token = headers.authorization?.split(" ")[1];
+
+		if (!token) {
+			return status(401, {
+				error: "Unauthorized",
+			});
+		}
+
+		const userId = await verifyToken(token);
+		const { username } = params;
+
+		const userToFollow = await findUserByUsername(username);
+
+		if (!userToFollow) {
+			return status(404, {
+				error: "User not found",
+			});
+		}
+
+		if (userToFollow.id === userId) {
+			return status(400, {
+				error: "Cannot follow yourself",
+			});
+		}
+
+		const existingFollow = await findUserFollow(userId, userToFollow.id);
+
+		if (existingFollow) {
+			return status(409, {
+				error: "Already following this user",
+			});
+		}
+
+		await createUserFollow(userId, userToFollow.id);
+
+		return status(201, { message: "User followed successfully" });
+	})
+	.delete("/:username/follow", async ({ params, headers, status }) => {
+		const token = headers.authorization?.split(" ")[1];
+
+		if (!token) {
+			return status(401, {
+				error: "Unauthorized",
+			});
+		}
+
+		const userId = await verifyToken(token);
+		const { username } = params;
+
+		const userToUnfollow = await findUserByUsername(username);
+
+		if (!userToUnfollow) {
+			return status(404, {
+				error: "User not found",
+			});
+		}
+
+		const existingFollow = await findUserFollow(userId, userToUnfollow.id);
+
+		if (!existingFollow) {
+			return status(404, {
+				error: "Not following this user",
+			});
+		}
+
+		await deleteUserFollow(userId, userToUnfollow.id);
+
+		return { message: "User unfollowed successfully" };
+	});

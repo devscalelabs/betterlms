@@ -6,6 +6,7 @@ export interface Profile {
 	bio: string;
 	imageUrl: string;
 	role: string;
+	isFollowing?: boolean;
 }
 
 export interface ProfileResponse {

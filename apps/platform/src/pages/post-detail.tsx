@@ -78,7 +78,7 @@ export const PostDetail = () => {
 				<Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
 					Back
 				</Button>
-				<div>Newest</div>
+				<div></div>
 			</HeadingBox>
 			{/* Post Detail */}
 			<article className="border-b border-border p-4">

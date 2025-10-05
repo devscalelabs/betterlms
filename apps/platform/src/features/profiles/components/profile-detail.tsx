@@ -7,7 +7,9 @@ import { useAccount } from "@/features/account/hooks/use-account";
 import { PostCard } from "@/features/posts/components/post-card";
 import { usePosts } from "@/features/posts/hooks/use-posts";
 import { usePostsFilter } from "@/features/posts/hooks/use-posts-filter";
+import { useFollowUser } from "../hooks/use-follow-user";
 import { useProfile } from "../hooks/use-profile";
+import { useUnfollowUser } from "../hooks/use-unfollow-user";
 
 export const ProfileDetail = () => {
 	const navigate = useNavigate();
@@ -17,8 +19,20 @@ export const ProfileDetail = () => {
 	const filters = usePostsFilter({ username: username || "" });
 	const { posts, isLoadingPosts } = usePosts(filters);
 	const [activeTab, setActiveTab] = useState<"posts" | "replies">("posts");
+	const { followUser, isFollowing } = useFollowUser();
+	const { unfollowUser, isUnfollowing } = useUnfollowUser();
 
 	const isOwnProfile = account?.user.username === username;
+
+	const handleFollowToggle = () => {
+		if (!username) return;
+
+		if (profile?.user.isFollowing) {
+			unfollowUser(username);
+		} else {
+			followUser(username);
+		}
+	};
 
 	if (isProfileLoading) {
 		return (
@@ -47,13 +61,26 @@ export const ProfileDetail = () => {
 				<Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
 					Back
 				</Button>
-				{isOwnProfile && (
+				{isOwnProfile ? (
 					<Button
 						variant="outline"
 						size="sm"
 						onClick={() => navigate("/profile/edit")}
 					>
 						Edit Profile
+					</Button>
+				) : (
+					<Button
+						variant={profile?.user.isFollowing ? "outline" : "default"}
+						size="sm"
+						onClick={handleFollowToggle}
+						disabled={isFollowing || isUnfollowing}
+					>
+						{isFollowing || isUnfollowing
+							? "Loading..."
+							: profile?.user.isFollowing
+								? "Unfollow"
+								: "Follow"}
 					</Button>
 				)}
 			</HeadingBox>

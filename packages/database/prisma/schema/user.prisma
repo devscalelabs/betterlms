@@ -26,6 +26,8 @@ model User {
   channels ChannelMember[]
   Media Media[]
   likes PostLike[]
+  followers UserFollow[] @relation("Follower")
+  following UserFollow[] @relation("Following")
 
   @@index([email])
   @@index([username])
