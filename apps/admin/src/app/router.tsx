@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router";
+import { ProtectedRoute } from "../components/protected-route";
 import { ArticlesPage } from "../pages/articles";
 import { CoursesPage } from "../pages/courses";
 import { DashboardPage } from "../pages/dashboard";
@@ -10,10 +11,38 @@ export const AppRouter = () => {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/" element={<LoginPage />} />
-				<Route path="/dashboard" element={<DashboardPage />} />
-				<Route path="/dashboard/users" element={<UsersPage />} />
-				<Route path="/dashboard/articles" element={<ArticlesPage />} />
-				<Route path="/dashboard/courses" element={<CoursesPage />} />
+				<Route
+					path="/dashboard"
+					element={
+						<ProtectedRoute>
+							<DashboardPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/users"
+					element={
+						<ProtectedRoute>
+							<UsersPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/articles"
+					element={
+						<ProtectedRoute>
+							<ArticlesPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/courses"
+					element={
+						<ProtectedRoute>
+							<CoursesPage />
+						</ProtectedRoute>
+					}
+				/>
 			</Routes>
 		</BrowserRouter>
 	);
