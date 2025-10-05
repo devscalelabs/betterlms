@@ -13,6 +13,7 @@ import { MenuItem } from "./shared/menu-item";
 
 export const SidebarLeft = () => {
 	const navigate = useNavigate();
+
 	return (
 		<aside className="sticky top-0 h-screen w-52 pr-4 flex flex-col justify-between pb-4">
 			<section className="space-y-2">

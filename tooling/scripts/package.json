@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "seed:users": "pnpm with-env tsx src/seed-users.ts",
+    "seed:channels": "pnpm with-env tsx src/seed-channels.ts",
     "seed:content": "pnpm with-env tsx src/seed-content.ts",
     "seed:all": "pnpm with-env tsx src/seed-all.ts",
     "reset:db": "pnpm with-env tsx src/reset-db.ts",

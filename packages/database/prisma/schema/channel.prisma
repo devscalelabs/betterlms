@@ -2,6 +2,7 @@ model Channel {
   id String @id @default(cuid())
 
   name String
+  slug String? @unique
   isPrivate Boolean @default(false)
 
   createdAt DateTime @default(now())

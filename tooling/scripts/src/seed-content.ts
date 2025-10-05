@@ -1,56 +1,29 @@
 import { prisma } from "@betterlms/database";
 
-const SAMPLE_CHANNELS = [
-	{
-		name: "general",
-		isPrivate: false,
-	},
-	{
-		name: "javascript",
-		isPrivate: false,
-	},
-	{
-		name: "python",
-		isPrivate: false,
-	},
-	{
-		name: "ai-and-llms",
-		isPrivate: false,
-	},
-	{
-		name: "random",
-		isPrivate: false,
-	},
-	{
-		name: "memes",
-		isPrivate: false,
-	},
-];
-
 const SAMPLE_POSTS = [
 	{
-		channelName: "general",
+		channelName: "General",
 		content:
 			"Hey everyone! 👋 Just joined this platform. Excited to connect with fellow engineers and share knowledge!",
 		title: null,
 		media: null,
 	},
 	{
-		channelName: "general",
+		channelName: "General",
 		content:
 			"What are you all working on this week? I'm refactoring a legacy codebase and it's... interesting 😅",
 		title: null,
 		media: null,
 	},
 	{
-		channelName: "javascript",
+		channelName: "JavaScript",
 		content:
 			"Hot take: TypeScript has become essential for any serious JavaScript project. The type safety alone saves countless hours of debugging. What's your experience?",
 		title: null,
 		media: null,
 	},
 	{
-		channelName: "javascript",
+		channelName: "JavaScript",
 		content:
 			"Just discovered Bun 1.0 and wow, the performance improvements are insane! Anyone else making the switch from Node?",
 		title: null,
@@ -62,21 +35,21 @@ const SAMPLE_POSTS = [
 		],
 	},
 	{
-		channelName: "javascript",
+		channelName: "JavaScript",
 		content:
 			"Looking for recommendations on state management libraries for React. Redux feels too heavy for my use case. Tried Zustand and loving the simplicity!",
 		title: null,
 		media: null,
 	},
 	{
-		channelName: "python",
+		channelName: "Python",
 		content:
 			"FastAPI vs Flask in 2024 - which one should I choose for a new API project? Need something that scales well and has good async support.",
 		title: null,
 		media: null,
 	},
 	{
-		channelName: "python",
+		channelName: "Python",
 		content:
 			"Just finished optimizing a Python script that was taking 45 minutes. Now it runs in 3 minutes thanks to multiprocessing and better algorithms. Never skip the profiler!",
 		title: null,
@@ -88,14 +61,14 @@ const SAMPLE_POSTS = [
 		],
 	},
 	{
-		channelName: "python",
+		channelName: "Python",
 		content:
 			"Poetry vs pip + venv - what's your preferred dependency management tool? I've been using Poetry and love the pyproject.toml approach.",
 		title: null,
 		media: null,
 	},
 	{
-		channelName: "ai-and-llms",
+		channelName: "AI & LLMs",
 		content:
 			"Built my first RAG application using LangChain and it's mind-blowing how well it works. The future of search is definitely here!",
 		title: null,
@@ -107,21 +80,21 @@ const SAMPLE_POSTS = [
 		],
 	},
 	{
-		channelName: "ai-and-llms",
+		channelName: "AI & LLMs",
 		content:
 			"GPT-4 vs Claude Sonnet 4 - which one do you prefer for coding tasks? I've been using Claude lately and the code quality is impressive.",
 		title: null,
 		media: null,
 	},
 	{
-		channelName: "ai-and-llms",
+		channelName: "AI & LLMs",
 		content:
 			"Prompt engineering is becoming a legitimate skill. Anyone else spending way too much time crafting the perfect system prompt? 😄",
 		title: null,
 		media: null,
 	},
 	{
-		channelName: "ai-and-llms",
+		channelName: "AI & LLMs",
 		content:
 			"Local LLMs with Ollama are getting really good. Running Llama 3 on my M2 MacBook and it's surprisingly fast!",
 		title: null,
@@ -133,7 +106,7 @@ const SAMPLE_POSTS = [
 		],
 	},
 	{
-		channelName: "random",
+		channelName: "Random & Memes",
 		content:
 			"Mechanical keyboards: worth the hype? Just got my first one and my fingers are so happy but my wallet is crying.",
 		title: null,
@@ -145,7 +118,7 @@ const SAMPLE_POSTS = [
 		],
 	},
 	{
-		channelName: "random",
+		channelName: "Random & Memes",
 		content: "Coffee or tea while coding? I'm a cold brew enthusiast ☕",
 		title: null,
 		media: [
@@ -156,7 +129,7 @@ const SAMPLE_POSTS = [
 		],
 	},
 	{
-		channelName: "memes",
+		channelName: "Random & Memes",
 		content:
 			"When you finally fix that bug that's been haunting you for 3 days and it was just a missing semicolon... 🤦‍♂️\n\n\"It's not a bug, it's a feature\" - me, trying to convince the PM",
 		title: null,
@@ -168,7 +141,7 @@ const SAMPLE_POSTS = [
 		],
 	},
 	{
-		channelName: "memes",
+		channelName: "Random & Memes",
 		content:
 			"Junior dev: carefully writes tests\nSenior dev: console.log() everywhere\nArchitect: implements logging framework\n\nWe are not the same 😂",
 		title: null,
@@ -297,38 +270,11 @@ async function seedContent() {
 		process.exit(1);
 	}
 
-	// Create channels
-	console.log("📢 Creating channels...");
-	const channels = [];
-	for (const channel of SAMPLE_CHANNELS) {
-		const created = await prisma.channel.upsert({
-			where: { id: channel.name },
-			update: {},
-			create: channel,
-		});
-		channels.push(created);
-		console.log(`✅ Created channel: ${channel.name}`);
-	}
-
-	// Add all users to all public channels
-	console.log("👥 Adding members to channels...");
-	for (const channel of channels) {
-		for (const user of users) {
-			await prisma.channelMember.upsert({
-				where: {
-					userId_channelId: {
-						userId: user.id,
-						channelId: channel.id,
-					},
-				},
-				update: {},
-				create: {
-					userId: user.id,
-					channelId: channel.id,
-				},
-			});
-		}
-		console.log(`✅ Added members to channel: ${channel.name}`);
+	// Get existing channels
+	const channels = await prisma.channel.findMany();
+	if (channels.length === 0) {
+		console.error("❌ No channels found. Please run seed:channels first.");
+		process.exit(1);
 	}
 
 	// Create posts

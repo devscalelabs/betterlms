@@ -1,8 +1,10 @@
 import { Button } from "@betterlms/ui";
+import { useQueryState } from "nuqs";
 import { useChannels } from "../hooks/use-channels";
 
 export const ChannelsList = () => {
 	const { channels, isLoadingChannels } = useChannels();
+	const [_, setChannel] = useQueryState("channel");
 
 	if (isLoadingChannels) {
 		return <div>Loading channels...</div>;
@@ -16,6 +18,7 @@ export const ChannelsList = () => {
 					size="xs"
 					variant="secondary"
 					className="w-fit block"
+					onClick={() => setChannel(channel.id)}
 				>
 					{channel.name}
 				</Button>
