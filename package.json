@@ -11,6 +11,10 @@
 		"db:migrate": "pnpm --filter @betterlms/database db:migrate",
 		"db:reset": "pnpm --filter @betterlms/database db:reset",
 		"db:studio": "pnpm --filter @betterlms/database db:studio",
+		"seed:users": "pnpm --filter scripts seed:users",
+		"seed:content": "pnpm --filter scripts seed:content",
+		"seed:all": "pnpm --filter scripts seed:all",
+		"reset:db": "pnpm --filter scripts reset:db",
 		"format": "pnpm exec biome format --write",
 		"lint": "pnpm exec biome lint",
 		"lint:fix": "pnpm exec biome lint --write --unsafe"

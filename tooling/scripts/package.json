@@ -1,0 +1,28 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "seed:users": "pnpm with-env tsx src/seed-users.ts",
+    "seed:content": "pnpm with-env tsx src/seed-content.ts",
+    "seed:all": "pnpm with-env tsx src/seed-all.ts",
+    "reset:db": "pnpm with-env tsx src/reset-db.ts",
+    "with-env": "dotenv -e ../../.env --"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@betterlms/database": "workspace:*",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@betterlms/typescript": "workspace:*",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^24.6.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}
