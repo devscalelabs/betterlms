@@ -14,7 +14,7 @@ import {
 import { Image01FreeIcons } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useSetAtom } from "jotai";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount } from "@/features/account/hooks/use-account";
 import { loginDialogAtom } from "@/features/auth/atoms/login-dialog-atom";
 import { useChannels } from "@/features/channels/hooks/use-channels";
@@ -22,14 +22,22 @@ import type { Channel } from "@/features/channels/types";
 import { MentionDropdown } from "@/features/mentions/components/mention-dropdown";
 import { useMention } from "@/features/mentions/hooks/use-mention";
 import { useCreatePost } from "../hooks/use-create-post";
+import type { Post } from "../types";
+import { extractMentions } from "../utils/extract-mentions";
 
 type PostFormProps = {
 	parentId?: string;
+	replyToPost?: Post;
 	onSuccess?: () => void;
 };
 
-export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
+export const PostForm = ({
+	parentId,
+	replyToPost,
+	onSuccess,
+}: PostFormProps) => {
 	const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+	const [initialMentions, setInitialMentions] = useState<string>("");
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const { account } = useAccount();
@@ -58,11 +66,66 @@ export const PostForm = ({ parentId, onSuccess }: PostFormProps) => {
 		setCursorCoordinates,
 	} = useMention();
 
+	// Auto-populate mentions when replying
+	useEffect(() => {
+		if (replyToPost && formData.content === "" && initialMentions === "") {
+			const mentionsSet = new Set<string>();
+
+			// Add post author
+			if (
+				replyToPost.user?.username &&
+				replyToPost.user.username !== account?.user?.username
+			) {
+				mentionsSet.add(replyToPost.user.username);
+			}
+
+			// Extract and add mentioned users from content
+			const mentionedUsers = extractMentions(replyToPost.content);
+			mentionedUsers.forEach((username) => {
+				if (username !== account?.user?.username) {
+					mentionsSet.add(username);
+				}
+			});
+
+			// Format mentions
+			if (mentionsSet.size > 0) {
+				const mentionsText = Array.from(mentionsSet)
+					.map((username) => `@${username}`)
+					.join(" ");
+				setInitialMentions(`${mentionsText} `);
+				setFormData((prev) => ({ ...prev, content: `${mentionsText} ` }));
+			}
+		}
+	}, [
+		replyToPost,
+		account?.user?.username,
+		formData.content,
+		setFormData,
+		initialMentions,
+	]);
+
 	const maxLength = formData.content.length;
 
 	function handleContentChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-		const newContent = event.target.value;
+		let newContent = event.target.value;
 		const cursorPosition = event.target.selectionStart;
+
+		// Prevent removing initial mentions when replying
+		if (initialMentions && !newContent.startsWith(initialMentions)) {
+			// User tried to remove initial mentions, restore them
+			const userInput = newContent.replace(initialMentions.trim(), "").trim();
+			newContent = `${initialMentions}${userInput}`;
+
+			// Restore cursor position after initial mentions
+			setTimeout(() => {
+				if (textareaRef.current) {
+					textareaRef.current.setSelectionRange(
+						initialMentions.length,
+						initialMentions.length,
+					);
+				}
+			}, 0);
+		}
 
 		setFormData({ ...formData, content: newContent });
 		handleMentionContentChange(

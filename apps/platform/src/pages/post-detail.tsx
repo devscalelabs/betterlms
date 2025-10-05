@@ -21,6 +21,7 @@ import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
 import { usePost } from "@/features/posts/hooks/use-post";
 import { usePosts } from "@/features/posts/hooks/use-posts";
 import { usePostsFilter } from "@/features/posts/hooks/use-posts-filter";
+import { parseContent } from "@/features/posts/utils/parse-content";
 
 export const PostDetail = () => {
 	const navigate = useNavigate();
@@ -146,7 +147,7 @@ export const PostDetail = () => {
 
 				{/* Content */}
 				<div className="text-sm leading-relaxed mb-3 whitespace-pre-line">
-					{post.content}
+					{parseContent(post.content)}
 				</div>
 
 				{/* Media */}
@@ -182,6 +183,7 @@ export const PostDetail = () => {
 			{isReplyFormOpen && (
 				<PostForm
 					parentId={post.id}
+					replyToPost={post}
 					onSuccess={() => setIsReplyFormOpen(false)}
 				/>
 			)}
