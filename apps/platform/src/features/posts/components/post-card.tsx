@@ -19,6 +19,7 @@ import { useLikePost } from "@/features/likes/hooks/use-like-post";
 import { useUnlikePost } from "@/features/likes/hooks/use-unlike-post";
 import { useDeletePost } from "../hooks/use-delete-post";
 import type { Post } from "../types";
+import { CommentPreview } from "./comment-preview";
 import { PostMedia } from "./post-media";
 
 interface PostCardProps {
@@ -218,6 +219,7 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 								<span className="ml-1">{optimisticLikeCount}</span>
 							)}
 						</Button>
+						<CommentPreview commentPreview={post.commentPreview} />
 					</div>
 				</div>
 			</div>

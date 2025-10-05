@@ -62,13 +62,59 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 							createdAt: true,
 						},
 					},
+					children: {
+						where: {
+							isDeleted: false,
+						},
+						select: {
+							id: true,
+							userId: true,
+							user: {
+								select: {
+									id: true,
+									name: true,
+									username: true,
+									imageUrl: true,
+								},
+							},
+						},
+						orderBy: {
+							createdAt: "desc",
+						},
+					},
 				},
 				orderBy: {
 					createdAt: "desc",
 				},
 			});
 
-			return { posts };
+			// Process posts to get unique commenters (first 3)
+			const postsWithCommentPreview = posts.map((post) => {
+				const uniqueCommenters = new Map();
+
+				for (const child of post.children) {
+					if (
+						child.user &&
+						child.userId &&
+						!uniqueCommenters.has(child.userId)
+					) {
+						uniqueCommenters.set(child.userId, child.user);
+						if (uniqueCommenters.size === 3) break;
+					}
+				}
+
+				const { children: _children, ...postData } = post;
+
+				return {
+					...postData,
+					commentPreview: {
+						users: Array.from(uniqueCommenters.values()),
+						totalCount: post.replyCount,
+					},
+				};
+			});
+
+			return { posts: postsWithCommentPreview };
 		},
 		{
 			query: t.Object({
@@ -108,6 +154,26 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 						createdAt: true,
 					},
 				},
+				children: {
+					where: {
+						isDeleted: false,
+					},
+					select: {
+						id: true,
+						userId: true,
+						user: {
+							select: {
+								id: true,
+								name: true,
+								username: true,
+								imageUrl: true,
+							},
+						},
+					},
+					orderBy: {
+						createdAt: "desc",
+					},
+				},
 			},
 		});
 
@@ -117,7 +183,27 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		return { post };
+		// Process post to get unique commenters (first 3)
+		const uniqueCommenters = new Map();
+
+		for (const child of post.children) {
+			if (child.user && child.userId && !uniqueCommenters.has(child.userId)) {
+				uniqueCommenters.set(child.userId, child.user);
+				if (uniqueCommenters.size === 3) break;
+			}
+		}
+
+		const { children: _children, ...postData } = post;
+
+		const postWithCommentPreview = {
+			...postData,
+			commentPreview: {
+				users: Array.from(uniqueCommenters.values()),
+				totalCount: post.replyCount,
+			},
+		};
+
+		return { post: postWithCommentPreview };
 	})
 	.post(
 		"/",

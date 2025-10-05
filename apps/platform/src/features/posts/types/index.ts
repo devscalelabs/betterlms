@@ -25,6 +25,15 @@ export type Post = {
 		url: string;
 		type: "IMAGE" | "VIDEO" | "DOCUMENT";
 	}[];
+	commentPreview?: {
+		users: {
+			id: string;
+			name: string;
+			username: string;
+			imageUrl: string | null;
+		}[];
+		totalCount: number;
+	};
 };
 
 export type PostsResponse = {
