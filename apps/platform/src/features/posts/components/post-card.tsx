@@ -21,6 +21,7 @@ import { useDeletePost } from "../hooks/use-delete-post";
 import type { Post } from "../types";
 import { parseContent } from "../utils/parse-content";
 import { CommentPreview } from "./comment-preview";
+import { PostForm } from "./post-form";
 import { PostMedia } from "./post-media";
 
 interface PostCardProps {
@@ -41,6 +42,7 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 	const [optimisticLikeCount, setOptimisticLikeCount] = useState(
 		post.likeCount,
 	);
+	const [showReplyForm, setShowReplyForm] = useState(false);
 
 	// Sync isLiked state when post prop changes
 	useEffect(() => {
@@ -62,6 +64,17 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 		console.log("Report post:", post.id);
 	};
 
+	const handleReply = (e: React.MouseEvent) => {
+		e.stopPropagation();
+
+		if (!account) {
+			setLoginDialog(true);
+			return;
+		}
+
+		setShowReplyForm((prev) => !prev);
+	};
+
 	const handleLike = (e: React.MouseEvent) => {
 		e.stopPropagation();
 
@@ -79,6 +92,10 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 			setOptimisticLikeCount((prev) => prev + 1);
 			likePost(post.id);
 		}
+	};
+
+	const handleReplySuccess = () => {
+		setShowReplyForm(false);
 	};
 
 	const handleCardClick = (e: React.MouseEvent) => {
@@ -207,8 +224,12 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 						<Button
 							variant="ghost"
 							size="sm"
-							className="text-muted-foreground hover:text-primary"
-							onClick={(e) => e.stopPropagation()}
+							className={`${
+								showReplyForm
+									? "text-primary"
+									: "text-muted-foreground hover:text-primary"
+							}`}
+							onClick={handleReply}
 						>
 							<span className="text-xs">Reply</span>
 						</Button>
@@ -232,6 +253,22 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 						</Button>
 						<CommentPreview commentPreview={post.commentPreview} />
 					</div>
+
+					{/* Reply Form */}
+					{showReplyForm && (
+						// biome-ignore lint/a11y/noStaticElementInteractions: This is a static element that is used to stop event propagation
+						// biome-ignore lint/a11y/useKeyWithClickEvents: onClick is used to stop event propagation, not for interaction
+						<div
+							className="mt-3 pl-2 border-l-2 border-border"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<PostForm
+								parentId={post.id}
+								replyToPost={post}
+								onSuccess={handleReplySuccess}
+							/>
+						</div>
+					)}
 				</div>
 			</div>
 		</article>
