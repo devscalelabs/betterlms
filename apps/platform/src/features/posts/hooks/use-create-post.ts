@@ -3,7 +3,7 @@ import { useState } from "react";
 import { api } from "@/utils/api-client";
 import type { CreatePostRequest, CreatePostResponse } from "../types";
 
-export const useCreatePost = () => {
+export const useCreatePost = (parentId?: string) => {
 	const [formData, setFormData] = useState<CreatePostRequest>({
 		content: "",
 		images: [],
@@ -22,6 +22,9 @@ export const useCreatePost = () => {
 			}
 			if (channelId) {
 				formDataToSend.append("channelId", channelId);
+			}
+			if (parentId) {
+				formDataToSend.append("parentId", parentId);
 			}
 
 			// Add images

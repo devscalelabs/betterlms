@@ -5,43 +5,54 @@ import { uploadImageToS3 } from "../../utils/upload-files";
 
 export const postsRouter = new Elysia({ prefix: "/posts" })
 	.decorate("db", prisma)
-	.get("/", async ({ db }) => {
-		// Get all public posts (not deleted)
-		const posts = await db.post.findMany({
-			where: {
-				isDeleted: false,
-			},
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-						username: true,
-						imageUrl: true,
+	.get(
+		"/",
+		async ({ db, query }) => {
+			// Get all public posts (not deleted)
+			// If parentId query param is provided, get replies for that post
+			// Otherwise, get top-level posts only
+			const posts = await db.post.findMany({
+				where: {
+					isDeleted: false,
+					parentId: query.parentId || null,
+				},
+				include: {
+					user: {
+						select: {
+							id: true,
+							name: true,
+							username: true,
+							imageUrl: true,
+						},
+					},
+					channel: {
+						select: {
+							id: true,
+							name: true,
+						},
+					},
+					Media: {
+						select: {
+							id: true,
+							url: true,
+							type: true,
+							createdAt: true,
+						},
 					},
 				},
-				channel: {
-					select: {
-						id: true,
-						name: true,
-					},
+				orderBy: {
+					createdAt: "desc",
 				},
-				Media: {
-					select: {
-						id: true,
-						url: true,
-						type: true,
-						createdAt: true,
-					},
-				},
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		});
+			});
 
-		return { posts };
-	})
+			return { posts };
+		},
+		{
+			query: t.Object({
+				parentId: t.Optional(t.String()),
+			}),
+		},
+	)
 	.get("/:id", async ({ params, db, status }) => {
 		const post = await db.post.findUnique({
 			where: {
@@ -98,7 +109,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 				new TextEncoder().encode(process.env.JWT_SECRET),
 			);
 
-			const { title, content, channelId, images } = body;
+			const { title, content, channelId, parentId, images } = body;
 			const userId = decoded.payload.id as string;
 
 			// Create post
@@ -107,6 +118,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 					title: title || null,
 					content,
 					channelId: channelId || null,
+					parentId: parentId || null,
 					userId,
 				},
 				include: {
@@ -196,6 +208,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 				title: t.Optional(t.String({ maxLength: 200 })),
 				content: t.String({ minLength: 1, maxLength: 5000 }),
 				channelId: t.Optional(t.String()),
+				parentId: t.Optional(t.String()),
 				images: t.Optional(t.Files()),
 			}),
 		},

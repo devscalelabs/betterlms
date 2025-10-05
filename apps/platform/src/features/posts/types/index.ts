@@ -36,6 +36,7 @@ export type CreatePostRequest = {
 	content: string;
 	images?: File[];
 	channelId?: string;
+	parentId?: string;
 };
 
 export type CreatePostResponse = {
