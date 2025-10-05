@@ -11,7 +11,7 @@ import {
 	DropdownMenuTrigger,
 } from "@betterlms/ui";
 import { useSetAtom } from "jotai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAccount } from "@/features/account/hooks/use-account";
 import { loginDialogAtom } from "@/features/auth/atoms/login-dialog-atom";
@@ -37,10 +37,20 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 	const setLoginDialog = useSetAtom(loginDialogAtom);
 	const isCurrentUser = account?.user?.id === post.user?.id;
 
-	const [isLiked, setIsLiked] = useState(false);
+	const [isLiked, setIsLiked] = useState(post.isLiked);
 	const [optimisticLikeCount, setOptimisticLikeCount] = useState(
 		post.likeCount,
 	);
+
+	// Sync isLiked state when post prop changes
+	useEffect(() => {
+		setIsLiked(post.isLiked);
+	}, [post.isLiked]);
+
+	// Sync optimisticLikeCount when post.likeCount changes
+	useEffect(() => {
+		setOptimisticLikeCount(post.likeCount);
+	}, [post.likeCount]);
 
 	const handleDelete = (e: React.MouseEvent) => {
 		e.stopPropagation();

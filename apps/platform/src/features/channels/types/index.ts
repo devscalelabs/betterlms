@@ -34,6 +34,7 @@ export type Post = {
 	userId: string | null;
 	parentId: string | null;
 	isDeleted: boolean;
+	isLiked: boolean;
 	createdAt: string;
 	updatedAt: string;
 	user: {

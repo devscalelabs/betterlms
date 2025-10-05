@@ -18,38 +18,60 @@ import {
 export const postsRouter = new Elysia({ prefix: "/posts" })
 	.get(
 		"/",
-		async ({ query }) => {
+		async ({ query, headers }) => {
+			// Optionally get userId if user is authenticated
+			let userId: string | undefined;
+			const token = headers.authorization?.split(" ")[1];
+			if (token) {
+				try {
+					userId = await verifyToken(token);
+				} catch {
+					// If token is invalid, just continue without userId
+					userId = undefined;
+				}
+			}
+
 			const posts = await findPosts({
 				parentId: query.parentId,
 				username: query.username,
 				channelSlug: query.channelSlug,
 			});
 
-			// Process posts to get unique commenters (first 3)
-			const postsWithCommentPreview = posts.map((post) => {
-				const uniqueCommenters = new Map();
+			// Process posts to get unique commenters (first 3) and check if user liked
+			const postsWithCommentPreview = await Promise.all(
+				posts.map(async (post) => {
+					const uniqueCommenters = new Map();
 
-				for (const child of post.children) {
-					if (
-						child.user &&
-						child.userId &&
-						!uniqueCommenters.has(child.userId)
-					) {
-						uniqueCommenters.set(child.userId, child.user);
-						if (uniqueCommenters.size === 3) break;
+					for (const child of post.children) {
+						if (
+							child.user &&
+							child.userId &&
+							!uniqueCommenters.has(child.userId)
+						) {
+							uniqueCommenters.set(child.userId, child.user);
+							if (uniqueCommenters.size === 3) break;
+						}
 					}
-				}
 
-				const { children: _children, ...postData } = post;
+					// Check if current user has liked this post
+					let isLiked = false;
+					if (userId) {
+						const like = await findPostLike(userId, post.id);
+						isLiked = !!like;
+					}
 
-				return {
-					...postData,
-					commentPreview: {
-						users: Array.from(uniqueCommenters.values()),
-						totalCount: post.replyCount,
-					},
-				};
-			});
+					const { children: _children, ...postData } = post;
+
+					return {
+						...postData,
+						isLiked,
+						commentPreview: {
+							users: Array.from(uniqueCommenters.values()),
+							totalCount: post.replyCount,
+						},
+					};
+				}),
+			);
 
 			return { posts: postsWithCommentPreview };
 		},
@@ -61,7 +83,19 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			}),
 		},
 	)
-	.get("/:id", async ({ params, status }) => {
+	.get("/:id", async ({ params, status, headers }) => {
+		// Optionally get userId if user is authenticated
+		let userId: string | undefined;
+		const token = headers.authorization?.split(" ")[1];
+		if (token) {
+			try {
+				userId = await verifyToken(token);
+			} catch {
+				// If token is invalid, just continue without userId
+				userId = undefined;
+			}
+		}
+
 		const post = await findPostById(params.id);
 
 		if (!post) {
@@ -80,10 +114,18 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			}
 		}
 
+		// Check if current user has liked this post
+		let isLiked = false;
+		if (userId) {
+			const like = await findPostLike(userId, post.id);
+			isLiked = !!like;
+		}
+
 		const { children: _children, ...postData } = post;
 
 		const postWithCommentPreview = {
 			...postData,
+			isLiked,
 			commentPreview: {
 				users: Array.from(uniqueCommenters.values()),
 				totalCount: post.replyCount,
