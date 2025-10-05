@@ -7,7 +7,7 @@ import {
 	ZapFreeIcons,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { ChannelsList } from "@/features/channels/components/channels-list";
 import { MenuItem } from "./shared/menu-item";
 
@@ -16,12 +16,14 @@ export const SidebarLeft = () => {
 	return (
 		<aside className="sticky top-0 h-screen w-52 pr-4 flex flex-col justify-between pb-4">
 			<section className="space-y-2">
-				<header className="ml-2 h-14 flex gap-2 items-center font-medium pr-4">
-					<div className="size-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
-						D
-					</div>
-					<div>BetterLMS</div>
-				</header>
+				<Link to="/">
+					<header className="ml-2 h-14 flex gap-2 items-center font-medium pr-4">
+						<div className="size-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
+							D
+						</div>
+						<div>BetterLMS</div>
+					</header>
+				</Link>
 				<nav>
 					<MenuItem onClick={() => navigate("/")}>
 						<HugeiconsIcon icon={ZapFreeIcons} strokeWidth={2} />

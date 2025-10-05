@@ -11,7 +11,8 @@ import {
 	DropdownMenuTrigger,
 } from "@betterlms/ui";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { HeadingBox } from "@/components/shared/heading-box";
 import { useAccount } from "@/features/account/hooks/use-account";
 import { PostCard } from "@/features/posts/components/post-card";
 import { PostForm } from "@/features/posts/components/post-form";
@@ -21,6 +22,7 @@ import { usePost } from "@/features/posts/hooks/use-post";
 import { usePosts } from "@/features/posts/hooks/use-posts";
 
 export const PostDetail = () => {
+	const navigate = useNavigate();
 	const { id } = useParams<{ id: string }>();
 	const { post, isLoading } = usePost(id || "");
 	const { posts: replies, isLoadingPosts: isLoadingReplies } = usePosts(id);
@@ -62,6 +64,12 @@ export const PostDetail = () => {
 
 	return (
 		<div>
+			<HeadingBox>
+				<Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+					Back
+				</Button>
+				<div>Newest</div>
+			</HeadingBox>
 			{/* Post Detail */}
 			<article className="border-b border-border p-4">
 				{/* Header */}

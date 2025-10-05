@@ -27,11 +27,13 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 	const { deletePost, isDeletingPost } = useDeletePost();
 	const isCurrentUser = account?.user?.id === post.user?.id;
 
-	const handleDelete = () => {
+	const handleDelete = (e: React.MouseEvent) => {
+		e.stopPropagation();
 		deletePost(post.id);
 	};
 
-	const handleReport = () => {
+	const handleReport = (e: React.MouseEvent) => {
+		e.stopPropagation();
 		console.log("Report post:", post.id);
 	};
 
@@ -110,14 +112,14 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 							<DropdownMenuContent align="end">
 								{isCurrentUser && (
 									<DropdownMenuItem
-										onClick={handleDelete}
+										onClick={(e) => handleDelete(e)}
 										className="text-red-600"
 										disabled={isDeletingPost}
 									>
 										{isDeletingPost ? "Deleting..." : "Delete"}
 									</DropdownMenuItem>
 								)}
-								<DropdownMenuItem onClick={handleReport}>
+								<DropdownMenuItem onClick={(e) => handleReport(e)}>
 									Report
 								</DropdownMenuItem>
 							</DropdownMenuContent>
