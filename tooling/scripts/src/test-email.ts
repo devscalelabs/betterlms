@@ -24,7 +24,7 @@ async function testEmail() {
 					<hr style="border: 1px solid #e5e7eb; margin: 20px 0;" />
 					<p style="color: #6b7280; font-size: 14px;">
 						Sent from BetterLMS Email Service<br />
-						Powered by nodemailer
+						Powered by Devscalelabs Indonesia
 					</p>
 				</div>
 			`,
@@ -32,9 +32,9 @@ async function testEmail() {
 		console.log("✅ Email sent to me@indrazm.com\n");
 
 		// Test email 2
-		console.log("📤 Sending test email to indrazulfi@gmal.com...");
+		console.log("📤 Sending test email to indrazulfi@gmail.com...");
 		await sendEmail({
-			to: "indrazulfi@gmal.com",
+			to: "indrazulfi@gmail.com",
 			subject: "Test Email from BetterLMS",
 			text: "This is a test email from the BetterLMS platform. If you receive this, the email service is working correctly!",
 			html: `
@@ -46,17 +46,17 @@ async function testEmail() {
 					<hr style="border: 1px solid #e5e7eb; margin: 20px 0;" />
 					<p style="color: #6b7280; font-size: 14px;">
 						Sent from BetterLMS Email Service<br />
-						Powered by nodemailer
+						Powered by Devscalelabs Indonesia
 					</p>
 				</div>
 			`,
 		});
-		console.log("✅ Email sent to indrazulfi@gmal.com\n");
+		console.log("✅ Email sent to indrazulfi@gmail.com\n");
 
 		// Test email with multiple recipients
 		console.log("📤 Sending test email to both addresses at once...");
 		await sendEmail({
-			to: ["me@indrazm.com", "indrazulfi@gmal.com"],
+			to: ["me@indrazm.com", "indrazulfi@gmail.com"],
 			subject: "BetterLMS - Multi-Recipient Test",
 			text: "This test email was sent to multiple recipients at once!",
 			html: `
@@ -78,7 +78,7 @@ async function testEmail() {
 		console.log("🎉 All test emails sent successfully!");
 		console.log("📬 Please check your inbox at:");
 		console.log("   - me@indrazm.com");
-		console.log("   - indrazulfi@gmal.com");
+		console.log("   - indrazulfi@gmail.com");
 	} catch (error) {
 		console.error("❌ Error sending test emails:", error);
 		process.exit(1);
