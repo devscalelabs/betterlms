@@ -7,14 +7,14 @@ enum MediaType {
 model Media {
   id String @id @default(cuid())
 
-  url String
+  url  String
   type MediaType @default(IMAGE)
 
   userId String
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   postId String?
-  post Post? @relation(fields: [postId], references: [id])
+  post   Post?   @relation(fields: [postId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

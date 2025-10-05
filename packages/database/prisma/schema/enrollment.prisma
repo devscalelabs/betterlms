@@ -1,0 +1,95 @@
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  SUSPENDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model CourseEnrollment {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation("CourseEnrollment", fields: [userId], references: [id])
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  status        EnrollmentStatus @default(ACTIVE)
+  paymentStatus PaymentStatus    @default(PENDING)
+
+  // Enrollment metadata
+  enrolledAt     DateTime  @default(now())
+  startedAt      DateTime?
+  completedAt    DateTime?
+  lastAccessedAt DateTime?
+
+  // Progress tracking
+  progressPercentage Float   @default(0.0) // 0-100
+  currentLessonId    String?
+  currentLesson      Lesson? @relation("CurrentLesson", fields: [currentLessonId], references: [id])
+
+  // Payment information
+  amountPaid    Decimal? @db.Decimal(10, 2)
+  currency      String   @default("USD")
+  paymentMethod String?
+  transactionId String?
+
+  // Certificate
+  certificateIssued   Boolean   @default(false)
+  certificateUrl      String?
+  certificateIssuedAt DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessonProgress LessonProgress[]
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+  @@index([enrolledAt])
+}
+
+model LessonProgress {
+  id String @id @default(cuid())
+
+  enrollmentId String
+  enrollment   CourseEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  lessonId String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  // Progress tracking
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  timeSpent   Int       @default(0) // in seconds
+
+  // Quiz/Assignment results
+  score     Float? // For quizzes/assignments
+  maxScore  Float?
+  attempts  Int    @default(0)
+  bestScore Float?
+
+  // Video progress
+  videoProgress Float @default(0.0) // 0-100 percentage watched
+
+  // Timestamps
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastAccessedAt DateTime?
+
+  @@unique([enrollmentId, lessonId])
+  @@index([enrollmentId])
+  @@index([lessonId])
+  @@index([isCompleted])
+}

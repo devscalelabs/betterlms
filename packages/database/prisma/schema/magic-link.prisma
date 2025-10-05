@@ -1,10 +1,10 @@
 model MagicLink {
   id String @id @default(cuid())
 
-  email String
-  code String @unique
+  email     String
+  code      String   @unique
   expiresAt DateTime
-  isUsed Boolean @default(false)
+  isUsed    Boolean  @default(false)
 
   createdAt DateTime @default(now())
 
@@ -12,4 +12,3 @@ model MagicLink {
   @@index([code])
   @@index([expiresAt])
 }
-

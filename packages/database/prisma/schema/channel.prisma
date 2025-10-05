@@ -1,25 +1,25 @@
 model Channel {
   id String @id @default(cuid())
 
-  name String
-  slug String? @unique
+  name      String
+  slug      String? @unique
   isPrivate Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   members ChannelMember[]
-  posts Post[]
+  posts   Post[]
 }
 
 model ChannelMember {
   id String @id @default(cuid())
 
   userId String
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   channelId String
-  channel Channel @relation(fields: [channelId], references: [id])
+  channel   Channel @relation(fields: [channelId], references: [id])
 
   @@unique([userId, channelId])
 }

@@ -1,21 +1,21 @@
 model Post {
   id String @id @default(cuid())
 
-  title String?
+  title   String?
   content String
 
-  likeCount Int @default(0)
+  likeCount  Int @default(0)
   replyCount Int @default(0)
 
   channelId String?
-  channel Channel? @relation(fields: [channelId], references: [id])
+  channel   Channel? @relation(fields: [channelId], references: [id])
 
   userId String?
-  user User? @relation(fields: [userId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id])
 
   parentId String?
-  parent Post? @relation("ParentPost", fields: [parentId], references: [id])
-  children Post[] @relation("ParentPost")
+  parent   Post?   @relation("ParentPost", fields: [parentId], references: [id])
+  children Post[]  @relation("ParentPost")
 
   isDeleted Boolean @default(false)
 

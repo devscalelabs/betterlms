@@ -1,0 +1,97 @@
+enum LessonType {
+  VIDEO
+  TEXT
+}
+
+
+model Course {
+  id String @id @default(cuid())
+
+  title       String
+  description String?
+  slug        String  @unique
+
+  thumbnailUrl String?
+  isPublished  Boolean @default(false)
+  isPrivate    Boolean @default(false)
+
+  price    Decimal? @db.Decimal(10, 2)
+  currency String   @default("USD")
+
+  // Course metadata
+  tags     String[] // Array of tags
+  category String?
+
+  // Instructor/Author
+  instructorId String
+  instructor   User   @relation("CourseInstructor", fields: [instructorId], references: [id])
+
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  // Relations
+  sections    Section[]
+  enrollments CourseEnrollment[]
+
+  @@index([instructorId])
+  @@index([isPublished])
+  @@index([slug])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model Section {
+  id String @id @default(cuid())
+
+  title String
+  order Int // Order within the course
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessons Lesson[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+  @@index([order])
+}
+
+model Lesson {
+  id String @id @default(cuid())
+
+  title String
+  content String? // For text-based lessons
+  order  Int // Order within the section
+
+  type LessonType @default(TEXT)
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  // Video-specific fields
+  videoUrl String?
+
+  // Lesson metadata
+  isFree Boolean @default(false) // Free preview lesson
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessonProgress     LessonProgress[]
+  currentEnrollments CourseEnrollment[] @relation("CurrentLesson")
+
+  @@unique([sectionId, order])
+  @@index([sectionId])
+  @@index([order])
+  @@index([type])
+}
