@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage, Button } from "@betterlms/ui";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { HeadingBox } from "@/components/shared/heading-box";
+import { useAccount } from "@/features/account/hooks/use-account";
 import { PostCard } from "@/features/posts/components/post-card";
 import { usePosts } from "@/features/posts/hooks/use-posts";
 import { usePostsFilter } from "@/features/posts/hooks/use-posts-filter";
@@ -11,10 +12,13 @@ import { useProfile } from "../hooks/use-profile";
 export const ProfileDetail = () => {
 	const navigate = useNavigate();
 	const { username } = useParams<{ username: string }>();
+	const { account } = useAccount();
 	const { profile, isProfileLoading, error } = useProfile(username || "");
 	const filters = usePostsFilter({ username: username || "" });
 	const { posts, isLoadingPosts } = usePosts(filters);
 	const [activeTab, setActiveTab] = useState<"posts" | "replies">("posts");
+
+	const isOwnProfile = account?.user.username === username;
 
 	if (isProfileLoading) {
 		return (
@@ -43,7 +47,15 @@ export const ProfileDetail = () => {
 				<Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
 					Back
 				</Button>
-				<div />
+				{isOwnProfile && (
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => navigate("/profile/edit")}
+					>
+						Edit Profile
+					</Button>
+				)}
 			</HeadingBox>
 			{/* Profile Header */}
 			<div className="border-b border-border p-6">
@@ -58,15 +70,7 @@ export const ProfileDetail = () => {
 					<div className="flex-1">
 						<h1 className="text-2xl font-bold">{user.name}</h1>
 						<p className="text-muted-foreground">@{user.username}</p>
-
-						{user.bio && (
-							<p className="mt-3 text-sm leading-relaxed">{user.bio}</p>
-						)}
-
-						<div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
-							<span>{user.email}</span>
-							<span className="capitalize">{user.role}</span>
-						</div>
+						{user.bio && <p className="text-sm leading-relaxed">{user.bio}</p>}
 					</div>
 				</div>
 			</div>

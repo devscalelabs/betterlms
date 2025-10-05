@@ -1,11 +1,11 @@
 import {
 	Avatar,
 	AvatarFallback,
+	AvatarImage,
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
-	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
@@ -19,18 +19,17 @@ export const AccountCard = ({ account }: { account: Account }) => {
 	return (
 		<main className="flex items-center justify-between gap-2">
 			<div>
-				<div>{account.username}</div>
-				<div>{account.bio}</div>
+				<div>{account.name}</div>
 			</div>
 
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Avatar>
+						<AvatarImage src={account.imageUrl} />
 						<AvatarFallback>{account.username.charAt(0)}</AvatarFallback>
 					</Avatar>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-56" align="end">
-					<DropdownMenuLabel>My Account</DropdownMenuLabel>
 					<DropdownMenuGroup>
 						<DropdownMenuItem
 							onClick={() => {
@@ -40,13 +39,17 @@ export const AccountCard = ({ account }: { account: Account }) => {
 							Profile
 							<DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
 						</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => {
+								navigate("/profile/edit");
+							}}
+						>
+							Edit Profile
+							<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+						</DropdownMenuItem>
 						<DropdownMenuItem>
 							Billing
 							<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-						</DropdownMenuItem>
-						<DropdownMenuItem>
-							Settings
-							<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 					<DropdownMenuSeparator />

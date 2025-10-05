@@ -55,8 +55,7 @@ export const useMention = () => {
 		const afterMention = content.slice(cursorPosition);
 
 		const lastAtIndex = beforeMention.lastIndexOf("@");
-		const newContent =
-			`${beforeMention.slice(0, lastAtIndex)}@${username} ${afterMention}`;
+		const newContent = `${beforeMention.slice(0, lastAtIndex)}@${username} ${afterMention}`;
 
 		onContentChange(newContent);
 		setShowMentionDropdown(false);

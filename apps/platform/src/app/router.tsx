@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import { Layout } from "../components/layout";
+import { EditProfilePage } from "../pages/edit-profile";
 import { PostDetail } from "../pages/post-detail";
 import { Profile } from "../pages/profile";
 import { Register } from "../pages/register";
@@ -14,6 +15,7 @@ export const AppRouter = () => {
 					<Route path="/" element={<Timeline />} />
 					<Route path="/post/:id" element={<PostDetail />} />
 					<Route path="/profile/:username" element={<Profile />} />
+					<Route path="/profile/edit" element={<EditProfilePage />} />
 				</Route>
 			</Routes>
 		</BrowserRouter>

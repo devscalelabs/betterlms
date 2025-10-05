@@ -40,3 +40,26 @@ export async function findAllUsers() {
 		},
 	});
 }
+
+export async function updateUser(
+	userId: string,
+	data: {
+		name?: string;
+		bio?: string;
+		imageUrl?: string;
+	},
+) {
+	return await prisma.user.update({
+		where: { id: userId },
+		data,
+		select: {
+			id: true,
+			name: true,
+			username: true,
+			email: true,
+			bio: true,
+			imageUrl: true,
+			role: true,
+		},
+	});
+}

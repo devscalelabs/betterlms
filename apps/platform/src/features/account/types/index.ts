@@ -4,6 +4,8 @@ export interface Account {
 	username: string;
 	email: string;
 	bio: string;
+	imageUrl: string;
+	role: string;
 }
 
 export interface AccountResponse {
