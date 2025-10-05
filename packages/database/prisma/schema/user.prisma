@@ -10,7 +10,6 @@ model User {
   name String?
   username String @unique
   email String @unique
-  password String?
   bio String?
 
   isEmailVerified Boolean?

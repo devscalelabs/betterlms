@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@betterlms/database": "workspace:*",
+    "@betterlms/email": "workspace:*",
     "@betterlms/storages": "workspace:*",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/jwt": "^1.4.0",

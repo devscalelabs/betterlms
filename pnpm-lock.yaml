@@ -17,6 +17,9 @@ importers:
       '@betterlms/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@betterlms/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@betterlms/storages':
         specifier: workspace:*
         version: link:../../packages/storages
