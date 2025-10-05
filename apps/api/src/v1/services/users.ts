@@ -23,6 +23,7 @@ export async function findUserByUsername(username: string) {
 			bio: true,
 			imageUrl: true,
 			role: true,
+			isSuspended: true,
 		},
 	});
 }
@@ -37,6 +38,10 @@ export async function findAllUsers() {
 			bio: true,
 			imageUrl: true,
 			role: true,
+			isSuspended: true,
+		},
+		orderBy: {
+			name: "asc",
 		},
 	});
 }
@@ -60,6 +65,40 @@ export async function updateUser(
 			bio: true,
 			imageUrl: true,
 			role: true,
+		},
+	});
+}
+
+export async function suspendUser(userId: string) {
+	return await prisma.user.update({
+		where: { id: userId },
+		data: { isSuspended: true },
+		select: {
+			id: true,
+			name: true,
+			username: true,
+			email: true,
+			bio: true,
+			imageUrl: true,
+			role: true,
+			isSuspended: true,
+		},
+	});
+}
+
+export async function unsuspendUser(userId: string) {
+	return await prisma.user.update({
+		where: { id: userId },
+		data: { isSuspended: false },
+		select: {
+			id: true,
+			name: true,
+			username: true,
+			email: true,
+			bio: true,
+			imageUrl: true,
+			role: true,
+			isSuspended: true,
 		},
 	});
 }

@@ -9,6 +9,8 @@ import { verifyToken } from "../services/jwt";
 import {
 	findAllUsers,
 	findUserByUsername,
+	suspendUser,
+	unsuspendUser,
 	updateUser,
 } from "../services/users";
 
@@ -163,4 +165,58 @@ export const profileRouter = new Elysia({ prefix: "/profile" })
 		await deleteUserFollow(userId, userToUnfollow.id);
 
 		return { message: "User unfollowed successfully" };
+	})
+	.post("/:username/suspend", async ({ params, headers, status }) => {
+		const token = headers.authorization?.split(" ")[1];
+
+		if (!token) {
+			return status(401, {
+				error: "Unauthorized",
+			});
+		}
+
+		await verifyToken(token);
+		const { username } = params;
+
+		const userToSuspend = await findUserByUsername(username);
+
+		if (!userToSuspend) {
+			return status(404, {
+				error: "User not found",
+			});
+		}
+
+		const suspendedUser = await suspendUser(userToSuspend.id);
+
+		return status(200, {
+			message: "User suspended successfully",
+			user: suspendedUser,
+		});
+	})
+	.delete("/:username/suspend", async ({ params, headers, status }) => {
+		const token = headers.authorization?.split(" ")[1];
+
+		if (!token) {
+			return status(401, {
+				error: "Unauthorized",
+			});
+		}
+
+		await verifyToken(token);
+		const { username } = params;
+
+		const userToUnsuspend = await findUserByUsername(username);
+
+		if (!userToUnsuspend) {
+			return status(404, {
+				error: "User not found",
+			});
+		}
+
+		const unsuspendedUser = await unsuspendUser(userToUnsuspend.id);
+
+		return status(200, {
+			message: "User unsuspended successfully",
+			user: unsuspendedUser,
+		});
 	});

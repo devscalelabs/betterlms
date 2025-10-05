@@ -78,6 +78,13 @@ export const authRouter = new Elysia({ prefix: "/auth" })
 				});
 			}
 
+			if (user.isSuspended) {
+				return status(403, {
+					error:
+						"Your account has been suspended. Please contact support for assistance.",
+				});
+			}
+
 			const token = await generateToken(user.id);
 
 			return status(200, {

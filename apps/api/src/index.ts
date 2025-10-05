@@ -9,12 +9,11 @@ import { postsRouter } from "./v1/router/posts";
 import { profileRouter } from "./v1/router/profile";
 
 const PORT = process.env.BACKEND_PORT || 8000;
-const CORS_ORIGINS = process.env.CORS_ORIGINS || "http://localhost:3000";
 
 export const app = new Elysia({ adapter: node() })
 	.use(
 		cors({
-			origin: CORS_ORIGINS.split(","),
+			origin: true,
 			allowedHeaders: ["Content-Type", "Authorization"],
 			methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		}),

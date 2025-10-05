@@ -17,15 +17,28 @@ export const accountRouter = new Elysia({ prefix: "/account" }).get(
 			const userId = await verifyToken(token);
 			const user = await findUserById(userId);
 
+			if (!user) {
+				return status(404, {
+					error: "User not found",
+				});
+			}
+
+			if (user.isSuspended) {
+				return status(403, {
+					error:
+						"Your account has been suspended. Please contact support for assistance.",
+				});
+			}
+
 			return {
 				user: {
-					id: user?.id,
-					name: user?.name,
-					username: user?.username,
-					email: user?.email,
-					bio: user?.bio,
-					imageUrl: user?.imageUrl,
-					role: user?.role,
+					id: user.id,
+					name: user.name,
+					username: user.username,
+					email: user.email,
+					bio: user.bio,
+					imageUrl: user.imageUrl,
+					role: user.role,
 				},
 			};
 		} catch (error) {
