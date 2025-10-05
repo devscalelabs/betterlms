@@ -1,4 +1,5 @@
 import { prisma } from "@betterlms/database";
+import type { Prisma } from "@betterlms/database/generated/prisma";
 import { Elysia, t } from "elysia";
 import * as jose from "jose";
 import { uploadImageToS3 } from "../../utils/upload-files";
@@ -11,20 +12,27 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			// Get all public posts (not deleted)
 			// If parentId query param is provided, get replies for that post
 			// If username query param is provided, get posts by that user
+			// If channelSlug query param is provided, get posts in that channel
 			// Otherwise, get top-level posts only
-			const whereClause: any = {
+			const whereClause: Prisma.PostWhereInput = {
 				isDeleted: false,
 			};
 
 			if (query.parentId) {
 				whereClause.parentId = query.parentId;
-			} else if (!query.username) {
+			} else if (!query.username && !query.channelSlug) {
 				whereClause.parentId = null;
 			}
 
 			if (query.username) {
 				whereClause.user = {
 					username: query.username,
+				};
+			}
+
+			if (query.channelSlug) {
+				whereClause.channel = {
+					slug: query.channelSlug,
 				};
 			}
 
@@ -43,6 +51,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 						select: {
 							id: true,
 							name: true,
+							slug: true,
 						},
 					},
 					Media: {
@@ -65,6 +74,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			query: t.Object({
 				parentId: t.Optional(t.String()),
 				username: t.Optional(t.String()),
+				channelSlug: t.Optional(t.String()),
 			}),
 		},
 	)
@@ -87,6 +97,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 					select: {
 						id: true,
 						name: true,
+						slug: true,
 					},
 				},
 				Media: {
@@ -149,6 +160,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 						select: {
 							id: true,
 							name: true,
+							slug: true,
 						},
 					},
 					Media: {
@@ -200,6 +212,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 							select: {
 								id: true,
 								name: true,
+								slug: true,
 							},
 						},
 						Media: {

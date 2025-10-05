@@ -5,6 +5,7 @@ import type { PostsResponse } from "../types";
 interface UsePostsFilters {
 	parentId?: string;
 	username?: string;
+	channelSlug?: string;
 }
 
 export const usePosts = (filters?: UsePostsFilters) => {
@@ -14,6 +15,8 @@ export const usePosts = (filters?: UsePostsFilters) => {
 			const params = new URLSearchParams();
 			if (filters?.parentId) params.append("parentId", filters.parentId);
 			if (filters?.username) params.append("username", filters.username);
+			if (filters?.channelSlug)
+				params.append("channelSlug", filters.channelSlug);
 
 			const url = params.toString()
 				? `api/v1/posts/?${params.toString()}`

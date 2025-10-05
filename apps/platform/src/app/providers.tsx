@@ -7,7 +7,9 @@ const queryClient = new QueryClient();
 export const Providers = ({ children }: PropsWithChildren) => {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<NuqsAdapter>{children}</NuqsAdapter>
+			<NuqsAdapter fullPageNavigationOnShallowFalseUpdates>
+				{children}
+			</NuqsAdapter>
 		</QueryClientProvider>
 	);
 };

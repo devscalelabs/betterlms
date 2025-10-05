@@ -18,7 +18,7 @@ export const ChannelsList = () => {
 					size="xs"
 					variant="secondary"
 					className="w-fit block"
-					onClick={() => setChannel(channel.id)}
+					onClick={() => setChannel(channel.slug)}
 				>
 					{channel.name}
 				</Button>
