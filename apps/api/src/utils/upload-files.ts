@@ -15,6 +15,9 @@ export async function uploadImageToS3(
 		contentType: file.type,
 	});
 
-	const url = `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}/${key}`;
+	// Use public endpoint if available, otherwise fall back to S3_ENDPOINT
+	const publicEndpoint =
+		process.env.S3_PUBLIC_ENDPOINT || process.env.S3_ENDPOINT;
+	const url = `${publicEndpoint}/${process.env.S3_BUCKET}/${key}`;
 	return url;
 }
