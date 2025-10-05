@@ -25,6 +25,7 @@ model User {
 
   posts Post[]
   channels ChannelMember[]
+  Media Media[]
 
   @@index([email])
   @@index([username])
