@@ -20,6 +20,11 @@ export type Post = {
 		id: string;
 		name: string;
 	} | null;
+	Media?: {
+		id: string;
+		url: string;
+		type: "IMAGE" | "VIDEO" | "DOCUMENT";
+	}[];
 };
 
 export type PostsResponse = {

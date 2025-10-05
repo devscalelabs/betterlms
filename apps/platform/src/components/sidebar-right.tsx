@@ -7,7 +7,7 @@ export const SidebarRight = () => {
 	const { account } = useAccount();
 
 	return (
-		<aside className="w-80 border-r border-border">
+		<aside className="sticky top-0 h-screen w-80 border-r border-border">
 			<HeadingBox>
 				<div />
 				{account ? <AccountCard account={account.user} /> : <LoginDialog />}

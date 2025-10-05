@@ -13,6 +13,7 @@ import {
 import { useAccount } from "@/features/account/hooks/use-account";
 import { useDeletePost } from "../hooks/use-delete-post";
 import type { Post } from "../types";
+import { PostMedia } from "./post-media";
 
 interface PostCardProps {
 	post: Post;
@@ -103,6 +104,9 @@ export const PostCard = ({ post }: PostCardProps) => {
 					<div className="text-sm leading-relaxed mb-3 whitespace-pre-line">
 						{post.content}
 					</div>
+
+					{/* Media */}
+					{post.Media && <PostMedia media={post.Media} />}
 
 					{/* Actions */}
 					<div className="flex items-center">

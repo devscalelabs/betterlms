@@ -12,7 +12,7 @@ import { MenuItem } from "./shared/menu-item";
 
 export const SidebarLeft = () => {
 	return (
-		<aside className="w-52 pr-4 flex flex-col justify-between pb-4">
+		<aside className="sticky top-0 h-screen w-52 pr-4 flex flex-col justify-between pb-4">
 			<section className="space-y-2">
 				<header className="ml-2 h-14 flex gap-2 items-center font-medium pr-4">
 					<div className="size-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">

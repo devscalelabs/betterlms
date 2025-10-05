@@ -4,7 +4,7 @@ import { SidebarRight } from "./sidebar-right";
 
 export const Layout = () => {
 	return (
-		<main className="flex h-screen max-w-7xl mx-auto">
+		<main className="relative flex min-h-screen max-w-7xl mx-auto">
 			<SidebarLeft />
 			<main className="flex-1 border-x">
 				<Outlet />
