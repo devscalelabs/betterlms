@@ -1,41 +1,22 @@
-import { prisma } from "@betterlms/database";
 import { Elysia, t } from "elysia";
-import * as jose from "jose";
+import {
+	addChannelMember,
+	createChannel,
+	findChannelById,
+	findChannelMember,
+	findPublicChannels,
+	removeChannelMember,
+} from "../services/channels";
+import { verifyToken } from "../services/jwt";
 
 export const channelsRouter = new Elysia({ prefix: "/channels" })
-	.decorate("db", prisma)
-	.get("/", async ({ db }) => {
-		// Get channels where user is a member or public channels
-		const channels = await db.channel.findMany({
-			where: {
-				isPrivate: false,
-			},
-			include: {
-				members: {
-					include: {
-						user: {
-							select: {
-								id: true,
-								name: true,
-								username: true,
-								imageUrl: true,
-							},
-						},
-					},
-				},
-				_count: {
-					select: {
-						posts: true,
-					},
-				},
-			},
-		});
-
+	.get("/", async () => {
+		const channels = await findPublicChannels();
 		return { channels };
 	})
 	.post(
 		"/",
-		async ({ body, db, headers, status }) => {
+		async ({ body, headers, status }) => {
 			const token = headers.authorization?.split(" ")[1];
 
 			if (!token) {
@@ -44,28 +25,11 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 				});
 			}
 
-			const decoded = await jose.jwtVerify(
-				token,
-				new TextEncoder().encode(process.env.JWT_SECRET),
-			);
-
+			const userId = await verifyToken(token);
 			const { name, isPrivate } = body;
 
-			// Create channel
-			const channel = await db.channel.create({
-				data: {
-					name,
-					isPrivate: isPrivate || false,
-				},
-			});
-
-			// Add creator as member
-			await db.channelMember.create({
-				data: {
-					userId: decoded.payload.id as string,
-					channelId: channel.id,
-				},
-			});
+			const channel = await createChannel(name, isPrivate || false);
+			await addChannelMember(userId, channel.id);
 
 			return status(201, { channel });
 		},
@@ -76,7 +40,7 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 			}),
 		},
 	)
-	.get("/:id", async ({ params, db, headers, status }) => {
+	.get("/:id", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
 
 		if (!token) {
@@ -85,43 +49,8 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 			});
 		}
 
-		const decoded = await jose.jwtVerify(
-			token,
-			new TextEncoder().encode(process.env.JWT_SECRET),
-		);
-
-		const channel = await db.channel.findUnique({
-			where: { id: params.id },
-			include: {
-				members: {
-					include: {
-						user: {
-							select: {
-								id: true,
-								name: true,
-								username: true,
-								imageUrl: true,
-							},
-						},
-					},
-				},
-				posts: {
-					include: {
-						user: {
-							select: {
-								id: true,
-								name: true,
-								username: true,
-								imageUrl: true,
-							},
-						},
-					},
-					orderBy: {
-						createdAt: "desc",
-					},
-				},
-			},
-		});
+		const userId = await verifyToken(token);
+		const channel = await findChannelById(params.id);
 
 		if (!channel) {
 			return status(404, {
@@ -129,9 +58,8 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 			});
 		}
 
-		// Check if user has access to this channel
 		const isMember = channel.members.some(
-			(member: { userId: string }) => member.userId === decoded.payload.id,
+			(member: { userId: string }) => member.userId === userId,
 		);
 
 		if (channel.isPrivate && !isMember) {
@@ -142,7 +70,7 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 
 		return { channel };
 	})
-	.post("/:id/join", async ({ params, db, headers, status }) => {
+	.post("/:id/join", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
 
 		if (!token) {
@@ -151,14 +79,8 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 			});
 		}
 
-		const decoded = await jose.jwtVerify(
-			token,
-			new TextEncoder().encode(process.env.JWT_SECRET),
-		);
-
-		const channel = await db.channel.findUnique({
-			where: { id: params.id },
-		});
+		const userId = await verifyToken(token);
+		const channel = await findChannelById(params.id);
 
 		if (!channel) {
 			return status(404, {
@@ -166,15 +88,7 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 			});
 		}
 
-		// Check if user is already a member
-		const existingMember = await db.channelMember.findUnique({
-			where: {
-				userId_channelId: {
-					userId: decoded.payload.id as string,
-					channelId: params.id,
-				},
-			},
-		});
+		const existingMember = await findChannelMember(userId, params.id);
 
 		if (existingMember) {
 			return status(409, {
@@ -182,17 +96,11 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 			});
 		}
 
-		// Add user as member
-		const member = await db.channelMember.create({
-			data: {
-				userId: decoded.payload.id as string,
-				channelId: params.id,
-			},
-		});
+		const member = await addChannelMember(userId, params.id);
 
 		return status(201, { member });
 	})
-	.delete("/:id/leave", async ({ params, db, headers, status }) => {
+	.delete("/:id/leave", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
 
 		if (!token) {
@@ -201,20 +109,8 @@ export const channelsRouter = new Elysia({ prefix: "/channels" })
 			});
 		}
 
-		const decoded = await jose.jwtVerify(
-			token,
-			new TextEncoder().encode(process.env.JWT_SECRET),
-		);
-
-		// Remove user from channel
-		await db.channelMember.delete({
-			where: {
-				userId_channelId: {
-					userId: decoded.payload.id as string,
-					channelId: params.id,
-				},
-			},
-		});
+		const userId = await verifyToken(token);
+		await removeChannelMember(userId, params.id);
 
 		return { message: "Left channel successfully" };
 	});

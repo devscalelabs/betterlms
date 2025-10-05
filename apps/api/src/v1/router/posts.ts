@@ -1,91 +1,28 @@
-import { prisma } from "@betterlms/database";
-import type { Prisma } from "@betterlms/database/generated/prisma";
 import { Elysia, t } from "elysia";
-import * as jose from "jose";
 import { uploadImageToS3 } from "../../utils/upload-files";
+import { verifyToken } from "../services/jwt";
+import {
+	createMedia,
+	createPost,
+	createPostLike,
+	decrementPostLikeCount,
+	deletePost,
+	deletePostLike,
+	findPostById,
+	findPostLike,
+	findPosts,
+	findPostWithMedia,
+	incrementPostLikeCount,
+} from "../services/posts";
 
 export const postsRouter = new Elysia({ prefix: "/posts" })
-	.decorate("db", prisma)
 	.get(
 		"/",
-		async ({ db, query }) => {
-			// Get all public posts (not deleted)
-			// If parentId query param is provided, get replies for that post
-			// If username query param is provided, get posts by that user
-			// If channelSlug query param is provided, get posts in that channel
-			// Otherwise, get top-level posts only
-			const whereClause: Prisma.PostWhereInput = {
-				isDeleted: false,
-			};
-
-			if (query.parentId) {
-				whereClause.parentId = query.parentId;
-			} else if (!query.username && !query.channelSlug) {
-				whereClause.parentId = null;
-			}
-
-			if (query.username) {
-				whereClause.user = {
-					username: query.username,
-				};
-			}
-
-			if (query.channelSlug) {
-				whereClause.channel = {
-					slug: query.channelSlug,
-				};
-			}
-
-			const posts = await db.post.findMany({
-				where: whereClause,
-				include: {
-					user: {
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							imageUrl: true,
-						},
-					},
-					channel: {
-						select: {
-							id: true,
-							name: true,
-							slug: true,
-						},
-					},
-					Media: {
-						select: {
-							id: true,
-							url: true,
-							type: true,
-							createdAt: true,
-						},
-					},
-					children: {
-						where: {
-							isDeleted: false,
-						},
-						select: {
-							id: true,
-							userId: true,
-							user: {
-								select: {
-									id: true,
-									name: true,
-									username: true,
-									imageUrl: true,
-								},
-							},
-						},
-						orderBy: {
-							createdAt: "desc",
-						},
-					},
-				},
-				orderBy: {
-					createdAt: "desc",
-				},
+		async ({ query }) => {
+			const posts = await findPosts({
+				parentId: query.parentId,
+				username: query.username,
+				channelSlug: query.channelSlug,
 			});
 
 			// Process posts to get unique commenters (first 3)
@@ -124,58 +61,8 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			}),
 		},
 	)
-	.get("/:id", async ({ params, db, status }) => {
-		const post = await db.post.findUnique({
-			where: {
-				id: params.id,
-				isDeleted: false,
-			},
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-						username: true,
-						imageUrl: true,
-					},
-				},
-				channel: {
-					select: {
-						id: true,
-						name: true,
-						slug: true,
-					},
-				},
-				Media: {
-					select: {
-						id: true,
-						url: true,
-						type: true,
-						createdAt: true,
-					},
-				},
-				children: {
-					where: {
-						isDeleted: false,
-					},
-					select: {
-						id: true,
-						userId: true,
-						user: {
-							select: {
-								id: true,
-								name: true,
-								username: true,
-								imageUrl: true,
-							},
-						},
-					},
-					orderBy: {
-						createdAt: "desc",
-					},
-				},
-			},
-		});
+	.get("/:id", async ({ params, status }) => {
+		const post = await findPostById(params.id);
 
 		if (!post) {
 			return status(404, {
@@ -207,7 +94,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 	})
 	.post(
 		"/",
-		async ({ body, db, headers, status }) => {
+		async ({ body, headers, status }) => {
 			const token = headers.authorization?.split(" ")[1];
 
 			if (!token) {
@@ -216,51 +103,17 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 				});
 			}
 
-			const decoded = await jose.jwtVerify(
-				token,
-				new TextEncoder().encode(process.env.JWT_SECRET),
-			);
-
+			const userId = await verifyToken(token);
 			const { title, content, channelId, parentId, images } = body;
-			const userId = decoded.payload.id as string;
 
-			// Create post
-			const post = await db.post.create({
-				data: {
-					title: title || null,
-					content,
-					channelId: channelId || null,
-					parentId: parentId || null,
-					userId,
-				},
-				include: {
-					user: {
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							imageUrl: true,
-						},
-					},
-					channel: {
-						select: {
-							id: true,
-							name: true,
-							slug: true,
-						},
-					},
-					Media: {
-						select: {
-							id: true,
-							url: true,
-							type: true,
-							createdAt: true,
-						},
-					},
-				},
+			const post = await createPost({
+				title,
+				content,
+				channelId,
+				parentId,
+				userId,
 			});
 
-			// Upload images and create media records
 			if (images && images.length > 0) {
 				console.log(`Uploading ${images.length} image(s) to S3...`);
 
@@ -269,48 +122,13 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 						const url = await uploadImageToS3(image, userId);
 						console.log(`Uploaded: ${image.name} -> ${url}`);
 
-						return db.media.create({
-							data: {
-								url,
-								type: "IMAGE",
-								userId,
-								postId: post.id,
-							},
-						});
+						return createMedia(url, userId, post.id);
 					}),
 				);
 
 				console.log(`Created ${mediaRecords.length} media record(s)`);
 
-				// Refetch post with media
-				const postWithMedia = await db.post.findUnique({
-					where: { id: post.id },
-					include: {
-						user: {
-							select: {
-								id: true,
-								name: true,
-								username: true,
-								imageUrl: true,
-							},
-						},
-						channel: {
-							select: {
-								id: true,
-								name: true,
-								slug: true,
-							},
-						},
-						Media: {
-							select: {
-								id: true,
-								url: true,
-								type: true,
-								createdAt: true,
-							},
-						},
-					},
-				});
+				const postWithMedia = await findPostWithMedia(post.id);
 
 				return status(201, { post: postWithMedia });
 			}
@@ -327,7 +145,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			}),
 		},
 	)
-	.delete("/:id", async ({ params, db, headers, status }) => {
+	.delete("/:id", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
 
 		if (!token) {
@@ -336,15 +154,8 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		const decoded = await jose.jwtVerify(
-			token,
-			new TextEncoder().encode(process.env.JWT_SECRET),
-		);
-
-		// Check if post exists
-		const post = await db.post.findUnique({
-			where: { id: params.id },
-		});
+		const userId = await verifyToken(token);
+		const post = await findPostById(params.id);
 
 		if (!post) {
 			return status(404, {
@@ -352,21 +163,17 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		// Check if user owns the post
-		if (post.userId !== decoded.payload.id) {
+		if (post.userId !== userId) {
 			return status(403, {
 				error: "Forbidden - You can only delete your own posts",
 			});
 		}
 
-		// Delete the post
-		await db.post.delete({
-			where: { id: params.id },
-		});
+		await deletePost(params.id);
 
 		return { message: "Post deleted successfully" };
 	})
-	.post("/:id/like", async ({ params, db, headers, status }) => {
+	.post("/:id/like", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
 
 		if (!token) {
@@ -375,17 +182,8 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		const decoded = await jose.jwtVerify(
-			token,
-			new TextEncoder().encode(process.env.JWT_SECRET),
-		);
-
-		const userId = decoded.payload.id as string;
-
-		// Check if post exists
-		const post = await db.post.findUnique({
-			where: { id: params.id },
-		});
+		const userId = await verifyToken(token);
+		const post = await findPostById(params.id);
 
 		if (!post) {
 			return status(404, {
@@ -393,15 +191,7 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		// Check if user already liked the post
-		const existingLike = await db.postLike.findUnique({
-			where: {
-				userId_postId: {
-					userId,
-					postId: params.id,
-				},
-			},
-		});
+		const existingLike = await findPostLike(userId, params.id);
 
 		if (existingLike) {
 			return status(409, {
@@ -409,26 +199,12 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		// Create like and update like count
-		await db.postLike.create({
-			data: {
-				userId,
-				postId: params.id,
-			},
-		});
-
-		await db.post.update({
-			where: { id: params.id },
-			data: {
-				likeCount: {
-					increment: 1,
-				},
-			},
-		});
+		await createPostLike(userId, params.id);
+		await incrementPostLikeCount(params.id);
 
 		return status(201, { message: "Post liked successfully" });
 	})
-	.delete("/:id/like", async ({ params, db, headers, status }) => {
+	.delete("/:id/like", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
 
 		if (!token) {
@@ -437,22 +213,8 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		const decoded = await jose.jwtVerify(
-			token,
-			new TextEncoder().encode(process.env.JWT_SECRET),
-		);
-
-		const userId = decoded.payload.id as string;
-
-		// Check if like exists
-		const existingLike = await db.postLike.findUnique({
-			where: {
-				userId_postId: {
-					userId,
-					postId: params.id,
-				},
-			},
-		});
+		const userId = await verifyToken(token);
+		const existingLike = await findPostLike(userId, params.id);
 
 		if (!existingLike) {
 			return status(404, {
@@ -460,24 +222,8 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		// Delete like and update like count
-		await db.postLike.delete({
-			where: {
-				userId_postId: {
-					userId,
-					postId: params.id,
-				},
-			},
-		});
-
-		await db.post.update({
-			where: { id: params.id },
-			data: {
-				likeCount: {
-					decrement: 1,
-				},
-			},
-		});
+		await deletePostLike(userId, params.id);
+		await decrementPostLikeCount(params.id);
 
 		return { message: "Post unliked successfully" };
 	});

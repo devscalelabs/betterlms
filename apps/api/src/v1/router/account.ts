@@ -1,10 +1,10 @@
-import { prisma } from "@betterlms/database";
 import { Elysia } from "elysia";
-import * as jose from "jose";
+import { verifyToken } from "../services/jwt";
+import { findUserById } from "../services/users";
 
-export const accountRouter = new Elysia({ prefix: "/account" })
-	.decorate("db", prisma)
-	.get("/", async ({ db, headers, status }) => {
+export const accountRouter = new Elysia({ prefix: "/account" }).get(
+	"/",
+	async ({ headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
 
 		if (!token) {
@@ -14,14 +14,8 @@ export const accountRouter = new Elysia({ prefix: "/account" })
 		}
 
 		try {
-			const decoded = await jose.jwtVerify(
-				token,
-				new TextEncoder().encode(process.env.JWT_SECRET),
-			);
-
-			const user = await db.user.findUnique({
-				where: { id: decoded.payload.id as string },
-			});
+			const userId = await verifyToken(token);
+			const user = await findUserById(userId);
 
 			return {
 				user: {
@@ -39,4 +33,5 @@ export const accountRouter = new Elysia({ prefix: "/account" })
 				error: `${error}`,
 			});
 		}
-	});
+	},
+);

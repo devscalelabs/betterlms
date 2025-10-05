@@ -1,42 +1,18 @@
-import { prisma } from "@betterlms/database";
 import { Elysia } from "elysia";
+import { findAllUsers, findUserByUsername } from "../services/users";
 
 export const profileRouter = new Elysia({ prefix: "/profile" })
-	.decorate("db", prisma)
-	.get("/", async ({ db }) => {
-		const users = await db.user.findMany({
-			select: {
-				id: true,
-				name: true,
-				username: true,
-				email: true,
-				bio: true,
-				imageUrl: true,
-				role: true,
-			},
-		});
+	.get("/", async () => {
+		const users = await findAllUsers();
 
 		return {
 			users,
 		};
 	})
-	.get("/:username", async ({ db, params, status }) => {
+	.get("/:username", async ({ params, status }) => {
 		const { username } = params;
 
-		const user = await db.user.findUnique({
-			where: {
-				username,
-			},
-			select: {
-				id: true,
-				name: true,
-				username: true,
-				email: true,
-				bio: true,
-				imageUrl: true,
-				role: true,
-			},
-		});
+		const user = await findUserByUsername(username);
 
 		if (!user) {
 			return status(404, {
