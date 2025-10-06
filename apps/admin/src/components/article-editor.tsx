@@ -96,7 +96,7 @@ export const ArticleEditor = ({
 		editorProps: {
 			attributes: {
 				class:
-					"prose prose-gray max-w-none focus:outline-none min-h-[400px] p-6 prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-strong:font-semibold",
+					"prose max-w-none focus:outline-none min-h-[400px] p-6 prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-strong:font-semibold",
 			},
 		},
 	});

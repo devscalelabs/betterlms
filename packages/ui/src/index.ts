@@ -11,3 +11,5 @@ export * from "./components/hover-card";
 export * from "./components/separator";
 export * from "./components/dropdown-menu";
 export * from "./components/avatar";
+export * from "./components/switch";
+export * from "./theme/provider";
