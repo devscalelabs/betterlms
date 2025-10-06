@@ -213,8 +213,9 @@ export const ArticleDetailPage = () => {
 				</header>
 
 				{/* Content */}
-				<div className="prose prose-sm text-sm max-w-none">
+				<div className="w-full text-sm">
 					<div
+						className="prose prose-pre:whitespace-pre-line"
 						// biome-ignore lint/security/noDangerouslySetInnerHtml: This is intentional for rendering article HTML content
 						dangerouslySetInnerHTML={{ __html: article.content }}
 					/>
