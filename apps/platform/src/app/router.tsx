@@ -2,6 +2,8 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { Layout } from "../components/layout";
 import { ArticleDetailPage } from "../pages/article-detail";
 import { ArticlesPage } from "../pages/articles";
+import { CourseDetailPage } from "../pages/course-detail";
+import { CoursesPage } from "../pages/courses";
 import { EditProfilePage } from "../pages/edit-profile";
 import { PostDetail } from "../pages/post-detail";
 import { Profile } from "../pages/profile";
@@ -17,6 +19,8 @@ export const AppRouter = () => {
 					<Route path="/" element={<Timeline />} />
 					<Route path="/articles" element={<ArticlesPage />} />
 					<Route path="/article/:id" element={<ArticleDetailPage />} />
+					<Route path="/courses" element={<CoursesPage />} />
+					<Route path="/courses/:slug" element={<CourseDetailPage />} />
 					<Route path="/post/:id" element={<PostDetail />} />
 					<Route path="/profile/:username" element={<Profile />} />
 					<Route path="/profile/edit" element={<EditProfilePage />} />
