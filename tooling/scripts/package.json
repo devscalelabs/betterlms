@@ -7,6 +7,8 @@
     "seed:users": "pnpm with-env tsx src/seed-users.ts",
     "seed:channels": "pnpm with-env tsx src/seed-channels.ts",
     "seed:content": "pnpm with-env tsx src/seed-content.ts",
+    "seed:articles": "pnpm with-env tsx src/seed-articles.ts",
+    "seed:courses": "pnpm with-env tsx src/seed-courses.ts",
     "seed:all": "pnpm with-env tsx src/seed-all.ts",
     "reset:db": "pnpm with-env tsx src/reset-db.ts",
     "createsuperuser": "pnpm with-env tsx src/createsuperuser.ts",
