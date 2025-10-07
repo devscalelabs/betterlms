@@ -5,6 +5,7 @@ import { ArticlesPage } from "../pages/articles";
 import { CourseDetailPage } from "../pages/course-detail";
 import { CoursesPage } from "../pages/courses";
 import { EditProfilePage } from "../pages/edit-profile";
+import { LessonDetailPage } from "../pages/lesson-detail";
 import { PostDetail } from "../pages/post-detail";
 import { Profile } from "../pages/profile";
 import { Register } from "../pages/register";
@@ -21,6 +22,7 @@ export const AppRouter = () => {
 					<Route path="/article/:id" element={<ArticleDetailPage />} />
 					<Route path="/courses" element={<CoursesPage />} />
 					<Route path="/courses/:slug" element={<CourseDetailPage />} />
+					<Route path="/lessons/:lessonId" element={<LessonDetailPage />} />
 					<Route path="/post/:id" element={<PostDetail />} />
 					<Route path="/profile/:username" element={<Profile />} />
 					<Route path="/profile/edit" element={<EditProfilePage />} />

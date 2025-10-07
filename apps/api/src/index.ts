@@ -7,6 +7,7 @@ import { authRouter } from "./v1/router/auth";
 import { channelsRouter } from "./v1/router/channels";
 import { coursesRouter } from "./v1/router/courses";
 import { enrollmentsRouter } from "./v1/router/enrollments";
+import { lessonsRouter } from "./v1/router/lessons";
 import { linkPreviewRouter } from "./v1/router/link-preview";
 import { mediaRouter } from "./v1/router/media";
 import { postsRouter } from "./v1/router/posts";
@@ -30,6 +31,7 @@ export const app = new Elysia({ adapter: node() })
 			.use(channelsRouter)
 			.use(coursesRouter)
 			.use(enrollmentsRouter)
+			.use(lessonsRouter)
 			.use(mediaRouter)
 			.use(postsRouter)
 			.use(profileRouter)

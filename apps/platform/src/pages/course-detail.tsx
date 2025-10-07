@@ -248,25 +248,31 @@ export const CourseDetailPage = () => {
 										<h3 className="font-semibold mb-3">{section.title}</h3>
 										<div className="space-y-2">
 											{section.lessons.map((lesson) => (
-												<div
+												<button
 													key={lesson.id}
-													className="flex items-center justify-between py-2 border-b last:border-b-0"
+													type="button"
+													className="w-full py-2 border-b last:border-b-0 cursor-pointer hover:bg-muted/50 rounded-md px-2 transition-colors text-left"
+													onClick={() => navigate(`/lessons/${lesson.id}`)}
 												>
-													<div className="flex items-center gap-3">
-														<span className="text-sm text-muted-foreground">
-															{lesson.order}
-														</span>
-														<span className="text-sm">{lesson.title}</span>
-														{lesson.isFree && (
-															<span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-																Free
+													<div className="flex items-center justify-between">
+														<div className="flex items-center gap-3">
+															<span className="text-sm text-muted-foreground">
+																{lesson.order}
 															</span>
-														)}
+															<span className="text-sm font-medium">
+																{lesson.title}
+															</span>
+															{lesson.isFree && (
+																<span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+																	Free
+																</span>
+															)}
+														</div>
+														<span className="text-xs text-muted-foreground">
+															{lesson.type === "VIDEO" ? "Video" : "Text"}
+														</span>
 													</div>
-													<span className="text-xs text-muted-foreground">
-														{lesson.type === "VIDEO" ? "Video" : "Text"}
-													</span>
-												</div>
+												</button>
 											))}
 										</div>
 									</div>
