@@ -60,7 +60,7 @@ export const ArticleDetailPage = () => {
 
 	if (isLoading) {
 		return (
-			<main>
+			<div className="p-6 max-w-full overflow-hidden">
 				<div className="space-y-6">
 					{/* Header skeleton */}
 					<div className="space-y-4">
@@ -81,17 +81,17 @@ export const ArticleDetailPage = () => {
 						))}
 					</div>
 				</div>
-			</main>
+			</div>
 		);
 	}
 
 	if (error || !article) {
 		return (
-			<main className="max-w-4xl mx-auto p-6">
+			<div className="p-6 max-w-full overflow-hidden">
 				<div className="text-center py-8">
 					<p className="text-muted-foreground">Failed to load article</p>
 				</div>
-			</main>
+			</div>
 		);
 	}
 
@@ -142,7 +142,7 @@ export const ArticleDetailPage = () => {
 	};
 
 	return (
-		<main className="max-w-4xl mx-auto p-6">
+		<div className="p-6 max-w-full overflow-hidden">
 			<article className="space-y-6">
 				{/* Header */}
 				<header className="space-y-4">
@@ -217,8 +217,8 @@ export const ArticleDetailPage = () => {
 				</header>
 
 				{/* Content */}
-				<div className="w-full text-sm">
-					<div className="prose max-w-none prose-pre:whitespace-pre-line">
+				<div className="text-sm">
+					<div className="prose prose-pre:whitespace-pre-line">
 						{typeof processedContent === "string" ? (
 							<div
 								// biome-ignore lint/security/noDangerouslySetInnerHtml: This is intentional for rendering article HTML content
@@ -275,6 +275,6 @@ export const ArticleDetailPage = () => {
 					</div>
 				)}
 			</article>
-		</main>
+		</div>
 	);
 };
