@@ -1,0 +1,10 @@
+{
+  "extends": "@betterlms/typescript/base.json",
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
