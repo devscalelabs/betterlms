@@ -14,6 +14,7 @@ import {
 	findPostWithMedia,
 	incrementPostLikeCount,
 } from "../services/posts";
+import { findUserById } from "../services/users";
 
 export const postsRouter = new Elysia({ prefix: "/posts" })
 	.get(
@@ -198,7 +199,14 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 		}
 
 		const userId = await verifyToken(token);
+		const user = await findUserById(userId);
 		const post = await findPostById(params.id);
+
+		if (!user) {
+			return status(404, {
+				error: "User not found",
+			});
+		}
 
 		if (!post) {
 			return status(404, {
@@ -206,7 +214,8 @@ export const postsRouter = new Elysia({ prefix: "/posts" })
 			});
 		}
 
-		if (post.userId !== userId) {
+		// Allow admins to delete any post, regular users can only delete their own
+		if (user.role !== "ADMIN" && post.userId !== userId) {
 			return status(403, {
 				error: "Forbidden - You can only delete your own posts",
 			});

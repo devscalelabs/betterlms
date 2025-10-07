@@ -307,3 +307,50 @@ export async function decrementPostLikeCount(postId: string) {
 		},
 	});
 }
+
+export async function updatePost(
+	id: string,
+	data: {
+		title?: string | null;
+		content?: string;
+		channelId?: string | null;
+	},
+) {
+	const updateData: any = {
+		updatedAt: new Date(),
+	};
+
+	if (data.title !== undefined) updateData.title = data.title;
+	if (data.content !== undefined) updateData.content = data.content;
+	if (data.channelId !== undefined) updateData.channelId = data.channelId;
+
+	return await prisma.post.update({
+		where: { id },
+		data: updateData,
+		include: {
+			user: {
+				select: {
+					id: true,
+					name: true,
+					username: true,
+					imageUrl: true,
+				},
+			},
+			channel: {
+				select: {
+					id: true,
+					name: true,
+					slug: true,
+				},
+			},
+			Media: {
+				select: {
+					id: true,
+					url: true,
+					type: true,
+					createdAt: true,
+				},
+			},
+		},
+	});
+}

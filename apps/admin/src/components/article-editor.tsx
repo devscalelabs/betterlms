@@ -24,7 +24,7 @@ import {
 	Undo,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useId } from "react";
+import { useEffect, useId } from "react";
 
 const ToolbarButton = ({
 	onClick,
@@ -122,6 +122,13 @@ export const ArticleEditor = ({
 		// Reset the input value so the same file can be selected again
 		event.target.value = "";
 	};
+
+	// Update editor content when content prop changes
+	useEffect(() => {
+		if (editor && content !== undefined && editor.getHTML() !== content) {
+			editor.commands.setContent(content);
+		}
+	}, [editor, content]);
 
 	if (!editor) {
 		return null;

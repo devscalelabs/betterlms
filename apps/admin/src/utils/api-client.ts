@@ -6,16 +6,23 @@ export const api = ky.create({
 	hooks: {
 		beforeRequest: [
 			(request) => {
-				request.headers.set(
-					"Authorization",
-					`Bearer ${localStorage.getItem("token")}`,
-				);
+				const token = localStorage.getItem("token");
+				if (token) {
+					request.headers.set("Authorization", `Bearer ${token}`);
+				}
 			},
 		],
 		afterResponse: [
-			(_, __, response) => {
-				if (response.status === 401 || response.status === 403) {
+			(request, _options, response) => {
+				// Only redirect to login for authentication-related endpoints
+				// Don't redirect for article operations - let the component handle the error
+				if (
+					(response.status === 401 || response.status === 403) &&
+					!request.url.includes("/articles/") &&
+					!request.url.includes("/courses/")
+				) {
 					localStorage.removeItem("token");
+					localStorage.removeItem("user");
 					window.location.href = "/";
 				}
 			},

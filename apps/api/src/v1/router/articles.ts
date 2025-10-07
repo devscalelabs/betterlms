@@ -13,7 +13,9 @@ import {
 	findPosts,
 	findPostWithMedia,
 	incrementPostLikeCount,
+	updatePost,
 } from "../services/posts";
+import { findUserById } from "../services/users";
 
 export const articlesRouter = new Elysia({ prefix: "/articles" })
 	.get(
@@ -212,7 +214,14 @@ export const articlesRouter = new Elysia({ prefix: "/articles" })
 		}
 
 		const userId = await verifyToken(token);
+		const user = await findUserById(userId);
 		const article = await findPostById(params.id);
+
+		if (!user) {
+			return status(404, {
+				error: "User not found",
+			});
+		}
 
 		if (!article) {
 			return status(404, {
@@ -227,7 +236,8 @@ export const articlesRouter = new Elysia({ prefix: "/articles" })
 			});
 		}
 
-		if (article.userId !== userId) {
+		// Allow admins to delete any article, regular users can only delete their own
+		if (user.role !== "ADMIN" && article.userId !== userId) {
 			return status(403, {
 				error: "Forbidden - You can only delete your own articles",
 			});
@@ -237,6 +247,72 @@ export const articlesRouter = new Elysia({ prefix: "/articles" })
 
 		return { message: "Article deleted successfully" };
 	})
+	.put(
+		"/:id",
+		async ({ params, body, headers, status }) => {
+			const token = headers.authorization?.split(" ")[1];
+
+			if (!token) {
+				return status(401, {
+					error: "Unauthorized",
+				});
+			}
+
+			const userId = await verifyToken(token);
+			const user = await findUserById(userId);
+			const article = await findPostById(params.id);
+
+			if (!user) {
+				return status(404, {
+					error: "User not found",
+				});
+			}
+
+			if (!article) {
+				return status(404, {
+					error: "Article not found",
+				});
+			}
+
+			// Check if it's actually an article (has title)
+			if (!article.title) {
+				return status(404, {
+					error: "Article not found",
+				});
+			}
+
+			// Allow admins to edit any article, regular users can only edit their own
+			if (user.role !== "ADMIN" && article.userId !== userId) {
+				return status(403, {
+					error: "Forbidden - You can only edit your own articles",
+				});
+			}
+
+			const { title, content, channelId } = body;
+
+			// Ensure title is provided for articles
+			if (!title || title.trim().length === 0) {
+				return status(400, {
+					error: "Title is required for articles",
+				});
+			}
+
+			const updatedArticle = await updatePost(params.id, {
+				title,
+				content,
+				channelId: channelId || null,
+			});
+
+			return { article: updatedArticle };
+		},
+		{
+			body: t.Object({
+				title: t.String({ minLength: 1, maxLength: 200 }),
+				content: t.String({ minLength: 1, maxLength: 5000 }),
+				channelId: t.Optional(t.String()),
+			}),
+		},
+	)
 	.post("/:id/like", async ({ params, headers, status }) => {
 		const token = headers.authorization?.split(" ")[1];
 

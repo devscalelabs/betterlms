@@ -5,6 +5,7 @@ import { CoursesPage } from "../pages/courses";
 import { CreateArticlePage } from "../pages/create-article";
 import { CreateCoursePage } from "../pages/create-course";
 import { DashboardPage } from "../pages/dashboard";
+import { EditArticlePage } from "../pages/edit-article";
 import { EditCoursePage } from "../pages/edit-course";
 import { LoginPage } from "../pages/login";
 import { UsersPage } from "../pages/users";
@@ -43,6 +44,14 @@ export const AppRouter = () => {
 					element={
 						<ProtectedRoute>
 							<CreateArticlePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/articles/edit/:articleId"
+					element={
+						<ProtectedRoute>
+							<EditArticlePage />
 						</ProtectedRoute>
 					}
 				/>
