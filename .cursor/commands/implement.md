@@ -8,4 +8,11 @@ I'd like to you to implement the following feature:
 - Do not create barrel files for frontend.
 </guidelines>
 
+<important>
+- Do not use Any type.
+- Always check the linter
+- If you create new pages, make sure you add into the route.
+- Do not create markdown for guide or example files.
+</important>
+
 Now implement the feature.
