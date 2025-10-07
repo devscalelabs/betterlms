@@ -19,10 +19,13 @@ BetterLMS is a comprehensive platform that combines social media features with l
   - Like and comment system
   - User profiles and following system
   - Media upload and sharing
+  - User mention system (@username mentions)
+  - Link preview functionality
+  - Notification system
 
 - **📚 Learning Management**
   - Article creation and management
-  - Course organization
+  - Course organization and enrollment
   - Channel-based content grouping
   - Private and public communities
 
@@ -47,14 +50,15 @@ better-openlms/
 ├── apps/
 │   ├── admin/          # Admin dashboard (React + Vite)
 │   ├── api/            # Backend API (Elysia + TypeScript)
-│   └── platform/       # Main platform (React + Vite)
+│   ├── platform/       # Main platform (React + Vite)
+│   └── worker/         # Background job processor
 ├── packages/
 │   ├── common/         # Shared utilities
 │   ├── database/       # Prisma ORM + PostgreSQL
 │   ├── email/          # Email service (Nodemailer)
 │   ├── storages/       # S3 file storage
 │   └── ui/             # Shared UI components
-└── tooling/            # Development scripts and tools
+└── tooling/            # Development tools and scripts
 ```
 
 ## 🛠️ Technology Stack
@@ -154,6 +158,7 @@ better-openlms/
    pnpm api:dev      # Backend API (port 8000)
    pnpm platform:dev # Main platform
    pnpm admin:dev    # Admin dashboard
+   pnpm worker:dev   # Background worker
    ```
 
 ## 📁 Project Structure
@@ -163,6 +168,7 @@ better-openlms/
 - **`apps/admin/`** - Administrative dashboard for platform management
 - **`apps/api/`** - RESTful API server with authentication and business logic
 - **`apps/platform/`** - Main user-facing application
+- **`apps/worker/`** - Background job processor for asynchronous tasks
 
 ### Packages
 
@@ -171,6 +177,11 @@ better-openlms/
 - **`packages/common/`** - Shared utilities and helper functions
 - **`packages/email/`** - Email service integration
 - **`packages/storages/`** - File upload and storage management
+
+### Tooling
+
+- **`tooling/scripts/`** - Development and utility scripts
+- **`tooling/typescript/`** - TypeScript configuration presets
 
 ### Key Features Implementation
 
@@ -189,7 +200,9 @@ better-openlms/
 - User profiles and following system
 - Like and comment functionality
 - Timeline feed
-- Mention system
+- User mention system (@username mentions)
+- Link preview functionality
+- Notification system
 
 ## 🧪 Development
 
@@ -200,6 +213,8 @@ better-openlms/
 pnpm dev                 # Start all services
 pnpm api:dev            # Start API server only
 pnpm platform:dev       # Start platform only
+pnpm admin:dev          # Start admin dashboard only
+pnpm worker:dev         # Start background worker only
 
 # Database
 pnpm db:generate        # Generate Prisma client
