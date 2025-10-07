@@ -22,7 +22,10 @@ export const AppRouter = () => {
 					<Route path="/article/:id" element={<ArticleDetailPage />} />
 					<Route path="/courses" element={<CoursesPage />} />
 					<Route path="/courses/:slug" element={<CourseDetailPage />} />
-					<Route path="/lessons/:lessonId" element={<LessonDetailPage />} />
+					<Route
+						path="/courses/:slug/lessons/:lessonId"
+						element={<LessonDetailPage />}
+					/>
 					<Route path="/post/:id" element={<PostDetail />} />
 					<Route path="/profile/:username" element={<Profile />} />
 					<Route path="/profile/edit" element={<EditProfilePage />} />

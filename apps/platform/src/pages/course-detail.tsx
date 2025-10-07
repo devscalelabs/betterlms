@@ -215,12 +215,6 @@ export const CourseDetailPage = () => {
 									>
 										{isCancelling ? "Cancelling..." : "Cancel Enrollment"}
 									</Button>
-									<Button
-										size="lg"
-										onClick={() => navigate(`/courses/${course.slug}/learn`)}
-									>
-										Continue Learning
-									</Button>
 								</div>
 							) : (
 								<Button
@@ -252,7 +246,11 @@ export const CourseDetailPage = () => {
 													key={lesson.id}
 													type="button"
 													className="w-full py-2 border-b last:border-b-0 cursor-pointer hover:bg-muted/50 rounded-md px-2 transition-colors text-left"
-													onClick={() => navigate(`/lessons/${lesson.id}`)}
+													onClick={() =>
+														navigate(
+															`/courses/${course.slug}/lessons/${lesson.id}`,
+														)
+													}
 												>
 													<div className="flex items-center justify-between">
 														<div className="flex items-center gap-3">

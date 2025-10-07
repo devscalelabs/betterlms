@@ -15,7 +15,7 @@ export const LessonDetailPage = () => {
 		return match?.[2] && match[2].length === 11 ? match[2] : "";
 	};
 	const navigate = useNavigate();
-	const { lessonId } = useParams<{ lessonId: string }>();
+	const { slug, lessonId } = useParams<{ slug: string; lessonId: string }>();
 
 	const {
 		data: lessonData,
@@ -69,8 +69,12 @@ export const LessonDetailPage = () => {
 	return (
 		<div>
 			<HeadingBox>
-				<Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-					Back
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={() => navigate(`/courses/${slug}`)}
+				>
+					Back to Course
 				</Button>
 				<div></div>
 			</HeadingBox>
