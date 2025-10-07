@@ -68,7 +68,7 @@ export const authRouter = new Elysia({ prefix: "/auth" })
 			const user = await findUserByEmail(email);
 
 			if (!user) {
-				return status(404, {
+				return status(400, {
 					error: "User not found. Please contact admin to create an account.",
 				});
 			}
@@ -124,7 +124,7 @@ export const authRouter = new Elysia({ prefix: "/auth" })
 			const user = await findUserByEmail(email);
 
 			if (!user) {
-				return status(404, {
+				return status(400, {
 					error: "User not found",
 				});
 			}
