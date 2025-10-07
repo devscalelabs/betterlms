@@ -118,7 +118,7 @@ export const CourseDetailPage = () => {
 					{/* Course Header */}
 					<div className="space-y-4">
 						{/* Thumbnail */}
-						<div className="aspect-video bg-muted rounded-lg overflow-hidden">
+						<div className="bg-muted rounded-lg overflow-hidden">
 							{course.thumbnailUrl ? (
 								<img
 									src={course.thumbnailUrl}
@@ -126,7 +126,7 @@ export const CourseDetailPage = () => {
 									className="w-full h-full object-cover"
 								/>
 							) : (
-								<div className="w-full h-full flex items-center justify-center">
+								<div className="w-full h-64 flex items-center justify-center">
 									<div className="text-6xl text-muted-foreground">📚</div>
 								</div>
 							)}

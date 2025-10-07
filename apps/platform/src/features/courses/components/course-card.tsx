@@ -1,5 +1,5 @@
 import { getUserInitials } from "@betterlms/common/strings";
-import { Avatar, AvatarFallback, AvatarImage, Button } from "@betterlms/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@betterlms/ui";
 import { useNavigate } from "react-router";
 import type { Course } from "../types";
 
@@ -51,7 +51,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
 			onClick={handleCardClick}
 		>
 			{/* Thumbnail */}
-			<div className="aspect-video bg-muted relative">
+			<div className="bg-muted relative">
 				{course.thumbnailUrl ? (
 					<img
 						src={course.thumbnailUrl}
@@ -59,7 +59,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
 						className="w-full h-full object-cover"
 					/>
 				) : (
-					<div className="w-full h-full flex items-center justify-center">
+					<div className="w-full h-64 flex items-center justify-center">
 						<div className="text-4xl text-muted-foreground">📚</div>
 					</div>
 				)}
@@ -140,9 +140,6 @@ export const CourseCard = ({ course }: CourseCardProps) => {
 					<span className="font-semibold text-lg">
 						{formatPrice(course.price, course.currency)}
 					</span>
-					<Button size="sm" onClick={(e) => e.stopPropagation()}>
-						{course.price ? "Enroll" : "Start Course"}
-					</Button>
 				</div>
 			</div>
 		</button>
