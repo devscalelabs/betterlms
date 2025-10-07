@@ -3,6 +3,7 @@ import { Button } from "@betterlms/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import { HeadingBox } from "@/components/shared/heading-box";
+import { useProcessedContent } from "@/features/articles/hooks/use-processed-content";
 import type { Lesson } from "@/features/courses/types";
 import { api } from "@/utils/api-client";
 
@@ -28,6 +29,9 @@ export const LessonDetailPage = () => {
 	});
 
 	const lesson = lessonData?.lesson;
+	const { processedContent } = useProcessedContent({
+		content: lesson?.content || "",
+	});
 
 	if (!lessonId) {
 		return (
@@ -121,9 +125,16 @@ export const LessonDetailPage = () => {
 
 					{/* Content */}
 					{lesson.content && (
-						<div className="prose max-w-none">
-							<div className="text-muted-foreground whitespace-pre-wrap">
-								{lesson.content}
+						<div className="text-sm">
+							<div className="prose prose-pre:whitespace-pre-line">
+								{typeof processedContent === "string" ? (
+									<div
+										// biome-ignore lint/security/noDangerouslySetInnerHtml: This is intentional for rendering lesson HTML content
+										dangerouslySetInnerHTML={{ __html: processedContent }}
+									/>
+								) : (
+									<div>{processedContent}</div>
+								)}
 							</div>
 						</div>
 					)}
