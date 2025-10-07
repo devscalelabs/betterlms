@@ -20,14 +20,24 @@ const SAMPLE_COURSES = [
 						content:
 							"<p>JavaScript is a programming language that runs in web browsers and servers.</p>",
 						order: 1,
-						type: "TEXT" as const,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=W6NZfCO5SIk",
 					},
 					{
 						title: "Setting up your environment",
 						content:
 							"<p>Learn how to set up your development environment for JavaScript.</p>",
 						order: 2,
-						type: "TEXT" as const,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=hdI2bqOjy3c",
+					},
+					{
+						title: "Console and Developer Tools",
+						content:
+							"<p>Learn how to use the browser console and developer tools for debugging.</p>",
+						order: 3,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=xkzDaKwinA8",
 					},
 				],
 			},
@@ -40,13 +50,61 @@ const SAMPLE_COURSES = [
 						content:
 							"<p>Learn about variables, strings, numbers, and booleans in JavaScript.</p>",
 						order: 1,
-						type: "TEXT" as const,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=9YWzbKfzUyg",
 					},
 					{
 						title: "Functions",
 						content: "<p>How to create and use functions in JavaScript.</p>",
 						order: 2,
-						type: "TEXT" as const,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=N8ap4k_1QEQ",
+					},
+					{
+						title: "Arrays and Objects",
+						content:
+							"<p>Learn how to work with arrays and objects in JavaScript.</p>",
+						order: 3,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=R8rmfD9Y5-c",
+					},
+					{
+						title: "Control Flow",
+						content:
+							"<p>Understanding if statements, loops, and conditional logic.</p>",
+						order: 4,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=s9wW2PpJsmQ",
+					},
+				],
+			},
+			{
+				title: "Intermediate JavaScript",
+				order: 3,
+				lessons: [
+					{
+						title: "DOM Manipulation",
+						content:
+							"<p>Learn how to interact with HTML elements using JavaScript.</p>",
+						order: 1,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=0ik6X4DJKCc",
+					},
+					{
+						title: "Event Handling",
+						content:
+							"<p>How to handle user interactions and events in JavaScript.</p>",
+						order: 2,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=XF1_MlZ5l6M",
+					},
+					{
+						title: "Async JavaScript",
+						content:
+							"<p>Understanding promises, async/await, and asynchronous programming.</p>",
+						order: 3,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=PoRJizFvM7s",
 					},
 				],
 			},
@@ -71,13 +129,23 @@ const SAMPLE_COURSES = [
 						content:
 							"<p>Step-by-step guide to install Python on your computer.</p>",
 						order: 1,
-						type: "TEXT" as const,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=YYXdXT2l-Gg",
 					},
 					{
 						title: "Your First Program",
 						content: "<p>Write and run your first Python program.</p>",
 						order: 2,
-						type: "TEXT" as const,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=kqtD5dpn9C8",
+					},
+					{
+						title: "Python Syntax Basics",
+						content:
+							"<p>Learn the fundamental syntax and structure of Python.</p>",
+						order: 3,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=Yv_8dHF6N6k",
 					},
 				],
 			},
@@ -89,13 +157,59 @@ const SAMPLE_COURSES = [
 						title: "Lists and Dictionaries",
 						content: "<p>Learn about Python's built-in data structures.</p>",
 						order: 1,
-						type: "TEXT" as const,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=daefaLgNkw0",
 					},
 					{
 						title: "File Handling",
 						content: "<p>How to read and write files in Python.</p>",
 						order: 2,
-						type: "TEXT" as const,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=Uh2ebFW8OYM",
+					},
+					{
+						title: "String Manipulation",
+						content:
+							"<p>Master string operations and formatting in Python.</p>",
+						order: 3,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=k9TUPpGqYTo",
+					},
+					{
+						title: "Tuples and Sets",
+						content: "<p>Understanding tuples and sets in Python.</p>",
+						order: 4,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=R-HLU9Fl5ug",
+					},
+				],
+			},
+			{
+				title: "Control Structures",
+				order: 3,
+				lessons: [
+					{
+						title: "Conditional Statements",
+						content:
+							"<p>Learn about if, elif, and else statements in Python.</p>",
+						order: 1,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=AWek49wXGzI",
+					},
+					{
+						title: "Loops in Python",
+						content: "<p>Master for and while loops in Python.</p>",
+						order: 2,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=OnDr4J2UXSA",
+					},
+					{
+						title: "Functions and Modules",
+						content:
+							"<p>Creating functions and organizing code with modules.</p>",
+						order: 3,
+						type: "VIDEO" as const,
+						videoUrl: "https://www.youtube.com/watch?v=9Os0o3wzS_I",
 					},
 				],
 			},
@@ -159,6 +273,7 @@ async function seedCourses() {
 						content: lessonData.content,
 						order: lessonData.order,
 						type: lessonData.type,
+						videoUrl: lessonData.videoUrl,
 						sectionId: section.id,
 					},
 				});

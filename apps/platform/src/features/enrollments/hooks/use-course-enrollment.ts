@@ -25,8 +25,10 @@ export const useCourseEnrollment = (courseId: string) => {
 				.get<EnrollmentsResponse>("api/v1/enrollments/my-enrollments")
 				.json();
 
-			return enrollments.enrollments.find(
-				(enrollment) => enrollment.courseId === courseId,
+			return (
+				enrollments.enrollments.find(
+					(enrollment) => enrollment.courseId === courseId,
+				) || null
 			);
 		},
 		enabled: !!courseId && !!localStorage.getItem("token"),
