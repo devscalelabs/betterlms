@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useAccount } from "@/features/account/hooks/use-account";
 import { useArticle } from "@/features/articles/hooks/use-article";
+import { useProcessedContent } from "@/features/articles/hooks/use-processed-content";
 import { loginDialogAtom } from "@/features/auth/atoms/login-dialog-atom";
 import { useLikePost } from "@/features/likes/hooks/use-like-post";
 import { useUnlikePost } from "@/features/likes/hooks/use-unlike-post";
@@ -33,6 +34,9 @@ export const ArticleDetailPage = () => {
 	const setLoginDialog = useSetAtom(loginDialogAtom);
 
 	const { data: article, isLoading, error } = useArticle(id || "");
+	const { processedContent } = useProcessedContent({
+		content: article?.content || "",
+	});
 
 	const [isLiked, setIsLiked] = useState(false);
 	const [optimisticLikeCount, setOptimisticLikeCount] = useState(0);
@@ -214,11 +218,16 @@ export const ArticleDetailPage = () => {
 
 				{/* Content */}
 				<div className="w-full text-sm">
-					<div
-						className="prose max-w-none prose-pre:whitespace-pre-line"
-						// biome-ignore lint/security/noDangerouslySetInnerHtml: This is intentional for rendering article HTML content
-						dangerouslySetInnerHTML={{ __html: article.content }}
-					/>
+					<div className="prose max-w-none prose-pre:whitespace-pre-line">
+						{typeof processedContent === "string" ? (
+							<div
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: This is intentional for rendering article HTML content
+								dangerouslySetInnerHTML={{ __html: processedContent }}
+							/>
+						) : (
+							<div>{processedContent}</div>
+						)}
+					</div>
 				</div>
 
 				{/* Media */}
