@@ -13,13 +13,13 @@ import { z } from 'zod'
 
 const channelsRouter = new Hono()
 
-channelsRouter.get('/channels', async (c) => {
+channelsRouter.get('/channels/', async (c) => {
   const channels = await findPublicChannels()
   return c.json({ channels })
 })
 
 channelsRouter.post(
-  '/channels',
+  '/channels/',
   zValidator('json', z.object({
     name: z.string().min(1).max(100),
     isPrivate: z.boolean().optional(),

@@ -19,7 +19,7 @@ import { uploadImageToS3 } from '../../utils/upload-files'
 const postsRouter = new Hono()
 
 postsRouter.get(
-  '/posts',
+  '/posts/',
   zValidator('query', z.object({
     parentId: z.string().optional(),
     username: z.string().optional(),
@@ -140,7 +140,7 @@ postsRouter.get('/posts/:id', async (c) => {
 })
 
 postsRouter.post(
-  '/posts',
+  '/posts/',
   zValidator('form', z.object({
     content: z.string().min(1).max(5000),
     channelId: z.string().optional(),

@@ -20,7 +20,7 @@ import { uploadImageToS3 } from '../../utils/upload-files'
 const articlesRouter = new Hono()
 
 articlesRouter.get(
-  '/articles',
+  '/articles/',
   zValidator('query', z.object({
     parentId: z.string().optional(),
     username: z.string().optional(),
@@ -147,7 +147,7 @@ articlesRouter.get('/articles/:id', async (c) => {
 })
 
 articlesRouter.post(
-  '/articles',
+  '/articles/',
   zValidator('form', z.object({
     title: z.string().min(1).max(200),
     content: z.string().min(1).max(5000),

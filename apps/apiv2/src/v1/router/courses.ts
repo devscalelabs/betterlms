@@ -11,7 +11,7 @@ import { z } from 'zod'
 const coursesRouter = new Hono()
 
 coursesRouter.get(
-  '/courses',
+  '/courses/',
   zValidator('query', z.object({
     instructorId: z.string().optional(),
     category: z.string().optional(),
@@ -86,7 +86,7 @@ coursesRouter.get('/courses/slug/:slug', async (c) => {
 })
 
 coursesRouter.post(
-  '/courses',
+  '/courses/',
   zValidator('json', z.object({
     title: z.string().min(1).max(200),
     description: z.string().max(2000).optional(),

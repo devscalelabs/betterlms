@@ -10,7 +10,7 @@ import { z } from 'zod'
 
 const notificationsRouter = new Hono()
 
-notificationsRouter.get('/notifications', async (c) => {
+notificationsRouter.get('/notifications/', async (c) => {
   const token = c.req.header('authorization')?.split(' ')[1]
 
   if (!token) {
