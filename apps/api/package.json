@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "pnpm with-env tsx watch src/index.ts",
-    "build": "pnpm with-env tsc src/index.ts --outDir dist",
     "start": "NODE_ENV=production node dist/index.js",
+    "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile ./dist/server ./src/index.ts",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
     "with-env": "dotenv -e ../../.env --"
   },
   "keywords": [],

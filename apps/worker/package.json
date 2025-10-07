@@ -5,8 +5,13 @@
   "main": "src/worker.ts",
   "scripts": {
     "dev": "pnpm with-env tsx watch src/worker.ts",
-    "build": "pnpm with-env tsc src/worker.ts --outDir dist",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build:clean": "rm -rf dist",
+    "build:clean-build": "pnpm build:clean && pnpm build",
     "start": "NODE_ENV=production node dist/worker.js",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
     "with-env": "dotenv -e ../../.env --"
   },
   "keywords": [],
