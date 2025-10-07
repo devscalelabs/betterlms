@@ -1,8 +1,5 @@
 import { serve } from '@hono/node-server'
-import { config } from 'dotenv'
 import app from './index'
-
-config()
 
 const PORT = Number(process.env.BACKEND_PORT) || 8000
 

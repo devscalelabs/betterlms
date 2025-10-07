@@ -2,8 +2,10 @@
   "name": "@betterlms/core",
   "version": "1.0.0",
   "description": "Core business logic and services for BetterLMS",
+  "type": "module",
   "main": "index.ts",
   "exports": {
+    ".": "./index.ts",
     "./channels": "./src/channels.ts",
     "./courses": "./src/courses.ts",
     "./emails": "./src/emails.ts",
@@ -22,10 +24,10 @@
   "dependencies": {
     "@betterlms/database": "workspace:*",
     "@betterlms/email": "workspace:*",
-    "bcrypt": "^5.1.1",
-    "bullmq": "^5.7.1",
-    "ioredis": "^5.4.1",
-    "jose": "^5.9.6"
+    "bcrypt": "^6.0.0",
+    "bullmq": "^5.61.0",
+    "ioredis": "^5.8.1",
+    "jose": "^6.1.0"
   },
   "devDependencies": {
     "@betterlms/typescript": "workspace:*",

@@ -1,28 +1,29 @@
 {
-	"name": "@betterlms/database",
-	"version": "1.0.0",
-	"description": "",
-	"main": "index.ts",
-	"exports": {
-		".": "./index.ts"
-	},
-	"scripts": {
-		"db:generate": "pnpm with-env prisma migrate dev --create-only",
-		"db:migrate": "pnpm with-env prisma migrate dev",
-		"db:reset": "pnpm with-env prisma migrate reset",
-		"db:studio": "pnpm with-env prisma studio",
-		"with-env": "dotenv -e ../../.env --"
-	},
-	"author": "",
-	"license": "ISC",
-	"dependencies": {
-		"@prisma/client": "^6.16.3",
-		"dotenv": "^17.2.3",
-		"prisma": "^6.16.3"
-	},
-	"devDependencies": {
-		"@betterlms/typescript": "workspace:*",
-		"@types/node": "^24.6.2",
-		"typescript": "^5.9.3"
-	}
+  "name": "@betterlms/database",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "db:generate": "pnpm with-env prisma migrate dev --create-only",
+    "db:migrate": "pnpm with-env prisma migrate dev",
+    "db:reset": "pnpm with-env prisma migrate reset",
+    "db:studio": "pnpm with-env prisma studio",
+    "with-env": "dotenv -e ../../.env --"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.16.3",
+    "dotenv": "^17.2.3",
+    "prisma": "^6.16.3"
+  },
+  "devDependencies": {
+    "@betterlms/typescript": "workspace:*",
+    "@types/node": "^24.6.2",
+    "typescript": "^5.9.3"
+  }
 }
