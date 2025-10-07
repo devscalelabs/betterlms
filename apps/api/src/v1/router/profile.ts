@@ -1,222 +1,233 @@
-import { Elysia, t } from "elysia";
+import {
+  createUserFollow,
+  deleteUserFollow,
+  findAllUsers,
+  findUserByUsername,
+  findUserFollow,
+  suspendUser,
+  unsuspendUser,
+  updateUser,
+  verifyToken,
+} from "@betterlms/core";
+import { zValidator } from "@hono/zod-validator";
+import { Hono } from "hono";
+import { z } from "zod";
 import { uploadImageToS3 } from "../../utils/upload-files";
-import {
-	createUserFollow,
-	deleteUserFollow,
-	findUserFollow,
-} from "../services/follows";
-import { verifyToken } from "../services/jwt";
-import {
-	findAllUsers,
-	findUserByUsername,
-	suspendUser,
-	unsuspendUser,
-	updateUser,
-} from "../services/users";
 
-export const profileRouter = new Elysia({ prefix: "/profile" })
-	.get("/", async () => {
-		const users = await findAllUsers();
+const profileRouter = new Hono();
 
-		return {
-			users,
-		};
-	})
-	.get("/:username", async ({ params, headers, status }) => {
-		const { username } = params;
+profileRouter.get("/profile", async (c) => {
+  const users = await findAllUsers();
 
-		const user = await findUserByUsername(username);
+  return c.json({
+    users,
+  });
+});
 
-		if (!user) {
-			return status(404, {
-				error: "User not found",
-			});
-		}
+profileRouter.get("/profile/:username", async (c) => {
+  const username = c.req.param("username");
 
-		let isFollowing = false;
+  const user = await findUserByUsername(username);
 
-		const token = headers.authorization?.split(" ")[1];
-		if (token) {
-			try {
-				const userId = await verifyToken(token);
-				const follow = await findUserFollow(userId, user.id);
-				isFollowing = !!follow;
-			} catch {
-				// Token is invalid or expired, treat as not authenticated
-				isFollowing = false;
-			}
-		}
+  if (!user) {
+    return c.json({
+      error: "User not found",
+    }, 404);
+  }
 
-		return {
-			user: {
-				...user,
-				isFollowing,
-			},
-		};
-	})
-	.put(
-		"/",
-		async ({ body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+  let isFollowing = false;
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+  const token = c.req.header("authorization")?.split(" ")[1];
+  if (token) {
+    try {
+      const userId = await verifyToken(token);
+      const follow = await findUserFollow(userId, user.id);
+      isFollowing = !!follow;
+    } catch {
+      // Token is invalid or expired, treat as not authenticated
+      isFollowing = false;
+    }
+  }
 
-			const userId = await verifyToken(token);
-			const { name, bio, avatar } = body;
+  return c.json({
+    user: {
+      ...user,
+      isFollowing,
+    },
+  });
+});
 
-			const updateData: {
-				name?: string;
-				bio?: string;
-				imageUrl?: string;
-			} = {};
+profileRouter.put(
+  "/profile",
+  zValidator(
+    "form",
+    z.object({
+      name: z.string().min(1).max(100).optional(),
+      bio: z.string().max(500).optional(),
+      avatar: z.instanceof(File).optional(),
+    }),
+  ),
+  async (c) => {
+    const token = c.req.header("authorization")?.split(" ")[1];
 
-			if (name) updateData.name = name;
-			if (bio !== undefined) updateData.bio = bio;
+    if (!token) {
+      return c.json({
+        error: "Unauthorized",
+      }, 401);
+    }
 
-			if (avatar) {
-				const imageUrl = await uploadImageToS3(avatar, userId, "avatars");
-				updateData.imageUrl = imageUrl;
-			}
+    const userId = await verifyToken(token);
+    const body = c.req.valid("form");
+    const { name, bio, avatar } = body;
 
-			const user = await updateUser(userId, updateData);
+    const updateData: {
+      name?: string;
+      bio?: string;
+      imageUrl?: string;
+    } = {};
 
-			return {
-				user,
-			};
-		},
-		{
-			body: t.Object({
-				name: t.Optional(t.String({ minLength: 1, maxLength: 100 })),
-				bio: t.Optional(t.String({ maxLength: 500 })),
-				avatar: t.Optional(t.File()),
-			}),
-		},
-	)
-	.post("/:username/follow", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+    if (name) updateData.name = name;
+    if (bio !== undefined) updateData.bio = bio;
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+    if (avatar) {
+      const imageUrl = await uploadImageToS3(avatar, userId, "avatars");
+      updateData.imageUrl = imageUrl;
+    }
 
-		const userId = await verifyToken(token);
-		const { username } = params;
+    const user = await updateUser(userId, updateData);
 
-		const userToFollow = await findUserByUsername(username);
+    return c.json({
+      user,
+    });
+  },
+);
 
-		if (!userToFollow) {
-			return status(404, {
-				error: "User not found",
-			});
-		}
+profileRouter.post("/profile/:username/follow", async (c) => {
+  const token = c.req.header("authorization")?.split(" ")[1];
 
-		if (userToFollow.id === userId) {
-			return status(400, {
-				error: "Cannot follow yourself",
-			});
-		}
+  if (!token) {
+    return c.json({
+      error: "Unauthorized",
+    }, 401);
+  }
 
-		const existingFollow = await findUserFollow(userId, userToFollow.id);
+  const userId = await verifyToken(token);
+  const username = c.req.param("username");
 
-		if (existingFollow) {
-			return status(409, {
-				error: "Already following this user",
-			});
-		}
+  const userToFollow = await findUserByUsername(username);
 
-		await createUserFollow(userId, userToFollow.id);
+  if (!userToFollow) {
+    return c.json({
+      error: "User not found",
+    }, 404);
+  }
 
-		return status(201, { message: "User followed successfully" });
-	})
-	.delete("/:username/follow", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+  if (userToFollow.id === userId) {
+    return c.json({
+      error: "Cannot follow yourself",
+    }, 400);
+  }
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+  const existingFollow = await findUserFollow(userId, userToFollow.id);
 
-		const userId = await verifyToken(token);
-		const { username } = params;
+  if (existingFollow) {
+    return c.json({
+      error: "Already following this user",
+    }, 409);
+  }
 
-		const userToUnfollow = await findUserByUsername(username);
+  await createUserFollow(userId, userToFollow.id);
 
-		if (!userToUnfollow) {
-			return status(404, {
-				error: "User not found",
-			});
-		}
+  return c.json({ message: "User followed successfully" }, 201);
+});
 
-		const existingFollow = await findUserFollow(userId, userToUnfollow.id);
+profileRouter.delete("/profile/:username/follow", async (c) => {
+  const token = c.req.header("authorization")?.split(" ")[1];
 
-		if (!existingFollow) {
-			return status(404, {
-				error: "Not following this user",
-			});
-		}
+  if (!token) {
+    return c.json({
+      error: "Unauthorized",
+    }, 401);
+  }
 
-		await deleteUserFollow(userId, userToUnfollow.id);
+  const userId = await verifyToken(token);
+  const username = c.req.param("username");
 
-		return { message: "User unfollowed successfully" };
-	})
-	.post("/:username/suspend", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+  const userToUnfollow = await findUserByUsername(username);
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+  if (!userToUnfollow) {
+    return c.json({
+      error: "User not found",
+    }, 404);
+  }
 
-		await verifyToken(token);
-		const { username } = params;
+  const existingFollow = await findUserFollow(userId, userToUnfollow.id);
 
-		const userToSuspend = await findUserByUsername(username);
+  if (!existingFollow) {
+    return c.json({
+      error: "Not following this user",
+    }, 404);
+  }
 
-		if (!userToSuspend) {
-			return status(404, {
-				error: "User not found",
-			});
-		}
+  await deleteUserFollow(userId, userToUnfollow.id);
 
-		const suspendedUser = await suspendUser(userToSuspend.id);
+  return c.json({ message: "User unfollowed successfully" });
+});
 
-		return status(200, {
-			message: "User suspended successfully",
-			user: suspendedUser,
-		});
-	})
-	.delete("/:username/suspend", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+profileRouter.post("/profile/:username/suspend", async (c) => {
+  const token = c.req.header("authorization")?.split(" ")[1];
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+  if (!token) {
+    return c.json({
+      error: "Unauthorized",
+    }, 401);
+  }
 
-		await verifyToken(token);
-		const { username } = params;
+  await verifyToken(token);
+  const username = c.req.param("username");
 
-		const userToUnsuspend = await findUserByUsername(username);
+  const userToSuspend = await findUserByUsername(username);
 
-		if (!userToUnsuspend) {
-			return status(404, {
-				error: "User not found",
-			});
-		}
+  if (!userToSuspend) {
+    return c.json({
+      error: "User not found",
+    }, 404);
+  }
 
-		const unsuspendedUser = await unsuspendUser(userToUnsuspend.id);
+  const suspendedUser = await suspendUser(userToSuspend.id);
 
-		return status(200, {
-			message: "User unsuspended successfully",
-			user: unsuspendedUser,
-		});
-	});
+  return c.json({
+    message: "User suspended successfully",
+    user: suspendedUser,
+  }, 200);
+});
+
+profileRouter.delete("/profile/:username/suspend", async (c) => {
+  const token = c.req.header("authorization")?.split(" ")[1];
+
+  if (!token) {
+    return c.json({
+      error: "Unauthorized",
+    }, 401);
+  }
+
+  await verifyToken(token);
+  const username = c.req.param("username");
+
+  const userToUnsuspend = await findUserByUsername(username);
+
+  if (!userToUnsuspend) {
+    return c.json({
+      error: "User not found",
+    }, 404);
+  }
+
+  const unsuspendedUser = await unsuspendUser(userToUnsuspend.id);
+
+  return c.json({
+    message: "User unsuspended successfully",
+    user: unsuspendedUser,
+  }, 200);
+});
+
+export { profileRouter };

@@ -1,50 +1,50 @@
-import { Elysia } from "elysia";
-import { verifyToken } from "../services/jwt";
-import { findUserById } from "../services/users";
+import { findUserById, verifyToken } from '@betterlms/core'
+import { Hono } from 'hono'
 
-export const accountRouter = new Elysia({ prefix: "/account" }).get(
-	"/",
-	async ({ headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+const accountRouter = new Hono()
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+accountRouter.get('/account/', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		try {
-			const userId = await verifyToken(token);
-			const user = await findUserById(userId);
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-			if (!user) {
-				return status(404, {
-					error: "User not found",
-				});
-			}
+  try {
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
 
-			if (user.isSuspended) {
-				return status(403, {
-					error:
-						"Your account has been suspended. Please contact support for assistance.",
-				});
-			}
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 404)
+    }
 
-			return {
-				user: {
-					id: user.id,
-					name: user.name,
-					username: user.username,
-					email: user.email,
-					bio: user.bio,
-					imageUrl: user.imageUrl,
-					role: user.role,
-				},
-			};
-		} catch (error) {
-			return status(401, {
-				error: `${error}`,
-			});
-		}
-	},
-);
+    if (user.isSuspended) {
+      return c.json({
+        error:
+          'Your account has been suspended. Please contact support for assistance.',
+      }, 403)
+    }
+
+    return c.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        bio: user.bio,
+        imageUrl: user.imageUrl,
+        role: user.role,
+      },
+    })
+  } catch (error) {
+    return c.json({
+      error: `${error}`,
+    }, 401)
+  }
+})
+
+export { accountRouter }

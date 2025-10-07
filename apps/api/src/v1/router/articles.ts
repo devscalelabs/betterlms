@@ -1,391 +1,397 @@
-import { Elysia, t } from "elysia";
-import { uploadImageToS3 } from "../../utils/upload-files";
-import { verifyToken } from "../services/jwt";
 import {
-	createMedia,
-	createPost,
-	createPostLike,
-	decrementPostLikeCount,
-	deletePost,
-	deletePostLike,
-	findPostById,
-	findPostLike,
-	findPosts,
-	findPostWithMedia,
-	incrementPostLikeCount,
-	updatePost,
-} from "../services/posts";
-import { findUserById } from "../services/users";
+  createMedia,
+  createPost,
+  createPostLike,
+  decrementPostLikeCount,
+  deletePost,
+  deletePostLike,
+  findPostById,
+  findPostLike,
+  findPosts,
+  findPostWithMedia, findUserById,
+  incrementPostLikeCount,
+  updatePost, verifyToken
+} from '@betterlms/core'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
+import { uploadImageToS3 } from '../../utils/upload-files'
 
-export const articlesRouter = new Elysia({ prefix: "/articles" })
-	.get(
-		"/",
-		async ({ query, headers }) => {
-			// Optionally get userId if user is authenticated
-			let userId: string | undefined;
-			const token = headers.authorization?.split(" ")[1];
-			if (token) {
-				try {
-					userId = await verifyToken(token);
-				} catch {
-					// If token is invalid, just continue without userId
-					userId = undefined;
-				}
-			}
+const articlesRouter = new Hono()
 
-			const articles = await findPosts({
-				parentId: query.parentId,
-				username: query.username,
-				channelSlug: query.channelSlug,
-				articlesOnly: true, // Only return articles (posts with titles)
-			});
+articlesRouter.get(
+  '/articles/',
+  zValidator('query', z.object({
+    parentId: z.string().optional(),
+    username: z.string().optional(),
+    channelSlug: z.string().optional(),
+  })),
+  async (c) => {
+    const query = c.req.valid('query')
+    // Optionally get userId if user is authenticated
+    let userId: string | undefined
+    const token = c.req.header('authorization')?.split(' ')[1]
+    if (token) {
+      try {
+        userId = await verifyToken(token)
+      } catch {
+        // If token is invalid, just continue without userId
+        userId = undefined
+      }
+    }
 
-			// Process articles to get unique commenters (first 3) and check if user liked
-			const articlesWithCommentPreview = await Promise.all(
-				articles.map(async (article) => {
-					const uniqueCommenters = new Map();
+    const articles = await findPosts({
+      parentId: query.parentId,
+      username: query.username,
+      channelSlug: query.channelSlug,
+      articlesOnly: true, // Only return articles (posts with titles)
+    })
 
-					for (const child of article.children) {
-						if (
-							child.user &&
-							child.userId &&
-							!uniqueCommenters.has(child.userId)
-						) {
-							uniqueCommenters.set(child.userId, child.user);
-							if (uniqueCommenters.size === 3) break;
-						}
-					}
+    // Process articles to get unique commenters (first 3) and check if user liked
+    const articlesWithCommentPreview = await Promise.all(
+      articles.map(async (article: any) => {
+        const uniqueCommenters = new Map()
 
-					// Check if current user has liked this article
-					let isLiked = false;
-					if (userId) {
-						const like = await findPostLike(userId, article.id);
-						isLiked = !!like;
-					}
+        for (const child of article.children) {
+          if (
+            child.user &&
+            child.userId &&
+            !uniqueCommenters.has(child.userId)
+          ) {
+            uniqueCommenters.set(child.userId, child.user)
+            if (uniqueCommenters.size === 3) break
+          }
+        }
 
-					const { children: _children, ...articleData } = article;
+        // Check if current user has liked this article
+        let isLiked = false
+        if (userId) {
+          const like = await findPostLike(userId, article.id)
+          isLiked = !!like
+        }
 
-					return {
-						...articleData,
-						isLiked,
-						commentPreview: {
-							users: Array.from(uniqueCommenters.values()),
-							totalCount: article.replyCount,
-						},
-					};
-				}),
-			);
+        const { children: _children, ...articleData } = article
 
-			return { articles: articlesWithCommentPreview };
-		},
-		{
-			query: t.Object({
-				parentId: t.Optional(t.String()),
-				username: t.Optional(t.String()),
-				channelSlug: t.Optional(t.String()),
-			}),
-		},
-	)
-	.get("/:id", async ({ params, status, headers }) => {
-		// Optionally get userId if user is authenticated
-		let userId: string | undefined;
-		const token = headers.authorization?.split(" ")[1];
-		if (token) {
-			try {
-				userId = await verifyToken(token);
-			} catch {
-				// If token is invalid, just continue without userId
-				userId = undefined;
-			}
-		}
+        return {
+          ...articleData,
+          isLiked,
+          commentPreview: {
+            users: Array.from(uniqueCommenters.values()),
+            totalCount: article.replyCount,
+          },
+        }
+      }),
+    )
 
-		const article = await findPostById(params.id);
+    return c.json({ articles: articlesWithCommentPreview })
+  },
+)
 
-		if (!article) {
-			return status(404, {
-				error: "Article not found",
-			});
-		}
+articlesRouter.get('/articles/:id', async (c) => {
+  // Optionally get userId if user is authenticated
+  let userId: string | undefined
+  const token = c.req.header('authorization')?.split(' ')[1]
+  if (token) {
+    try {
+      userId = await verifyToken(token)
+    } catch {
+      // If token is invalid, just continue without userId
+      userId = undefined
+    }
+  }
 
-		// Check if it's actually an article (has title)
-		if (!article.title) {
-			return status(404, {
-				error: "Article not found",
-			});
-		}
+  const article = await findPostById(c.req.param('id'))
 
-		// Process article to get unique commenters (first 3)
-		const uniqueCommenters = new Map();
+  if (!article) {
+    return c.json({
+      error: 'Article not found',
+    }, 404)
+  }
 
-		for (const child of article.children) {
-			if (child.user && child.userId && !uniqueCommenters.has(child.userId)) {
-				uniqueCommenters.set(child.userId, child.user);
-				if (uniqueCommenters.size === 3) break;
-			}
-		}
+  // Check if it's actually an article (has title)
+  if (!article.title) {
+    return c.json({
+      error: 'Article not found',
+    }, 404)
+  }
 
-		// Check if current user has liked this article
-		let isLiked = false;
-		if (userId) {
-			const like = await findPostLike(userId, article.id);
-			isLiked = !!like;
-		}
+  // Process article to get unique commenters (first 3)
+  const uniqueCommenters = new Map()
 
-		const { children: _children, ...articleData } = article;
+  for (const child of article.children) {
+    if (child.user && child.userId && !uniqueCommenters.has(child.userId)) {
+      uniqueCommenters.set(child.userId, child.user)
+      if (uniqueCommenters.size === 3) break
+    }
+  }
 
-		const articleWithCommentPreview = {
-			...articleData,
-			isLiked,
-			commentPreview: {
-				users: Array.from(uniqueCommenters.values()),
-				totalCount: article.replyCount,
-			},
-		};
+  // Check if current user has liked this article
+  let isLiked = false
+  if (userId) {
+    const like = await findPostLike(userId, article.id)
+    isLiked = !!like
+  }
 
-		return { article: articleWithCommentPreview };
-	})
-	.post(
-		"/",
-		async ({ body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+  const { children: _children, ...articleData } = article
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+  const articleWithCommentPreview = {
+    ...articleData,
+    isLiked,
+    commentPreview: {
+      users: Array.from(uniqueCommenters.values()),
+      totalCount: article.replyCount,
+    },
+  }
 
-			const userId = await verifyToken(token);
-			const { title, content, channelId, parentId, images } = body;
+  return c.json({ article: articleWithCommentPreview })
+})
 
-			// Ensure title is provided for articles
-			if (!title || title.trim().length === 0) {
-				return status(400, {
-					error: "Title is required for articles",
-				});
-			}
+articlesRouter.post(
+  '/articles/',
+  zValidator('form', z.object({
+    title: z.string().min(1).max(200),
+    content: z.string().min(1).max(5000),
+    channelId: z.string().optional(),
+    parentId: z.string().optional(),
+    images: z.array(z.instanceof(File)).optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			const article = await createPost({
-				title,
-				content,
-				channelId,
-				parentId,
-				userId,
-			});
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			if (images && images.length > 0) {
-				console.log(`Uploading ${images.length} image(s) to S3...`);
+    const userId = await verifyToken(token)
+    const body = c.req.valid('form')
+    const { title, content, channelId, parentId, images } = body
 
-				const mediaRecords = await Promise.all(
-					images.map(async (image) => {
-						const url = await uploadImageToS3(image, userId);
-						console.log(`Uploaded: ${image.name} -> ${url}`);
+    // Ensure title is provided for articles
+    if (!title || title.trim().length === 0) {
+      return c.json({
+        error: 'Title is required for articles',
+      }, 400)
+    }
 
-						return createMedia(url, userId, article.id);
-					}),
-				);
+    const article = await createPost({
+      title,
+      content,
+      channelId,
+      parentId,
+      userId,
+    })
 
-				console.log(`Created ${mediaRecords.length} media record(s)`);
+    if (images && images.length > 0) {
+      console.log(`Uploading ${images.length} image(s) to S3...`)
 
-				const articleWithMedia = await findPostWithMedia(article.id);
+      const mediaRecords = await Promise.all(
+        images.map(async (image: File) => {
+          const url = await uploadImageToS3(image, userId)
+          console.log(`Uploaded: ${image.name} -> ${url}`)
 
-				return status(201, { article: articleWithMedia });
-			}
+          return createMedia(url, userId, article.id)
+        }),
+      )
 
-			return status(201, { article });
-		},
-		{
-			body: t.Object({
-				title: t.String({ minLength: 1, maxLength: 200 }),
-				content: t.String({ minLength: 1, maxLength: 5000 }),
-				channelId: t.Optional(t.String()),
-				parentId: t.Optional(t.String()),
-				images: t.Optional(t.Files()),
-			}),
-		},
-	)
-	.delete("/:id", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+      console.log(`Created ${mediaRecords.length} media record(s)`)
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+      const articleWithMedia = await findPostWithMedia(article.id)
 
-		const userId = await verifyToken(token);
-		const user = await findUserById(userId);
-		const article = await findPostById(params.id);
+      return c.json({ article: articleWithMedia }, 201)
+    }
 
-		if (!user) {
-			return status(404, {
-				error: "User not found",
-			});
-		}
+    return c.json({ article }, 201)
+  },
+)
 
-		if (!article) {
-			return status(404, {
-				error: "Article not found",
-			});
-		}
+articlesRouter.delete('/articles/:id', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		// Check if it's actually an article (has title)
-		if (!article.title) {
-			return status(404, {
-				error: "Article not found",
-			});
-		}
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-		// Allow admins to delete any article, regular users can only delete their own
-		if (user.role !== "ADMIN" && article.userId !== userId) {
-			return status(403, {
-				error: "Forbidden - You can only delete your own articles",
-			});
-		}
+  const userId = await verifyToken(token)
+  const user = await findUserById(userId)
+  const article = await findPostById(c.req.param('id'))
 
-		await deletePost(params.id);
+  if (!user) {
+    return c.json({
+      error: 'User not found',
+    }, 404)
+  }
 
-		return { message: "Article deleted successfully" };
-	})
-	.put(
-		"/:id",
-		async ({ params, body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+  if (!article) {
+    return c.json({
+      error: 'Article not found',
+    }, 404)
+  }
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+  // Check if it's actually an article (has title)
+  if (!article.title) {
+    return c.json({
+      error: 'Article not found',
+    }, 404)
+  }
 
-			const userId = await verifyToken(token);
-			const user = await findUserById(userId);
-			const article = await findPostById(params.id);
+  // Allow admins to delete any article, regular users can only delete their own
+  if (user.role !== 'ADMIN' && article.userId !== userId) {
+    return c.json({
+      error: 'Forbidden - You can only delete your own articles',
+    }, 403)
+  }
 
-			if (!user) {
-				return status(404, {
-					error: "User not found",
-				});
-			}
+  await deletePost(c.req.param('id'))
 
-			if (!article) {
-				return status(404, {
-					error: "Article not found",
-				});
-			}
+  return c.json({ message: 'Article deleted successfully' })
+})
 
-			// Check if it's actually an article (has title)
-			if (!article.title) {
-				return status(404, {
-					error: "Article not found",
-				});
-			}
+articlesRouter.put(
+  '/articles/:id',
+  zValidator('json', z.object({
+    title: z.string().min(1).max(200),
+    content: z.string().min(1).max(5000),
+    channelId: z.string().optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			// Allow admins to edit any article, regular users can only edit their own
-			if (user.role !== "ADMIN" && article.userId !== userId) {
-				return status(403, {
-					error: "Forbidden - You can only edit your own articles",
-				});
-			}
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			const { title, content, channelId } = body;
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
+    const article = await findPostById(c.req.param('id'))
+    const body = c.req.valid('json')
 
-			// Ensure title is provided for articles
-			if (!title || title.trim().length === 0) {
-				return status(400, {
-					error: "Title is required for articles",
-				});
-			}
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 404)
+    }
 
-			const updatedArticle = await updatePost(params.id, {
-				title,
-				content,
-				channelId: channelId || null,
-			});
+    if (!article) {
+      return c.json({
+        error: 'Article not found',
+      }, 404)
+    }
 
-			return { article: updatedArticle };
-		},
-		{
-			body: t.Object({
-				title: t.String({ minLength: 1, maxLength: 200 }),
-				content: t.String({ minLength: 1, maxLength: 5000 }),
-				channelId: t.Optional(t.String()),
-			}),
-		},
-	)
-	.post("/:id/like", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+    // Check if it's actually an article (has title)
+    if (!article.title) {
+      return c.json({
+        error: 'Article not found',
+      }, 404)
+    }
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+    // Allow admins to edit any article, regular users can only edit their own
+    if (user.role !== 'ADMIN' && article.userId !== userId) {
+      return c.json({
+        error: 'Forbidden - You can only edit your own articles',
+      }, 403)
+    }
 
-		const userId = await verifyToken(token);
-		const article = await findPostById(params.id);
+    const { title, content, channelId } = body
 
-		if (!article) {
-			return status(404, {
-				error: "Article not found",
-			});
-		}
+    // Ensure title is provided for articles
+    if (!title || title.trim().length === 0) {
+      return c.json({
+        error: 'Title is required for articles',
+      }, 400)
+    }
 
-		// Check if it's actually an article (has title)
-		if (!article.title) {
-			return status(404, {
-				error: "Article not found",
-			});
-		}
+    const updatedArticle = await updatePost(c.req.param('id'), {
+      title,
+      content,
+      channelId: channelId || null,
+    })
 
-		const existingLike = await findPostLike(userId, params.id);
+    return c.json({ article: updatedArticle })
+  },
+)
 
-		if (existingLike) {
-			return status(409, {
-				error: "Article already liked",
-			});
-		}
+articlesRouter.post('/articles/:id/like', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		await createPostLike(userId, params.id);
-		await incrementPostLikeCount(params.id);
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-		return status(201, { message: "Article liked successfully" });
-	})
-	.delete("/:id/like", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+  const userId = await verifyToken(token)
+  const article = await findPostById(c.req.param('id'))
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+  if (!article) {
+    return c.json({
+      error: 'Article not found',
+    }, 404)
+  }
 
-		const userId = await verifyToken(token);
-		const article = await findPostById(params.id);
+  // Check if it's actually an article (has title)
+  if (!article.title) {
+    return c.json({
+      error: 'Article not found',
+    }, 404)
+  }
 
-		if (!article) {
-			return status(404, {
-				error: "Article not found",
-			});
-		}
+  const existingLike = await findPostLike(userId, c.req.param('id'))
 
-		// Check if it's actually an article (has title)
-		if (!article.title) {
-			return status(404, {
-				error: "Article not found",
-			});
-		}
+  if (existingLike) {
+    return c.json({
+      error: 'Article already liked',
+    }, 409)
+  }
 
-		const existingLike = await findPostLike(userId, params.id);
+  await createPostLike(userId, c.req.param('id'))
+  await incrementPostLikeCount(c.req.param('id'))
 
-		if (!existingLike) {
-			return status(404, {
-				error: "Like not found",
-			});
-		}
+  return c.json({ message: 'Article liked successfully' }, 201)
+})
 
-		await deletePostLike(userId, params.id);
-		await decrementPostLikeCount(params.id);
+articlesRouter.delete('/articles/:id/like', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		return { message: "Article unliked successfully" };
-	});
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
+
+  const userId = await verifyToken(token)
+  const article = await findPostById(c.req.param('id'))
+
+  if (!article) {
+    return c.json({
+      error: 'Article not found',
+    }, 404)
+  }
+
+  // Check if it's actually an article (has title)
+  if (!article.title) {
+    return c.json({
+      error: 'Article not found',
+    }, 404)
+  }
+
+  const existingLike = await findPostLike(userId, c.req.param('id'))
+
+  if (!existingLike) {
+    return c.json({
+      error: 'Like not found',
+    }, 404)
+  }
+
+  await deletePostLike(userId, c.req.param('id'))
+  await decrementPostLikeCount(c.req.param('id'))
+
+  return c.json({ message: 'Article unliked successfully' })
+})
+
+export { articlesRouter }

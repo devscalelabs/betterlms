@@ -1,274 +1,278 @@
-import { Elysia, t } from "elysia";
 import {
-	createCourse,
-	findCourseById,
-	findCourseBySlug,
-	findCourses,
-} from "../services/courses";
-import { verifyToken } from "../services/jwt";
-import { findUserById } from "../services/users";
+  createCourse,
+  findCourseById,
+  findCourseBySlug,
+  findCourses, findUserById, verifyToken
+} from '@betterlms/core'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
 
-export const coursesRouter = new Elysia({ prefix: "/courses" })
-	.get(
-		"/",
-		async ({ query }) => {
-			const courses = await findCourses({
-				instructorId: query.instructorId,
-				category: query.category,
-				isPublished:
-					query.isPublished === "true"
-						? true
-						: query.isPublished === "false"
-							? false
-							: undefined, // Show all if not specified
-			});
+const coursesRouter = new Hono()
 
-			return { courses };
-		},
-		{
-			query: t.Object({
-				instructorId: t.Optional(t.String()),
-				category: t.Optional(t.String()),
-				isPublished: t.Optional(t.String()),
-			}),
-		},
-	)
-	.get("/:id", async ({ params, status, headers }) => {
-		const course = await findCourseById(params.id);
+coursesRouter.get(
+  '/courses/',
+  zValidator('query', z.object({
+    instructorId: z.string().optional(),
+    category: z.string().optional(),
+    isPublished: z.string().optional(),
+  })),
+  async (c) => {
+    const query = c.req.valid('query')
+    const courses = await findCourses({
+      instructorId: query.instructorId,
+      category: query.category,
+      isPublished:
+        query.isPublished === 'true'
+          ? true
+          : query.isPublished === 'false'
+            ? false
+            : undefined, // Show all if not specified
+    })
 
-		if (!course) {
-			return status(404, {
-				error: "Course not found",
-			});
-		}
+    return c.json({ courses })
+  },
+)
 
-		// Check if user is admin
-		let isAdmin = false;
-		const token = headers.authorization?.split(" ")[1];
-		if (token) {
-			try {
-				const userId = await verifyToken(token);
-				const user = await findUserById(userId);
-				isAdmin = user?.role === "ADMIN";
-			} catch {
-				// Token is invalid, treat as non-admin
-			}
-		}
+coursesRouter.get('/courses/:id', async (c) => {
+  const course = await findCourseById(c.req.param('id'))
 
-		// Only show published courses to non-admin users
-		if (!course.isPublished && !isAdmin) {
-			return status(404, {
-				error: "Course not found",
-			});
-		}
+  if (!course) {
+    return c.json({
+      error: 'Course not found',
+    }, 404)
+  }
 
-		return { course };
-	})
-	.get("/slug/:slug", async ({ params, status }) => {
-		const course = await findCourseBySlug(params.slug);
+  // Check if user is admin
+  let isAdmin = false
+  const token = c.req.header('authorization')?.split(' ')[1]
+  if (token) {
+    try {
+      const userId = await verifyToken(token)
+      const user = await findUserById(userId)
+      isAdmin = user?.role === 'ADMIN'
+    } catch {
+      // Token is invalid, treat as non-admin
+    }
+  }
 
-		if (!course) {
-			return status(404, {
-				error: "Course not found",
-			});
-		}
+  // Only show published courses to non-admin users
+  if (!course.isPublished && !isAdmin) {
+    return c.json({
+      error: 'Course not found',
+    }, 404)
+  }
 
-		// Only show published courses to non-admin users
-		if (!course.isPublished) {
-			return status(404, {
-				error: "Course not found",
-			});
-		}
+  return c.json({ course })
+})
 
-		return { course };
-	})
-	.post(
-		"/",
-		async ({ body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+coursesRouter.get('/courses/slug/:slug', async (c) => {
+  const course = await findCourseBySlug(c.req.param('slug'))
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+  if (!course) {
+    return c.json({
+      error: 'Course not found',
+    }, 404)
+  }
 
-			const userId = await verifyToken(token);
-			const user = await findUserById(userId);
+  // Only show published courses to non-admin users
+  if (!course.isPublished) {
+    return c.json({
+      error: 'Course not found',
+    }, 404)
+  }
 
-			if (!user) {
-				return status(404, {
-					error: "User not found",
-				});
-			}
+  return c.json({ course })
+})
 
-			// Only admin users can create courses
-			if (user.role !== "ADMIN") {
-				return status(403, {
-					error: "Forbidden - Only admin users can create courses",
-				});
-			}
+coursesRouter.post(
+  '/courses/',
+  zValidator('json', z.object({
+    title: z.string().min(1).max(200),
+    description: z.string().max(2000).optional(),
+    slug: z.string().min(1).max(100),
+    thumbnailUrl: z.string().optional(),
+    isPublished: z.boolean().optional(),
+    isPrivate: z.boolean().optional(),
+    price: z.number().min(0).optional(),
+    currency: z.string().min(3).max(3).optional(),
+    tags: z.array(z.string()).optional(),
+    category: z.string().max(100).optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			const {
-				title,
-				description,
-				slug,
-				thumbnailUrl,
-				isPublished,
-				isPrivate,
-				price,
-				currency,
-				tags,
-				category,
-			} = body;
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			// Check if slug already exists
-			const existingCourse = await findCourseBySlug(slug);
-			if (existingCourse) {
-				return status(409, {
-					error: "Course with this slug already exists",
-				});
-			}
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
 
-			const course = await createCourse({
-				title,
-				description: description || null,
-				slug,
-				thumbnailUrl: thumbnailUrl || null,
-				isPublished: isPublished || false,
-				isPrivate: isPrivate || false,
-				price: price || null,
-				currency: currency || "USD",
-				tags: tags || [],
-				category: category || null,
-				instructorId: userId,
-			});
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 404)
+    }
 
-			return status(201, { course });
-		},
-		{
-			body: t.Object({
-				title: t.String({ minLength: 1, maxLength: 200 }),
-				description: t.Optional(t.String({ maxLength: 2000 })),
-				slug: t.String({ minLength: 1, maxLength: 100 }),
-				thumbnailUrl: t.Optional(t.String()),
-				isPublished: t.Optional(t.Boolean()),
-				isPrivate: t.Optional(t.Boolean()),
-				price: t.Optional(t.Number({ minimum: 0 })),
-				currency: t.Optional(t.String({ minLength: 3, maxLength: 3 })),
-				tags: t.Optional(t.Array(t.String())),
-				category: t.Optional(t.String({ maxLength: 100 })),
-			}),
-		},
-	)
-	.post(
-		"/:courseId/sections",
-		async ({ params, body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+    // Only admin users can create courses
+    if (user.role !== 'ADMIN') {
+      return c.json({
+        error: 'Forbidden - Only admin users can create courses',
+      }, 403)
+    }
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+    const body = c.req.valid('json')
+    const {
+      title,
+      description,
+      slug,
+      thumbnailUrl,
+      isPublished,
+      isPrivate,
+      price,
+      currency,
+      tags,
+      category,
+    } = body
 
-			const userId = await verifyToken(token);
-			const user = await findUserById(userId);
+    // Check if slug already exists
+    const existingCourse = await findCourseBySlug(slug)
+    if (existingCourse) {
+      return c.json({
+        error: 'Course with this slug already exists',
+      }, 409)
+    }
 
-			if (!user) {
-				return status(404, {
-					error: "User not found",
-				});
-			}
+    const course = await createCourse({
+      title,
+      description: description || null,
+      slug,
+      thumbnailUrl: thumbnailUrl || null,
+      isPublished: isPublished || false,
+      isPrivate: isPrivate || false,
+      price: price || null,
+      currency: currency || 'USD',
+      tags: tags || [],
+      category: category || null,
+      instructorId: userId,
+    })
 
-			// Only admin users can create sections
-			if (user.role !== "ADMIN") {
-				return status(403, {
-					error: "Forbidden - Only admin users can create sections",
-				});
-			}
+    return c.json({ course }, 201)
+  },
+)
 
-			const { title, order } = body;
+coursesRouter.post(
+  '/courses/:courseId/sections',
+  zValidator('json', z.object({
+    title: z.string().min(1).max(200),
+    order: z.number().optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			// Create section using Prisma directly
-			const { prisma } = await import("@betterlms/database");
-			const section = await prisma.section.create({
-				data: {
-					title,
-					order: order || 0,
-					courseId: params.courseId,
-				},
-				include: {
-					lessons: {
-						orderBy: {
-							order: "asc",
-						},
-					},
-				},
-			});
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			return status(201, { section });
-		},
-		{
-			body: t.Object({
-				title: t.String({ minLength: 1, maxLength: 200 }),
-				order: t.Optional(t.Number()),
-			}),
-		},
-	)
-	.post(
-		"/:courseId/sections/:sectionId/lessons",
-		async ({ params, body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 404)
+    }
 
-			const userId = await verifyToken(token);
-			const user = await findUserById(userId);
+    // Only admin users can create sections
+    if (user.role !== 'ADMIN') {
+      return c.json({
+        error: 'Forbidden - Only admin users can create sections',
+      }, 403)
+    }
 
-			if (!user) {
-				return status(404, {
-					error: "User not found",
-				});
-			}
+    const body = c.req.valid('json')
+    const { title, order } = body
 
-			// Only admin users can create lessons
-			if (user.role !== "ADMIN") {
-				return status(403, {
-					error: "Forbidden - Only admin users can create lessons",
-				});
-			}
+    // Create section using Prisma directly
+    const { prisma } = await import('@betterlms/database')
+    const section = await prisma.section.create({
+      data: {
+        title,
+        order: order || 0,
+        courseId: c.req.param('courseId'),
+      },
+      include: {
+        lessons: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    })
 
-			const { title, content, order, type, videoUrl, isFree } = body;
+    return c.json({ section }, 201)
+  },
+)
 
-			// Create lesson using Prisma directly
-			const { prisma } = await import("@betterlms/database");
-			const lesson = await prisma.lesson.create({
-				data: {
-					title,
-					content: content || null,
-					order: order || 0,
-					type: type || "TEXT",
-					videoUrl: videoUrl || null,
-					isFree: isFree || false,
-					sectionId: params.sectionId,
-				},
-			});
+coursesRouter.post(
+  '/courses/:courseId/sections/:sectionId/lessons',
+  zValidator('json', z.object({
+    title: z.string().min(1).max(200),
+    content: z.string().optional(),
+    order: z.number().optional(),
+    type: z.enum(['VIDEO', 'TEXT']).optional(),
+    videoUrl: z.string().optional(),
+    isFree: z.boolean().optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			return status(201, { lesson });
-		},
-		{
-			body: t.Object({
-				title: t.String({ minLength: 1, maxLength: 200 }),
-				content: t.Optional(t.String()),
-				order: t.Optional(t.Number()),
-				type: t.Optional(t.Union([t.Literal("VIDEO"), t.Literal("TEXT")])),
-				videoUrl: t.Optional(t.String()),
-				isFree: t.Optional(t.Boolean()),
-			}),
-		},
-	);
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
+
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
+
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 404)
+    }
+
+    // Only admin users can create lessons
+    if (user.role !== 'ADMIN') {
+      return c.json({
+        error: 'Forbidden - Only admin users can create lessons',
+      }, 403)
+    }
+
+    const body = c.req.valid('json')
+    const { title, content, order, type, videoUrl, isFree } = body
+
+    // Create lesson using Prisma directly
+    const { prisma } = await import('@betterlms/database')
+    const lesson = await prisma.lesson.create({
+      data: {
+        title,
+        content: content || null,
+        order: order || 0,
+        type: type || 'TEXT',
+        videoUrl: videoUrl || null,
+        isFree: isFree || false,
+        sectionId: c.req.param('sectionId'),
+      },
+    })
+
+    return c.json({ lesson }, 201)
+  },
+)
+
+export { coursesRouter }

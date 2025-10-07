@@ -1,9 +1,15 @@
 {
-	"extends": "@betterlms/typescript/base.json",
-	"compilerOptions": {
-		"strict": true,
-		"outDir": "./dist"
-	},
-	"include": ["src/**/*.ts", "../worker/src/extract-mentions.ts"],
-	"exclude": ["node_modules", "dist"]
+  "extends": "@betterlms/typescript/base.json",
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "./dist"
+  },
+  "include": [
+    "src/**/*.ts",
+    "../worker/src/extract-mentions.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

@@ -1,70 +1,74 @@
-import { Elysia, t } from "elysia";
-import { uploadImageToS3 } from "../../utils/upload-files";
-import { verifyToken } from "../services/jwt";
+import { verifyToken } from '@betterlms/core'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
+import { uploadImageToS3 } from '../../utils/upload-files'
 
-export const mediaRouter = new Elysia({ prefix: "/media" }).post(
-	"/",
-	async ({ body, headers, status }) => {
-		console.log("Media upload request received");
-		console.log("Headers:", headers);
-		console.log("Body keys:", Object.keys(body || {}));
+const mediaRouter = new Hono()
 
-		const token = headers.authorization?.split(" ")[1];
+mediaRouter.post(
+  '/media',
+  zValidator('form', z.object({
+    images: z.array(z.instanceof(File)),
+  })),
+  async (c) => {
+    console.log('Media upload request received')
+    console.log('Body keys:', Object.keys(c.req.valid('form') || {}))
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-		const userId = await verifyToken(token);
-		const { images } = body;
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-		console.log(
-			"Images received:",
-			images
-				? images.map((f) => ({ name: f.name, type: f.type, size: f.size }))
-				: "No images",
-		);
+    const userId = await verifyToken(token)
+    const body = c.req.valid('form')
+    const { images } = body
 
-		if (!images || images.length === 0) {
-			return status(400, {
-				error: "No image provided",
-			});
-		}
+    console.log(
+      'Images received:',
+      images
+        ? images.map((f: File) => ({ name: f.name, type: f.type, size: f.size }))
+        : 'No images',
+    )
 
-		// Take the first image
-		const firstImage = images[0];
+    if (!images || images.length === 0) {
+      return c.json({
+        error: 'No image provided',
+      }, 400)
+    }
 
-		if (!firstImage) {
-			return status(400, {
-				error: "Invalid image provided",
-			});
-		}
+    // Take first image
+    const firstImage = images[0]
 
-		try {
-			console.log(`Uploading image: ${firstImage.name} for user: ${userId}`);
+    if (!firstImage) {
+      return c.json({
+        error: 'Invalid image provided',
+      }, 400)
+    }
 
-			// Upload to S3
-			const url = await uploadImageToS3(firstImage, userId, "posts");
-			console.log(`Uploaded: ${firstImage.name} -> ${url}`);
+    try {
+      console.log(`Uploading image: ${firstImage.name} for user: ${userId}`)
 
-			return status(201, {
-				url,
-				filename: firstImage.name,
-				size: firstImage.size,
-				type: firstImage.type,
-			});
-		} catch (error) {
-			console.error("Failed to upload image:", error);
-			return status(500, {
-				error: "Failed to upload image",
-			});
-		}
-	},
-	{
-		body: t.Object({
-			images: t.Files(),
-		}),
-	},
-);
+      // Upload to S3
+      const url = await uploadImageToS3(firstImage, userId, 'posts')
+      console.log(`Uploaded: ${firstImage.name} -> ${url}`)
+
+      return c.json({
+        url,
+        filename: firstImage.name,
+        size: firstImage.size,
+        type: firstImage.type,
+      }, 201)
+    } catch (error) {
+      console.error('Failed to upload image:', error)
+      return c.json({
+        error: 'Failed to upload image',
+      }, 500)
+    }
+  },
+)
+
+export { mediaRouter }

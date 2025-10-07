@@ -1,73 +1,78 @@
-import { Elysia, t } from "elysia";
-import ogs from "open-graph-scraper";
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import ogs from 'open-graph-scraper'
+import { z } from 'zod'
 
 export interface OpenGraphData {
-	title: string;
-	description: string;
-	image: string;
-	url: string;
+  title: string
+  description: string
+  image: string
+  url: string
 }
 
 async function fetchOpenGraphData(url: string): Promise<OpenGraphData | null> {
-	try {
-		const { result } = await ogs({ url });
+  try {
+    const { result } = await ogs({ url })
 
-		if (!result.success) {
-			return null;
-		}
+    if (!result.success) {
+      return null
+    }
 
-		const ogTitle = result.ogTitle || result.twitterTitle || "";
-		const ogDescription =
-			result.ogDescription || result.twitterDescription || "";
-		const ogImage =
-			result.ogImage?.[0]?.url || result.twitterImage?.[0]?.url || "";
-		const ogUrl = result.ogUrl || url;
+    const ogTitle = result.ogTitle || result.twitterTitle || ''
+    const ogDescription =
+      result.ogDescription || result.twitterDescription || ''
+    const ogImage =
+      result.ogImage?.[0]?.url || result.twitterImage?.[0]?.url || ''
+    const ogUrl = result.ogUrl || url
 
-		return {
-			title: ogTitle,
-			description: ogDescription,
-			image: ogImage,
-			url: ogUrl,
-		};
-	} catch (error) {
-		console.error("Error fetching OG data:", error);
-		return null;
-	}
+    return {
+      title: ogTitle,
+      description: ogDescription,
+      image: ogImage,
+      url: ogUrl,
+    }
+  } catch (error) {
+    console.error('Error fetching OG data:', error)
+    return null
+  }
 }
 
-export const linkPreviewRouter = new Elysia({ prefix: "/link-preview" }).get(
-	"/",
-	async ({ query, status }) => {
-		const { url } = query;
+const linkPreviewRouter = new Hono()
 
-		if (!url) {
-			return status(400, {
-				error: "URL parameter is required",
-			});
-		}
+linkPreviewRouter.get(
+  '/link-preview',
+  zValidator('query', z.object({
+    url: z.string(),
+  })),
+  async (c) => {
+    const query = c.req.valid('query')
+    const { url } = query
 
-		// Validate URL format
-		try {
-			new URL(url);
-		} catch {
-			return status(400, {
-				error: "Invalid URL format",
-			});
-		}
+    if (!url) {
+      return c.json({
+        error: 'URL parameter is required',
+      }, 400)
+    }
 
-		const ogData = await fetchOpenGraphData(url);
+    // Validate URL format
+    try {
+      new URL(url)
+    } catch {
+      return c.json({
+        error: 'Invalid URL format',
+      }, 400)
+    }
 
-		if (!ogData) {
-			return status(404, {
-				error: "Failed to fetch preview data",
-			});
-		}
+    const ogData = await fetchOpenGraphData(url)
 
-		return { preview: ogData };
-	},
-	{
-		query: t.Object({
-			url: t.String(),
-		}),
-	},
-);
+    if (!ogData) {
+      return c.json({
+        error: 'Failed to fetch preview data',
+      }, 404)
+    }
+
+    return c.json({ preview: ogData })
+  },
+)
+
+export { linkPreviewRouter }
