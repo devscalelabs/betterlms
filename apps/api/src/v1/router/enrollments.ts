@@ -1,306 +1,303 @@
-import { Elysia, t } from "elysia";
-import { findCourseById } from "../services/courses";
 import {
-	createEnrollment,
-	deleteEnrollment,
-	findEnrollmentById,
-	findEnrollmentByUserAndCourse,
-	findEnrollments,
-	updateEnrollmentProgress,
-	updateEnrollmentStatus,
-} from "../services/enrollments";
-import { verifyToken } from "../services/jwt";
-import { findUserById } from "../services/users";
+  createEnrollment,
+  deleteEnrollment,
+  findCourseById,
+  findEnrollmentById,
+  findEnrollmentByUserAndCourse,
+  findEnrollments,
+  findUserById,
+  updateEnrollmentProgress,
+  updateEnrollmentStatus,
+  verifyToken,
+} from '@betterlms/core'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
 
-export const enrollmentsRouter = new Elysia({ prefix: "/enrollments" })
-	.get(
-		"/",
-		async ({ query, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+const enrollmentsRouter = new Hono()
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+enrollmentsRouter.get(
+  '/enrollments',
+  zValidator('query', z.object({
+    userId: z.string().optional(),
+    courseId: z.string().optional(),
+    status: z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED', 'SUSPENDED']).optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			const userId = await verifyToken(token);
-			const user = await findUserById(userId);
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			if (!user) {
-				return status(404, {
-					error: "User not found",
-				});
-			}
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
 
-			// Only admin users can view all enrollments
-			if (user.role !== "ADMIN") {
-				return status(403, {
-					error: "Forbidden - Only admin users can view all enrollments",
-				});
-			}
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 404)
+    }
 
-			const enrollments = await findEnrollments({
-				userId: query.userId,
-				courseId: query.courseId,
-				status: query.status as
-					| "ACTIVE"
-					| "COMPLETED"
-					| "CANCELLED"
-					| "SUSPENDED",
-			});
+    // Only admin users can view all enrollments
+    if (user.role !== 'ADMIN') {
+      return c.json({
+        error: 'Forbidden - Only admin users can view all enrollments',
+      }, 403)
+    }
 
-			return { enrollments };
-		},
-		{
-			query: t.Object({
-				userId: t.Optional(t.String()),
-				courseId: t.Optional(t.String()),
-				status: t.Optional(t.String()),
-			}),
-		},
-	)
-	.get("/my-enrollments", async ({ headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+    const query = c.req.valid('query')
+    const enrollments = await findEnrollments({
+      ...(query.userId && { userId: query.userId }),
+      ...(query.courseId && { courseId: query.courseId }),
+      ...(query.status && { status: query.status }),
+    })
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+    return c.json({ enrollments })
+  },
+)
 
-		const userId = await verifyToken(token);
-		const enrollments = await findEnrollments({ userId });
+enrollmentsRouter.get('/enrollments/my-enrollments', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		return { enrollments };
-	})
-	.get("/:id", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+  const userId = await verifyToken(token)
+  const enrollments = await findEnrollments({ userId })
 
-		const userId = await verifyToken(token);
-		const user = await findUserById(userId);
+  return c.json({ enrollments })
+})
 
-		if (!user) {
-			return status(404, {
-				error: "User not found",
-			});
-		}
+enrollmentsRouter.get('/enrollments/:id', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		const enrollment = await findEnrollmentById(params.id);
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-		if (!enrollment) {
-			return status(404, {
-				error: "Enrollment not found",
-			});
-		}
+  const userId = await verifyToken(token)
+  const user = await findUserById(userId)
 
-		// Users can only view their own enrollments unless they're admin
-		if (enrollment.userId !== userId && user.role !== "ADMIN") {
-			return status(403, {
-				error: "Forbidden - You can only view your own enrollments",
-			});
-		}
+  if (!user) {
+    return c.json({
+      error: 'User not found',
+    }, 404)
+  }
 
-		return { enrollment };
-	})
-	.post(
-		"/",
-		async ({ body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+  const enrollment = await findEnrollmentById(c.req.param('id'))
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+  if (!enrollment) {
+    return c.json({
+      error: 'Enrollment not found',
+    }, 404)
+  }
 
-			const userId = await verifyToken(token);
-			const { courseId, amountPaid, currency, paymentMethod, transactionId } =
-				body;
+  // Users can only view their own enrollments unless they're admin
+  if (enrollment.userId !== userId && user.role !== 'ADMIN') {
+    return c.json({
+      error: 'Forbidden - You can only view your own enrollments',
+    }, 403)
+  }
 
-			// Check if course exists
-			const course = await findCourseById(courseId);
-			if (!course) {
-				return status(404, {
-					error: "Course not found",
-				});
-			}
+  return c.json({ enrollment })
+})
 
-			// Check if course is published
-			if (!course.isPublished) {
-				return status(400, {
-					error: "Cannot enroll in unpublished course",
-				});
-			}
+enrollmentsRouter.post(
+  '/enrollments',
+  zValidator('json', z.object({
+    courseId: z.string(),
+    amountPaid: z.number().min(0).optional(),
+    currency: z.string().min(3).max(3).optional(),
+    paymentMethod: z.string().optional(),
+    transactionId: z.string().optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			// Check if user is already enrolled
-			const existingEnrollment = await findEnrollmentByUserAndCourse(
-				userId,
-				courseId,
-			);
-			if (existingEnrollment) {
-				return status(409, {
-					error: "Already enrolled in this course",
-				});
-			}
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			const enrollment = await createEnrollment({
-				userId,
-				courseId,
-				amountPaid,
-				currency,
-				paymentMethod,
-				transactionId,
-			});
+    const userId = await verifyToken(token)
+    const body = c.req.valid('json')
+    const { courseId, amountPaid, currency, paymentMethod, transactionId } = body
 
-			return status(201, { enrollment });
-		},
-		{
-			body: t.Object({
-				courseId: t.String(),
-				amountPaid: t.Optional(t.Number({ minimum: 0 })),
-				currency: t.Optional(t.String({ minLength: 3, maxLength: 3 })),
-				paymentMethod: t.Optional(t.String()),
-				transactionId: t.Optional(t.String()),
-			}),
-		},
-	)
-	.put(
-		"/:id/status",
-		async ({ params, body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+    // Check if course exists
+    const course = await findCourseById(courseId)
+    if (!course) {
+      return c.json({
+        error: 'Course not found',
+      }, 404)
+    }
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+    // Check if course is published
+    if (!course.isPublished) {
+      return c.json({
+        error: 'Cannot enroll in unpublished course',
+      }, 400)
+    }
 
-			const userId = await verifyToken(token);
-			const user = await findUserById(userId);
+    // Check if user is already enrolled
+    const existingEnrollment = await findEnrollmentByUserAndCourse(
+      userId,
+      courseId,
+    )
+    if (existingEnrollment) {
+      return c.json({
+        error: 'Already enrolled in this course',
+      }, 409)
+    }
 
-			if (!user) {
-				return status(404, {
-					error: "User not found",
-				});
-			}
+    const enrollment = await createEnrollment({
+      userId,
+      courseId,
+      ...(amountPaid !== undefined && { amountPaid }),
+      ...(currency && { currency }),
+      ...(paymentMethod && { paymentMethod }),
+      ...(transactionId && { transactionId }),
+    })
 
-			// Only admin users can update enrollment status
-			if (user.role !== "ADMIN") {
-				return status(403, {
-					error: "Forbidden - Only admin users can update enrollment status",
-				});
-			}
+    return c.json({ enrollment }, 201)
+  },
+)
 
-			const enrollment = await findEnrollmentById(params.id);
+enrollmentsRouter.put(
+  '/enrollments/:id/status',
+  zValidator('json', z.object({
+    status: z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED', 'SUSPENDED']),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			if (!enrollment) {
-				return status(404, {
-					error: "Enrollment not found",
-				});
-			}
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			const updatedEnrollment = await updateEnrollmentStatus(
-				params.id,
-				body.status,
-			);
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
 
-			return { enrollment: updatedEnrollment };
-		},
-		{
-			body: t.Object({
-				status: t.Union([
-					t.Literal("ACTIVE"),
-					t.Literal("COMPLETED"),
-					t.Literal("CANCELLED"),
-					t.Literal("SUSPENDED"),
-				]),
-			}),
-		},
-	)
-	.put(
-		"/:id/progress",
-		async ({ params, body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 404)
+    }
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+    // Only admin users can update enrollment status
+    if (user.role !== 'ADMIN') {
+      return c.json({
+        error: 'Forbidden - Only admin users can update enrollment status',
+      }, 403)
+    }
 
-			const userId = await verifyToken(token);
-			const enrollment = await findEnrollmentById(params.id);
+    const enrollment = await findEnrollmentById(c.req.param('id'))
 
-			if (!enrollment) {
-				return status(404, {
-					error: "Enrollment not found",
-				});
-			}
+    if (!enrollment) {
+      return c.json({
+        error: 'Enrollment not found',
+      }, 404)
+    }
 
-			// Users can only update their own enrollment progress
-			if (enrollment.userId !== userId) {
-				return status(403, {
-					error: "Forbidden - You can only update your own enrollment progress",
-				});
-			}
+    const body = c.req.valid('json')
+    const updatedEnrollment = await updateEnrollmentStatus(
+      c.req.param('id'),
+      body.status,
+    )
 
-			const { progressPercentage, currentLessonId } = body;
+    return c.json({ enrollment: updatedEnrollment })
+  },
+)
 
-			const updatedEnrollment = await updateEnrollmentProgress(params.id, {
-				progressPercentage,
-				currentLessonId,
-			});
+enrollmentsRouter.put(
+  '/enrollments/:id/progress',
+  zValidator('json', z.object({
+    progressPercentage: z.number().min(0).max(100).optional(),
+    currentLessonId: z.string().optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			return { enrollment: updatedEnrollment };
-		},
-		{
-			body: t.Object({
-				progressPercentage: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
-				currentLessonId: t.Optional(t.String()),
-			}),
-		},
-	)
-	.delete("/:id", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+    const userId = await verifyToken(token)
+    const enrollment = await findEnrollmentById(c.req.param('id'))
 
-		const userId = await verifyToken(token);
-		const user = await findUserById(userId);
+    if (!enrollment) {
+      return c.json({
+        error: 'Enrollment not found',
+      }, 404)
+    }
 
-		if (!user) {
-			return status(404, {
-				error: "User not found",
-			});
-		}
+    // Users can only update their own enrollment progress
+    if (enrollment.userId !== userId) {
+      return c.json({
+        error: 'Forbidden - You can only update your own enrollment progress',
+      }, 403)
+    }
 
-		const enrollment = await findEnrollmentById(params.id);
+    const body = c.req.valid('json')
+    const { progressPercentage, currentLessonId } = body
 
-		if (!enrollment) {
-			return status(404, {
-				error: "Enrollment not found",
-			});
-		}
+    const updatedEnrollment = await updateEnrollmentProgress(c.req.param('id'), {
+      ...(progressPercentage !== undefined && { progressPercentage }),
+      ...(currentLessonId && { currentLessonId }),
+    })
 
-		// Users can only delete their own enrollments unless they're admin
-		if (enrollment.userId !== userId && user.role !== "ADMIN") {
-			return status(403, {
-				error: "Forbidden - You can only delete your own enrollments",
-			});
-		}
+    return c.json({ enrollment: updatedEnrollment })
+  },
+)
 
-		await deleteEnrollment(params.id);
+enrollmentsRouter.delete('/enrollments/:id', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		return { message: "Enrollment deleted successfully" };
-	});
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
+
+  const userId = await verifyToken(token)
+  const user = await findUserById(userId)
+
+  if (!user) {
+    return c.json({
+      error: 'User not found',
+    }, 404)
+  }
+
+  const enrollment = await findEnrollmentById(c.req.param('id'))
+
+  if (!enrollment) {
+    return c.json({
+      error: 'Enrollment not found',
+    }, 404)
+  }
+
+  // Users can only delete their own enrollments unless they're admin
+  if (enrollment.userId !== userId && user.role !== 'ADMIN') {
+    return c.json({
+      error: 'Forbidden - You can only delete your own enrollments',
+    }, 403)
+  }
+
+  await deleteEnrollment(c.req.param('id'))
+
+  return c.json({ message: 'Enrollment deleted successfully' })
+})
+
+export { enrollmentsRouter }

@@ -1,67 +1,72 @@
-import { Elysia, t } from "elysia";
-import { verifyToken } from "../services/jwt";
 import {
-	findNotificationsByRecipient,
-	markAllNotificationsAsRead,
-	markNotificationAsRead,
-} from "../services/notifications";
+  findNotificationsByRecipient,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+  verifyToken,
+} from '@betterlms/core'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
 
-export const notificationsRouter = new Elysia({ prefix: "/notifications" })
-	.get("/", async ({ headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+const notificationsRouter = new Hono()
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+notificationsRouter.get('/notifications/', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		const userId = await verifyToken(token);
-		const notifications = await findNotificationsByRecipient(userId);
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-		return { notifications };
-	})
-	.put(
-		"/:id/read",
-		async ({ params, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+  const userId = await verifyToken(token)
+  const notifications = await findNotificationsByRecipient(userId)
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+  return c.json({ notifications })
+})
 
-			const userId = await verifyToken(token);
-			const result = await markNotificationAsRead(params.id, userId);
+notificationsRouter.put(
+  '/notifications/:id/read',
+  zValidator('param', z.object({
+    id: z.string(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			if (result.count === 0) {
-				return status(404, {
-					error: "Notification not found or already marked as read",
-				});
-			}
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			return { message: "Notification marked as read" };
-		},
-		{
-			params: t.Object({
-				id: t.String(),
-			}),
-		},
-	)
-	.put("/read-all", async ({ headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+    const userId = await verifyToken(token)
+    const result = await markNotificationAsRead(c.req.param('id'), userId)
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+    if (result.count === 0) {
+      return c.json({
+        error: 'Notification not found or already marked as read',
+      }, 404)
+    }
 
-		const userId = await verifyToken(token);
-		const result = await markAllNotificationsAsRead(userId);
+    return c.json({ message: 'Notification marked as read' })
+  },
+)
 
-		return {
-			message: `Marked ${result.count} notifications as read`,
-		};
-	});
+notificationsRouter.put('/notifications/read-all', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
+
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
+
+  const userId = await verifyToken(token)
+  const result = await markAllNotificationsAsRead(userId)
+
+  return c.json({
+    message: `Marked ${result.count} notifications as read`,
+  })
+})
+
+export { notificationsRouter }

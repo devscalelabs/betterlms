@@ -1,157 +1,157 @@
-import { Elysia, t } from "elysia";
-import { sendMagicLinkEmail } from "../services/emails";
-import { generateToken } from "../services/jwt";
 import {
-	createMagicLink,
-	findUnusedMagicLink,
-	generateCode,
-	markMagicLinkAsUsed,
-} from "../services/magic-link";
-import {
-	findUserByEmail,
-	findUserByEmailWithPassword,
-	validatePassword,
-} from "../services/users";
+  createMagicLink,
+  findUnusedMagicLink,
+  findUserByEmail,
+  findUserByEmailWithPassword,
+  generateCode, generateToken,
+  markMagicLinkAsUsed, sendMagicLinkEmail,
+  validatePassword,
+} from '@betterlms/core'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
 
-export const authRouter = new Elysia({ prefix: "/auth" })
-	.post(
-		"/login",
-		async ({ body, status }) => {
-			const { email, password } = body;
+const authRouter = new Hono()
 
-			// If password is provided, use password authentication
-			if (password) {
-				const user = await findUserByEmailWithPassword(email);
+authRouter.post(
+  '/auth/login',
+  zValidator('json', z.object({
+    email: z.string().email(),
+    password: z.string().optional(),
+  })),
+  async (c) => {
+    const body = c.req.valid('json')
+    const { email, password } = body
 
-				if (!user) {
-					return status(401, {
-						error: "Invalid email or password",
-					});
-				}
+    // If password is provided, use password authentication
+    if (password) {
+      const user = await findUserByEmailWithPassword(email)
 
-				if (!user.password) {
-					return status(401, {
-						error:
-							"Password authentication not available for this account. Please use magic link login.",
-					});
-				}
+      if (!user) {
+        return c.json({
+          error: 'Invalid email or password',
+        }, 401)
+      }
 
-				const isValidPassword = await validatePassword(password, user.password);
-				if (!isValidPassword) {
-					return status(401, {
-						error: "Invalid email or password",
-					});
-				}
+      if (!user.password) {
+        return c.json({
+          error:
+            'Password authentication not available for this account. Please use magic link login.',
+        }, 401)
+      }
 
-				if (user.isSuspended) {
-					return status(403, {
-						error:
-							"Your account has been suspended. Please contact support for assistance.",
-					});
-				}
+      const isValidPassword = await validatePassword(password, user.password)
+      if (!isValidPassword) {
+        return c.json({
+          error: 'Invalid email or password',
+        }, 401)
+      }
 
-				const token = await generateToken(user.id);
+      if (user.isSuspended) {
+        return c.json({
+          error:
+            'Your account has been suspended. Please contact support for assistance.',
+        }, 403)
+      }
 
-				return status(200, {
-					token,
-					user: {
-						id: user.id,
-						email: user.email,
-						name: user.name,
-						username: user.username,
-						role: user.role,
-					},
-				});
-			}
+      const token = await generateToken(user.id)
 
-			// If no password provided, use magic link authentication
-			const user = await findUserByEmail(email);
+      return c.json({
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          username: user.username,
+          role: user.role,
+        },
+      }, 200)
+    }
 
-			if (!user) {
-				return status(400, {
-					error: "User not found. Please contact admin to create an account.",
-				});
-			}
+    // If no password provided, use magic link authentication
+    const user = await findUserByEmail(email)
 
-			const code = generateCode();
-			const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    if (!user) {
+      return c.json({
+        error: 'User not found. Please contact admin to create an account.',
+      }, 400)
+    }
 
-			await createMagicLink(email, code, expiresAt);
+    const code = generateCode()
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
 
-			const magicLinkUrl = `${process.env.FRONTEND_URL}/auth/verify?code=${code}&email=${encodeURIComponent(email)}`;
+    await createMagicLink(email, code, expiresAt)
 
-			try {
-				await sendMagicLinkEmail(email, code, magicLinkUrl);
+    const magicLinkUrl = `${process.env.FRONTEND_URL}/auth/verify?code=${code}&email=${encodeURIComponent(email)}`
 
-				return status(200, {
-					message: "Magic link sent to your email",
-				});
-			} catch (error) {
-				console.error("Failed to send magic link email:", error);
-				return status(500, {
-					error: "Failed to send email. Please try again later.",
-				});
-			}
-		},
-		{
-			body: t.Object({
-				email: t.String({ format: "email" }),
-				password: t.Optional(t.String({ minLength: 1 })),
-			}),
-		},
-	)
-	.post(
-		"/verify",
-		async ({ body, status }) => {
-			const { email, code } = body;
+    try {
+      await sendMagicLinkEmail(email, code, magicLinkUrl)
 
-			const magicLink = await findUnusedMagicLink(email, code);
+      return c.json({
+        message: 'Magic link sent to your email',
+      }, 200)
+    } catch (error) {
+      console.error('Failed to send magic link email:', error)
+      return c.json({
+        error: 'Failed to send email. Please try again later.',
+      }, 500)
+    }
+  },
+)
 
-			if (!magicLink) {
-				return status(401, {
-					error: "Invalid or expired code",
-				});
-			}
+authRouter.post(
+  '/auth/verify',
+  zValidator('json', z.object({
+    email: z.string().email(),
+    code: z.string().min(6).max(6),
+  })),
+  async (c) => {
+    const body = c.req.valid('json')
+    const { email, code } = body
 
-			if (magicLink.expiresAt < new Date()) {
-				return status(401, {
-					error: "Code has expired. Please request a new one.",
-				});
-			}
+    const magicLink = await findUnusedMagicLink(email, code)
 
-			await markMagicLinkAsUsed(magicLink.id);
+    if (!magicLink) {
+      return c.json({
+        error: 'Invalid or expired code',
+      }, 401)
+    }
 
-			const user = await findUserByEmail(email);
+    if (magicLink.expiresAt < new Date()) {
+      return c.json({
+        error: 'Code has expired. Please request a new one.',
+      }, 401)
+    }
 
-			if (!user) {
-				return status(400, {
-					error: "User not found",
-				});
-			}
+    await markMagicLinkAsUsed(magicLink.id)
 
-			if (user.isSuspended) {
-				return status(403, {
-					error:
-						"Your account has been suspended. Please contact support for assistance.",
-				});
-			}
+    const user = await findUserByEmail(email)
 
-			const token = await generateToken(user.id);
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 400)
+    }
 
-			return status(200, {
-				token,
-				user: {
-					id: user.id,
-					email: user.email,
-					name: user.name,
-					username: user.username,
-				},
-			});
-		},
-		{
-			body: t.Object({
-				email: t.String({ format: "email" }),
-				code: t.String({ minLength: 6, maxLength: 6 }),
-			}),
-		},
-	);
+    if (user.isSuspended) {
+      return c.json({
+        error:
+          'Your account has been suspended. Please contact support for assistance.',
+      }, 403)
+    }
+
+    const token = await generateToken(user.id)
+
+    return c.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        username: user.username,
+      },
+    }, 200)
+  },
+)
+
+export { authRouter }

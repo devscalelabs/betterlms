@@ -1,0 +1,38 @@
+{
+  "name": "@betterlms/core",
+  "version": "1.0.0",
+  "description": "Core business logic and services for BetterLMS",
+  "type": "module",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./channels": "./src/channels.ts",
+    "./courses": "./src/courses.ts",
+    "./emails": "./src/emails.ts",
+    "./enrollments": "./src/enrollments.ts",
+    "./follows": "./src/follows.ts",
+    "./jwt": "./src/jwt.ts",
+    "./lessons": "./src/lessons.ts",
+    "./magic-link": "./src/magic-link.ts",
+    "./notifications": "./src/notifications.ts",
+    "./posts": "./src/posts.ts",
+    "./queue": "./src/queue.ts",
+    "./users": "./src/users.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@betterlms/database": "workspace:*",
+    "@betterlms/email": "workspace:*",
+    "bcrypt": "^6.0.0",
+    "bullmq": "^5.61.0",
+    "ioredis": "^5.8.1",
+    "jose": "^6.1.0"
+  },
+  "devDependencies": {
+    "@betterlms/typescript": "workspace:*",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^24.6.2",
+    "typescript": "^5.9.3"
+  }
+}

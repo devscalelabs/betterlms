@@ -1,116 +1,124 @@
-import { Elysia, t } from "elysia";
 import {
-	addChannelMember,
-	createChannel,
-	findChannelById,
-	findChannelMember,
-	findPublicChannels,
-	removeChannelMember,
-} from "../services/channels";
-import { verifyToken } from "../services/jwt";
+  addChannelMember,
+  createChannel,
+  findChannelById,
+  findChannelMember,
+  findPublicChannels,
+  removeChannelMember,
+  verifyToken,
+} from '@betterlms/core'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
 
-export const channelsRouter = new Elysia({ prefix: "/channels" })
-	.get("/", async () => {
-		const channels = await findPublicChannels();
-		return { channels };
-	})
-	.post(
-		"/",
-		async ({ body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+const channelsRouter = new Hono()
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+channelsRouter.get('/channels/', async (c) => {
+  const channels = await findPublicChannels()
+  return c.json({ channels })
+})
 
-			const userId = await verifyToken(token);
-			const { name, isPrivate } = body;
+channelsRouter.post(
+  '/channels/',
+  zValidator('json', z.object({
+    name: z.string().min(1).max(100),
+    isPrivate: z.boolean().optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			const channel = await createChannel(name, isPrivate || false);
-			await addChannelMember(userId, channel.id);
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			return status(201, { channel });
-		},
-		{
-			body: t.Object({
-				name: t.String({ minLength: 1, maxLength: 100 }),
-				isPrivate: t.Optional(t.Boolean()),
-			}),
-		},
-	)
-	.get("/:id", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+    const userId = await verifyToken(token)
+    const body = c.req.valid('json')
+    const { name, isPrivate } = body
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+    const channel = await createChannel(name, isPrivate || false)
+    await addChannelMember(userId, channel.id)
 
-		const userId = await verifyToken(token);
-		const channel = await findChannelById(params.id);
+    return c.json({ channel }, 201)
+  },
+)
 
-		if (!channel) {
-			return status(404, {
-				error: "Channel not found",
-			});
-		}
+channelsRouter.get('/channels/:id', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		const isMember = channel.members.some(
-			(member: { userId: string }) => member.userId === userId,
-		);
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-		if (channel.isPrivate && !isMember) {
-			return status(403, {
-				error: "Access denied",
-			});
-		}
+  const userId = await verifyToken(token)
+  const channel = await findChannelById(c.req.param('id'))
 
-		return { channel };
-	})
-	.post("/:id/join", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+  if (!channel) {
+    return c.json({
+      error: 'Channel not found',
+    }, 404)
+  }
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+  const isMember = channel.members.some(
+    (member: { userId: string }) => member.userId === userId,
+  )
 
-		const userId = await verifyToken(token);
-		const channel = await findChannelById(params.id);
+  if (channel.isPrivate && !isMember) {
+    return c.json({
+      error: 'Access denied',
+    }, 403)
+  }
 
-		if (!channel) {
-			return status(404, {
-				error: "Channel not found",
-			});
-		}
+  return c.json({ channel })
+})
 
-		const existingMember = await findChannelMember(userId, params.id);
+channelsRouter.post('/channels/:id/join', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-		if (existingMember) {
-			return status(409, {
-				error: "Already a member of this channel",
-			});
-		}
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-		const member = await addChannelMember(userId, params.id);
+  const userId = await verifyToken(token)
+  const channel = await findChannelById(c.req.param('id'))
 
-		return status(201, { member });
-	})
-	.delete("/:id/leave", async ({ params, headers, status }) => {
-		const token = headers.authorization?.split(" ")[1];
+  if (!channel) {
+    return c.json({
+      error: 'Channel not found',
+    }, 404)
+  }
 
-		if (!token) {
-			return status(401, {
-				error: "Unauthorized",
-			});
-		}
+  const existingMember = await findChannelMember(userId, c.req.param('id'))
 
-		const userId = await verifyToken(token);
-		await removeChannelMember(userId, params.id);
+  if (existingMember) {
+    return c.json({
+      error: 'Already a member of this channel',
+    }, 409)
+  }
 
-		return { message: "Left channel successfully" };
-	});
+  const member = await addChannelMember(userId, c.req.param('id'))
+
+  return c.json({ member }, 201)
+})
+
+channelsRouter.delete('/channels/:id/leave', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
+
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
+
+  const userId = await verifyToken(token)
+  await removeChannelMember(userId, c.req.param('id'))
+
+  return c.json({ message: 'Left channel successfully' })
+})
+
+export { channelsRouter }

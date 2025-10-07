@@ -1,73 +1,81 @@
-import { Elysia, t } from "elysia";
-import { verifyToken } from "../services/jwt";
-import { findLessonById, updateLesson } from "../services/lessons";
-import { findUserById } from "../services/users";
+import {
+  findLessonById,
+  findUserById,
+  updateLesson,
+  verifyToken,
+} from '@betterlms/core'
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
 
-export const lessonsRouter = new Elysia({ prefix: "/lessons" })
-	.get("/:lessonId", async ({ params, status }) => {
-		const { lessonId } = params;
+const lessonsRouter = new Hono()
 
-		const lesson = await findLessonById(lessonId);
+lessonsRouter.get('/lessons/:lessonId', async (c) => {
+  const lessonId = c.req.param('lessonId')
 
-		if (!lesson) {
-			return status(404, {
-				error: "Lesson not found",
-			});
-		}
+  const lesson = await findLessonById(lessonId)
 
-		return { lesson };
-	})
-	.put(
-		"/:lessonId",
-		async ({ params, body, headers, status }) => {
-			const token = headers.authorization?.split(" ")[1];
+  if (!lesson) {
+    return c.json({
+      error: 'Lesson not found',
+    }, 404)
+  }
 
-			if (!token) {
-				return status(401, {
-					error: "Unauthorized",
-				});
-			}
+  return c.json({ lesson })
+})
 
-			const userId = await verifyToken(token);
-			const user = await findUserById(userId);
+lessonsRouter.put(
+  '/lessons/:lessonId',
+  zValidator('json', z.object({
+    title: z.string().min(1).max(200).optional(),
+    content: z.string().optional(),
+    videoUrl: z.string().optional(),
+    isFree: z.boolean().optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
 
-			if (!user) {
-				return status(404, {
-					error: "User not found",
-				});
-			}
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
 
-			// Only admin users can update lessons
-			if (user.role !== "ADMIN") {
-				return status(403, {
-					error: "Forbidden - Only admin users can update lessons",
-				});
-			}
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
 
-			const { title, content, videoUrl, isFree } = body;
+    if (!user) {
+      return c.json({
+        error: 'User not found',
+      }, 404)
+    }
 
-			const updateData: {
-				title?: string;
-				content?: string;
-				videoUrl?: string;
-				isFree?: boolean;
-			} = {};
+    // Only admin users can update lessons
+    if (user.role !== 'ADMIN') {
+      return c.json({
+        error: 'Forbidden - Only admin users can update lessons',
+      }, 403)
+    }
 
-			if (title !== undefined) updateData.title = title;
-			if (content !== undefined) updateData.content = content;
-			if (videoUrl !== undefined) updateData.videoUrl = videoUrl;
-			if (isFree !== undefined) updateData.isFree = isFree;
+    const body = c.req.valid('json')
+    const { title, content, videoUrl, isFree } = body
 
-			const lesson = await updateLesson(params.lessonId, updateData);
+    const updateData: {
+      title?: string
+      content?: string
+      videoUrl?: string
+      isFree?: boolean
+    } = {}
 
-			return { lesson };
-		},
-		{
-			body: t.Object({
-				title: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
-				content: t.Optional(t.String()),
-				videoUrl: t.Optional(t.String()),
-				isFree: t.Optional(t.Boolean()),
-			}),
-		},
-	);
+    if (title !== undefined) updateData.title = title
+    if (content !== undefined) updateData.content = content
+    if (videoUrl !== undefined) updateData.videoUrl = videoUrl
+    if (isFree !== undefined) updateData.isFree = isFree
+
+    const lesson = await updateLesson(c.req.param('lessonId'), updateData)
+
+    return c.json({ lesson })
+  },
+)
+
+export { lessonsRouter }
