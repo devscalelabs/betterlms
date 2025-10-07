@@ -40,6 +40,25 @@ services:
       timeout: 3s
       retries: 5
 
+  # Database Migration Service
+  db-migrate:
+    build:
+      context: .
+      dockerfile: packages/database/Dockerfile
+    container_name: better-openlms-db-migrate
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/better_openlms
+      - SEED_DATABASE=false
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - better-openlms-network
+    restart: "no"
+
   # API Service
   api:
     build:
@@ -59,6 +78,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
     networks:
       - better-openlms-network
     healthcheck:
@@ -68,7 +89,7 @@ services:
       retries: 3
       start_period: 10s
 
-  # Worker Service (if you have background jobs)
+  # Worker Service
   worker:
     build:
       context: .
@@ -84,6 +105,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
     networks:
       - better-openlms-network
 
