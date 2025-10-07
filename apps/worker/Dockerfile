@@ -7,22 +7,21 @@ WORKDIR /app
 # Copy package files for dependency installation
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ ./packages/
-COPY apps/worker/package.json ./apps/worker/
+COPY apps/ ./apps/
+COPY tooling/ ./tooling/
 
 # Install pnpm and dependencies
 RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Build stage
 FROM base AS build
 
-# Copy source code
-COPY apps/worker/ ./apps/worker/
-COPY packages/ ./packages/
+# Source code is already copied in base stage
 
 # Build the worker application
-WORKDIR /app/apps/worker
-RUN pnpm run build
+WORKDIR /app
+RUN pnpm run --filter worker build
 
 # Production stage
 FROM node:18-alpine AS production
@@ -42,7 +41,7 @@ COPY --from=build --chown=workeruser:nodejs /app/apps/worker/package.json ./pack
 
 # Install only production dependencies
 RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile --production
+RUN pnpm install --production
 
 # Switch to non-root user
 USER workeruser

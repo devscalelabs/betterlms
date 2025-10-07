@@ -7,22 +7,21 @@ WORKDIR /app
 # Copy package files for dependency installation
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ ./packages/
-COPY apps/admin/package.json ./apps/admin/
+COPY apps/ ./apps/
+COPY tooling/ ./tooling/
 
 # Install pnpm and dependencies
 RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Build stage
 FROM base AS build
 
-# Copy source code
-COPY apps/admin/ ./apps/admin/
-COPY packages/ ./packages/
+# Source code is already copied in base stage
 
 # Build the admin application
-WORKDIR /app/apps/admin
-RUN pnpm run build
+WORKDIR /app
+RUN pnpm run --filter admin build
 
 # Production stage
 FROM nginx:alpine AS production

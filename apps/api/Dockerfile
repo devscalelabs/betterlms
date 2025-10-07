@@ -7,21 +7,23 @@ WORKDIR /app
 # Copy package files for dependency installation
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ ./packages/
-COPY apps/api/package.json ./apps/api/
+COPY apps/ ./apps/
+COPY tooling/ ./tooling/
+
+# Install pnpm for workspace management
+RUN bun install -g pnpm
 
 # Install dependencies
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Build stage
 FROM base AS build
 
-# Copy source code
-COPY apps/api/ ./apps/api/
-COPY packages/ ./packages/
+# Source code is already copied in base stage
 
 # Build the application
-WORKDIR /app/apps/api
-RUN bun run build
+WORKDIR /app
+RUN bun build --compile --minify-whitespace --minify-syntax --target bun --outfile ./apps/api/dist/server ./apps/api/src/index.ts
 
 # Production stage
 FROM oven/bun:1.1.0-alpine AS production
@@ -40,7 +42,7 @@ COPY --from=build --chown=bunuser:nodejs /app/apps/api/dist/server ./server
 COPY --from=build --chown=bunuser:nodejs /app/apps/api/package.json ./package.json
 
 # Install only production dependencies
-RUN bun install --frozen-lockfile --production
+RUN bun install --production
 
 # Switch to non-root user
 USER bunuser
