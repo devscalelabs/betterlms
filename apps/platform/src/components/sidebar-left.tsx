@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@betterlms/ui";
 import {
 	Notification01FreeIcons,
-	SettingsIcon,
 	TissuePaperFreeIcons,
 	Video01FreeIcons,
 	ZapFreeIcons,
@@ -10,11 +9,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryState } from "nuqs";
 import { useNavigate } from "react-router";
 import { ChannelsList } from "@/features/channels/components/channels-list";
+import { useNotifications } from "@/features/notifications/hooks/use-notifications";
 import { MenuItem } from "./shared/menu-item";
 
 export const SidebarLeft = () => {
 	const navigate = useNavigate();
 	const [_, setChannel] = useQueryState("channel");
+	const { unreadCount } = useNotifications();
 
 	return (
 		<aside className="sticky top-0 h-screen w-52 pr-4 flex flex-col justify-between pb-4">
@@ -50,13 +51,14 @@ export const SidebarLeft = () => {
 						<HugeiconsIcon icon={Video01FreeIcons} strokeWidth={2} />
 						<p>Courses</p>
 					</MenuItem>
-					<MenuItem>
+					<MenuItem onClick={() => navigate("/notifications")}>
 						<HugeiconsIcon icon={Notification01FreeIcons} strokeWidth={2} />
 						<p>Notifications</p>
-					</MenuItem>
-					<MenuItem>
-						<HugeiconsIcon icon={SettingsIcon} strokeWidth={2} />
-						<p>Settings</p>
+						{unreadCount > 0 && (
+							<div className="border border-emerald-400 w-5 h-5 text-xs font-bold bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+								{unreadCount > 99 ? "99+" : unreadCount}
+							</div>
+						)}
 					</MenuItem>
 				</nav>
 				<div className="pt-2">

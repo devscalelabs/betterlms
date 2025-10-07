@@ -6,6 +6,7 @@ import { CourseDetailPage } from "../pages/course-detail";
 import { CoursesPage } from "../pages/courses";
 import { EditProfilePage } from "../pages/edit-profile";
 import { LessonDetailPage } from "../pages/lesson-detail";
+import { Notifications } from "../pages/notifications";
 import { PostDetail } from "../pages/post-detail";
 import { Profile } from "../pages/profile";
 import { Register } from "../pages/register";
@@ -18,6 +19,7 @@ export const AppRouter = () => {
 				<Route path="/register" element={<Register />} />
 				<Route element={<Layout />}>
 					<Route path="/" element={<Timeline />} />
+					<Route path="/notifications" element={<Notifications />} />
 					<Route path="/articles" element={<ArticlesPage />} />
 					<Route path="/article/:id" element={<ArticleDetailPage />} />
 					<Route path="/courses" element={<CoursesPage />} />

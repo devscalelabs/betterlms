@@ -9,10 +9,12 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryState } from "nuqs";
 import { useNavigate } from "react-router";
+import { useNotifications } from "@/features/notifications/hooks/use-notifications";
 
 export const MobileMenu = () => {
 	const navigate = useNavigate();
 	const [_, setChannel] = useQueryState("channel");
+	const { unreadCount } = useNotifications();
 
 	const handleNavigation = (callback: () => void) => {
 		callback();
@@ -56,9 +58,17 @@ export const MobileMenu = () => {
 				<Button
 					variant="ghost"
 					size="sm"
-					className="flex flex-col items-center gap-1 h-auto py-2 px-3"
+					className="flex flex-col items-center gap-1 h-auto py-2 px-3 relative"
+					onClick={() => handleNavigation(() => navigate("/notifications"))}
 				>
-					<HugeiconsIcon icon={Notification01FreeIcons} size={20} />
+					<div className="relative">
+						<HugeiconsIcon icon={Notification01FreeIcons} size={20} />
+						{unreadCount > 0 && (
+							<div className="absolute -top-1 -right-1 border border-emerald-400 w-4 h-4 text-xs font-bold bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+								{unreadCount > 99 ? "99+" : unreadCount}
+							</div>
+						)}
+					</div>
 					<span className="text-xs">Alerts</span>
 				</Button>
 				<Button
