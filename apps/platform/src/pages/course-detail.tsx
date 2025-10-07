@@ -245,7 +245,7 @@ export const CourseDetailPage = () => {
 												<button
 													key={lesson.id}
 													type="button"
-													className="w-full py-2 border-b last:border-b-0 cursor-pointer hover:bg-muted/50 rounded-md px-2 transition-colors text-left"
+													className="w-full py-2 cursor-pointer hover:bg-muted/50 px-2 transition-colors text-left"
 													onClick={() =>
 														navigate(
 															`/courses/${course.slug}/lessons/${lesson.id}`,

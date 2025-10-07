@@ -419,7 +419,13 @@ export const EditCoursePage = () => {
 														</div>
 													</div>
 													<div className="flex items-center space-x-2">
-														<Button size="sm" variant="outline">
+														<Button
+															size="sm"
+															variant="outline"
+															onClick={() =>
+																navigate(`/dashboard/edit-lesson/${lesson.id}`)
+															}
+														>
 															Edit
 														</Button>
 													</div>

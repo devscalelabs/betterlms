@@ -9,3 +9,22 @@ export async function findLessonById(lessonId: string) {
 
 	return lesson;
 }
+
+export async function updateLesson(
+	lessonId: string,
+	data: {
+		title?: string;
+		content?: string;
+		videoUrl?: string;
+		isFree?: boolean;
+	},
+) {
+	const lesson = await prisma.lesson.update({
+		where: {
+			id: lessonId,
+		},
+		data,
+	});
+
+	return lesson;
+}

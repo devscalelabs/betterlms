@@ -16,6 +16,11 @@ import type { Account } from "../types";
 export const AccountCard = ({ account }: { account: Account }) => {
 	const navigate = useNavigate();
 
+	const handleLogout = () => {
+		localStorage.removeItem("token");
+		window.location.href = "/";
+	};
+
 	return (
 		<main className="flex items-center justify-between gap-2">
 			<div>
@@ -53,7 +58,7 @@ export const AccountCard = ({ account }: { account: Account }) => {
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem>
+					<DropdownMenuItem onClick={handleLogout}>
 						Log out
 						<DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
 					</DropdownMenuItem>

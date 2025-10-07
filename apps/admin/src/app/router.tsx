@@ -7,6 +7,7 @@ import { CreateCoursePage } from "../pages/create-course";
 import { DashboardPage } from "../pages/dashboard";
 import { EditArticlePage } from "../pages/edit-article";
 import { EditCoursePage } from "../pages/edit-course";
+import { EditLessonPage } from "../pages/edit-lesson";
 import { LoginPage } from "../pages/login";
 import { UsersPage } from "../pages/users";
 
@@ -76,6 +77,14 @@ export const AppRouter = () => {
 					element={
 						<ProtectedRoute>
 							<EditCoursePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/edit-lesson/:lessonId"
+					element={
+						<ProtectedRoute>
+							<EditLessonPage />
 						</ProtectedRoute>
 					}
 				/>

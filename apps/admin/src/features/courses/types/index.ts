@@ -95,3 +95,14 @@ export interface CreateLessonRequest {
 export interface CreateLessonResponse {
 	lesson: Lesson;
 }
+
+export interface EditLessonRequest {
+	title?: string;
+	content?: string;
+	videoUrl?: string;
+	isFree?: boolean;
+}
+
+export interface EditLessonResponse {
+	lesson: Lesson;
+}
