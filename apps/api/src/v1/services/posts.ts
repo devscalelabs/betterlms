@@ -1,5 +1,6 @@
 import { prisma } from "@betterlms/database";
 import type { Prisma } from "@betterlms/database/generated/prisma";
+import { processMentions } from "../../utils/extract-mentions";
 
 export async function findPosts(filters: {
 	parentId?: string | undefined;
@@ -153,6 +154,21 @@ export async function createPost(data: {
 	parentId?: string | null | undefined;
 	userId: string;
 }) {
+	// TODO: Process mentions in post content
+	// TODO: Implement mention notification system
+	// TODO: Add mention validation and database storage
+	const mentions = processMentions(data.content);
+
+	if (mentions.length > 0) {
+		console.log(
+			`[MENTION DETECTED] Post by user ${data.userId} mentions:`,
+			mentions,
+		);
+		// TODO: Send notifications to mentioned users
+		// TODO: Store mention relationships in database
+		// TODO: Validate that mentioned users exist
+	}
+
 	return await prisma.post.create({
 		data: {
 			title: data.title || null,
@@ -316,7 +332,12 @@ export async function updatePost(
 		channelId?: string | null;
 	},
 ) {
-	const updateData: any = {
+	const updateData: {
+		updatedAt: Date;
+		title?: string | null;
+		content?: string;
+		channelId?: string | null;
+	} = {
 		updatedAt: new Date(),
 	};
 
