@@ -80,11 +80,7 @@ export const useEditArticle = ({
 		}
 	}, [article]);
 
-	const {
-		mutate: updateArticle,
-		isPending: isUpdatingArticle,
-		error: updateError,
-	} = useMutation({
+	const { mutate: updateArticle, isPending: isUpdatingArticle } = useMutation({
 		mutationFn: async () => {
 			const updateData = {
 				title: formData.title,
@@ -160,7 +156,6 @@ export const useEditArticle = ({
 		removeImage,
 		updateArticle,
 		isUpdatingArticle,
-		updateError,
 		isFormValid,
 		selectedImages: formData.images || [],
 	};

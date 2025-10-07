@@ -23,7 +23,6 @@ export const EditArticlePage = () => {
 		handleChannelChange,
 		updateArticle,
 		isUpdatingArticle,
-		updateError,
 		isFormValid,
 	} = useEditArticle({
 		articleId: articleId || "",
@@ -88,31 +87,6 @@ export const EditArticlePage = () => {
 					</Button>
 				</div>
 			</div>
-
-			{/* Error display */}
-			{updateError && (
-				<div className="bg-red-50 border border-red-200 rounded-md p-4">
-					<div className="flex">
-						<div className="ml-3">
-							<h3 className="text-sm font-medium text-red-800">
-								Failed to update article
-							</h3>
-							<div className="mt-2 text-sm text-red-700">
-								{(updateError as any)?.response?.status === 401 && (
-									<p>Your session has expired. Please log in again.</p>
-								)}
-								{(updateError as any)?.response?.status === 403 && (
-									<p>You don't have permission to edit this article.</p>
-								)}
-								{(updateError as any)?.response?.status !== 401 &&
-									(updateError as any)?.response?.status !== 403 && (
-										<p>An unexpected error occurred. Please try again.</p>
-									)}
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Main content */}

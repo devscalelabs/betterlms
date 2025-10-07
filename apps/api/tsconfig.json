@@ -4,6 +4,6 @@
 		"strict": true,
 		"outDir": "./dist"
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "../worker/src/extract-mentions.ts"],
 	"exclude": ["node_modules", "dist"]
 }

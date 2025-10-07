@@ -1,6 +1,6 @@
 import { prisma } from "@betterlms/database";
 import type { Prisma } from "@betterlms/database/generated/prisma";
-import { processMentions } from "../../utils/extract-mentions";
+import { queueMentionProcessing } from "../../utils/queue";
 
 export async function findPosts(filters: {
 	parentId?: string | undefined;
@@ -154,22 +154,8 @@ export async function createPost(data: {
 	parentId?: string | null | undefined;
 	userId: string;
 }) {
-	// TODO: Process mentions in post content
-	// TODO: Implement mention notification system
-	// TODO: Add mention validation and database storage
-	const mentions = processMentions(data.content);
-
-	if (mentions.length > 0) {
-		console.log(
-			`[MENTION DETECTED] Post by user ${data.userId} mentions:`,
-			mentions,
-		);
-		// TODO: Send notifications to mentioned users
-		// TODO: Store mention relationships in database
-		// TODO: Validate that mentioned users exist
-	}
-
-	return await prisma.post.create({
+	// Create the post first
+	const post = await prisma.post.create({
 		data: {
 			title: data.title || null,
 			content: data.content,
@@ -203,6 +189,26 @@ export async function createPost(data: {
 			},
 		},
 	});
+
+	// Queue mention processing in the background (non-blocking)
+	// TODO: This runs asynchronously and won't block the API response
+	try {
+		await queueMentionProcessing({
+			postId: post.id,
+			content: data.content,
+			authorId: data.userId,
+			authorUsername: post.user?.username || "Unknown",
+		});
+		console.log(`[POST API] Queued mention processing for post ${post.id}`);
+	} catch (error) {
+		// Log error but don't fail the post creation
+		console.error(
+			`[POST API] Failed to queue mention processing for post ${post.id}:`,
+			error,
+		);
+	}
+
+	return post;
 }
 
 export async function createMedia(url: string, userId: string, postId: string) {

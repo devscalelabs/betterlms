@@ -1,0 +1,45 @@
+enum NotificationType {
+  MENTION
+  LIKE
+  FOLLOW
+  COMMENT
+  COURSE_ENROLLMENT
+  COURSE_COMPLETION
+}
+
+model Notification {
+  id String @id @default(cuid())
+
+  type NotificationType
+
+  // The user who will receive this notification
+  recipientId String
+  recipient   User   @relation("NotificationRecipient", fields: [recipientId], references: [id])
+
+  // The user who triggered this notification (e.g., who mentioned, liked, followed)
+  actorId String?
+  actor   User?   @relation("NotificationActor", fields: [actorId], references: [id])
+
+  // Related entities (optional, depending on notification type)
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id])
+
+  // Notification content
+  title   String
+  message String
+
+  // Read status
+  isRead Boolean @default(false)
+
+  // Metadata for additional context
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([recipientId])
+  @@index([actorId])
+  @@index([postId])
+  @@index([isRead])
+  @@index([createdAt])
+}
