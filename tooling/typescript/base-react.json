@@ -32,7 +32,8 @@
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"allowJs": true,
-		"checkJs": false
+		"checkJs": false,
+		"outDir": "./dist"
 	},
 	"include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"],
 	"exclude": [

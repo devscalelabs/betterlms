@@ -58,7 +58,7 @@ const SAMPLE_COURSES = [
 		slug: "python-beginners",
 		category: "Programming",
 		tags: ["python", "programming", "beginner"],
-		price: 29.99,
+		price: 0,
 		isPublished: true,
 		isPrivate: false,
 		sections: [
