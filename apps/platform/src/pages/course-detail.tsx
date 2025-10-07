@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import { HeadingBox } from "@/components/shared/heading-box";
 import type { CourseResponse } from "@/features/courses/types";
+import { useCourseEnrollment } from "@/features/enrollments/hooks/use-course-enrollment";
 import { api } from "@/utils/api-client";
 
 export const CourseDetailPage = () => {
@@ -22,6 +23,17 @@ export const CourseDetailPage = () => {
 	});
 
 	const course = courseData?.course;
+
+	// Enrollment hook
+	const {
+		enrollment,
+		isEnrolled,
+		isLoadingEnrollment,
+		enroll,
+		isEnrolling,
+		cancel,
+		isCancelling,
+	} = useCourseEnrollment(course?.id || "");
 
 	const formatPrice = (price: number | null, currency: string) => {
 		if (!price) return "Free";
@@ -163,6 +175,11 @@ export const CourseDetailPage = () => {
 							<span>{getTotalLessons()} lessons</span>
 							<span>{getTotalDuration()}</span>
 							<span>{course._count.enrollments} students</span>
+							{isEnrolled && enrollment && (
+								<span className="text-green-600 font-medium">
+									{Math.round(enrollment.progressPercentage)}% complete
+								</span>
+							)}
 						</div>
 
 						{/* Tags */}
@@ -184,9 +201,40 @@ export const CourseDetailPage = () => {
 							<span className="text-2xl font-bold">
 								{formatPrice(course.price, course.currency)}
 							</span>
-							<Button size="lg">
-								{course.price ? "Enroll Now" : "Start Free Course"}
-							</Button>
+							{isLoadingEnrollment ? (
+								<Button size="lg" disabled>
+									Loading...
+								</Button>
+							) : isEnrolled ? (
+								<div className="flex gap-2">
+									<Button
+										size="lg"
+										variant="outline"
+										onClick={() => cancel()}
+										disabled={isCancelling}
+									>
+										{isCancelling ? "Cancelling..." : "Cancel Enrollment"}
+									</Button>
+									<Button
+										size="lg"
+										onClick={() => navigate(`/courses/${course.slug}/learn`)}
+									>
+										Continue Learning
+									</Button>
+								</div>
+							) : (
+								<Button
+									size="lg"
+									onClick={() => enroll()}
+									disabled={isEnrolling}
+								>
+									{isEnrolling
+										? "Enrolling..."
+										: course.price
+											? "Enroll Now"
+											: "Start Free Course"}
+								</Button>
+							)}
 						</div>
 					</div>
 
