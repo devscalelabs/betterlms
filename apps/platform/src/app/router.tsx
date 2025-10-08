@@ -1,10 +1,12 @@
 import { BrowserRouter, Route, Routes } from "react-router";
+import { EventDetailPage } from "@/pages/event-detail";
 import { Layout } from "../components/layout";
 import { ArticleDetailPage } from "../pages/article-detail";
 import { ArticlesPage } from "../pages/articles";
 import { CourseDetailPage } from "../pages/course-detail";
 import { CoursesPage } from "../pages/courses";
 import { EditProfilePage } from "../pages/edit-profile";
+import { EventsPage } from "../pages/events";
 import { LessonDetailPage } from "../pages/lesson-detail";
 import { Notifications } from "../pages/notifications";
 import { PostDetail } from "../pages/post-detail";
@@ -28,6 +30,8 @@ export const AppRouter = () => {
 						path="/courses/:slug/lessons/:lessonId"
 						element={<LessonDetailPage />}
 					/>
+					<Route path="/events" element={<EventsPage />} />
+					<Route path="/events/:id" element={<EventDetailPage />} />
 					<Route path="/post/:id" element={<PostDetail />} />
 					<Route path="/profile/:username" element={<Profile />} />
 					<Route path="/profile/edit" element={<EditProfilePage />} />

@@ -40,31 +40,3 @@ export interface EventsResponse {
 export interface EventResponse {
 	event: Event;
 }
-
-export interface CreateEventRequest {
-	title: string;
-	description?: string;
-	type?: "ONLINE" | "OFFLINE";
-	date: string;
-	url?: string;
-	city?: string;
-	address?: string;
-}
-
-export interface CreateEventResponse {
-	event: Event;
-}
-
-export interface UpdateEventRequest {
-	title?: string;
-	description?: string | null;
-	type?: "ONLINE" | "OFFLINE";
-	date?: string;
-	url?: string | null;
-	city?: string | null;
-	address?: string | null;
-}
-
-export interface UpdateEventResponse {
-	event: Event;
-}
