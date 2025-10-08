@@ -8,17 +8,23 @@ This document explains the router pattern used in the BetterLMS platform backend
 
 ## Overview
 
-The application follows a **router pattern** where route handlers contain both HTTP handling and business logic in a single layer. This is a straightforward approach using Elysia framework.
+The application follows a **router pattern** where route handlers contain both HTTP handling and business logic in a single layer. This is a straightforward approach using the Hono framework with Zod validation.
 
 ## Pattern Structure
 
 ```
 src/
 ├── index.ts              # Application setup and main router
+├── server.ts             # Server entry point
+├── utils/                # Shared utilities
+│   └── upload-files.ts   # File upload utilities
 └── v1/
     └── router/           # Route definitions with inline logic
         ├── account.ts    # Account routes
-        └── auth.ts       # Authentication routes
+        ├── auth.ts       # Authentication routes
+        ├── courses.ts    # Course management routes
+        ├── posts.ts      # Social posts routes
+        └── ...           # Other feature routers
 ```
 
 ## How It Works
@@ -29,207 +35,415 @@ Routers handle both HTTP concerns and business logic in the same place:
 
 ```tsx
 // v1/router/auth.ts
-export const authRouter = new Elysia({ prefix: "/auth" })
-  .decorate("db", prisma)
-  .post(
-    "/register",
-    async ({ body, db, status }) => {
-      const { name, username, email, password } = body;
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+import { z } from 'zod'
 
-      // Check if user exists
-      const getUser = await db.user.findUnique({
-        where: { email },
-      });
+const authRouter = new Hono()
 
-      if (getUser) {
-        return status(409, { error: "User already exists" });
-      }
+authRouter.post(
+  '/auth/login',
+  zValidator('json', z.object({
+    email: z.string().email(),
+    password: z.string().optional(),
+  })),
+  async (c) => {
+    const body = c.req.valid('json')
+    const { email, password } = body
 
-      // Hash password and create user
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await db.user.create({
-        data: { name, username, email, password: hashedPassword },
-      });
+    // Business logic inline
+    const user = await findUserByEmailWithPassword(email)
 
-      return status(201, { user });
-    },
-    {
-      body: t.Object({
-        name: t.String({ minLength: 3 }),
-        username: t.String({ minLength: 4 }),
-        email: t.String({ format: "email" }),
-        password: t.String({ minLength: 8 }),
-      }),
-    },
-  );
+    if (!user) {
+      return c.json({
+        error: 'Invalid email or password',
+      }, 401)
+    }
+
+    const isValidPassword = await validatePassword(password, user.password)
+    if (!isValidPassword) {
+      return c.json({
+        error: 'Invalid email or password',
+      }, 401)
+    }
+
+    const token = await generateToken(user.id)
+
+    return c.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        username: user.username,
+        role: user.role,
+      },
+    }, 200)
+  },
+)
 ```
 
-### 2. Inline Business Logic
+### 2. Inline Business Logic with Core Functions
 
-All business logic is contained within the route handler functions:
+All business logic is contained within the route handler functions, using core utility functions:
 
 ```tsx
-// v1/router/auth.ts - Login handler
-.post("/login", async ({ body, db, status }) => {
-  const { email, password } = body;
+// v1/router/auth.ts - Magic link authentication
+authRouter.post(
+  '/auth/verify',
+  zValidator('json', z.object({
+    email: z.string().email(),
+    code: z.string().min(6).max(6),
+  })),
+  async (c) => {
+    const body = c.req.valid('json')
+    const { email, code } = body
 
-  // Find user
-  const user = await db.user.findUnique({ where: { email } });
+    // Business logic for magic link verification
+    const magicLink = await findUnusedMagicLink(email, code)
 
-  if (!user) {
-    return status(401, { error: "Invalid credentials" });
-  }
+    if (!magicLink) {
+      return c.json({
+        error: 'Invalid or expired code',
+      }, 401)
+    }
 
-  // Verify password
-  const isPasswordValid = await bcrypt.compare(password, user.password!);
-  
-  if (!isPasswordValid) {
-    return status(401, { error: "Invalid credentials" });
-  }
+    if (magicLink.expiresAt < new Date()) {
+      return c.json({
+        error: 'Code has expired. Please request a new one.',
+      }, 401)
+    }
 
-  // Generate JWT token
-  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-  const token = await new jose.SignJWT({ id: user.id })
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("1h")
-    .sign(secret);
+    await markMagicLinkAsUsed(magicLink.id)
+    const user = await findUserByEmail(email)
+    const token = await generateToken(user.id)
 
-  return { token };
-});
+    return c.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        username: user.username,
+      },
+    }, 200)
+  },
+)
 ```
 
 ## Router Types
 
 ### 1. Resource Routers (CRUD Operations)
 
-For managing resources:
+For managing resources with authentication and authorization:
 
 ```tsx
 // v1/router/account.ts
-export const accountRouter = new Elysia({ prefix: "/account" })
-  .decorate("db", prisma)
-  .get("/", async ({ db, headers, status }) => {
-    const token = headers.authorization?.split(" ")[1];
+const accountRouter = new Hono()
 
-    if (!token) {
-      return status(401, { error: "Unauthorized" });
-    }
+accountRouter.get('/account/', async (c) => {
+  const token = c.req.header('authorization')?.split(' ')[1]
 
-    // Verify JWT token
-    const decoded = await jose.jwtVerify(
-      token,
-      new TextEncoder().encode(process.env.JWT_SECRET),
-    );
+  if (!token) {
+    return c.json({
+      error: 'Unauthorized',
+    }, 401)
+  }
 
-    // Get user data
-    const user = await db.user.findUnique({
-      where: { id: decoded.payload.id as string },
-    });
-
-    return {
-      user: {
-        id: user?.id,
-        name: user?.name,
-        username: user?.username,
-        email: user?.email,
-        bio: user?.bio,
-        imageUrl: user?.imageUrl,
-        role: user?.role,
-      },
-    };
-  });
-```
-
-### 2. Action Routers (Business Operations)
-
-For specific business operations:
-
-```tsx
-// v1/router/auth.ts
-export const authRouter = new Elysia({ prefix: "/auth" })
-  .decorate("db", prisma)
-  .post("/login", async ({ body, db, status }) => {
-    const { email, password } = body;
-
-    // Business logic for authentication
-    const user = await db.user.findUnique({ where: { email } });
+  try {
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
 
     if (!user) {
-      return status(401, { error: "Invalid credentials" });
+      return c.json({
+        error: 'User not found',
+      }, 404)
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password!);
-    
-    if (!isPasswordValid) {
-      return status(401, { error: "Invalid credentials" });
-    }
-
-    // JWT generation logic
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const token = await new jose.SignJWT({ id: user.id })
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("1h")
-      .sign(secret);
-
-    return { token };
-  });
+    return c.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        bio: user.bio,
+        imageUrl: user.imageUrl,
+        role: user.role,
+      },
+    })
+  } catch (error) {
+    return c.json({
+      error: `${error}`,
+    }, 401)
+  }
+})
 ```
 
-## Benefits
+### 2. Complex Resource Routers with Nested Routes
 
-1. **Simplicity**: Everything in one place - easy to understand
-2. **Direct**: No abstraction layers - straightforward request to response
-3. **Fast Development**: Quick to write and modify
-4. **Type Safety**: Full TypeScript support with Elysia
-5. **Validation**: Built-in request/response validation with TypeBox
-
-## Usage Pattern
+For resources with nested entities and complex business logic:
 
 ```tsx
-// 1. Create router with prefix
-export const authRouter = new Elysia({ prefix: "/auth" })
-  .decorate("db", prisma)  // Inject database
-  .post("/endpoint", async ({ body, db, status }) => {
-    // 2. Handle request
-    const { data } = body;
-    
-    // 3. Business logic inline
-    const result = await db.someModel.create({ data });
-    
-    // 4. Return response
-    return status(201, { result });
-  });
+// v1/router/courses.ts
+const coursesRouter = new Hono()
+
+coursesRouter.post(
+  '/courses/',
+  zValidator('json', z.object({
+    title: z.string().min(1).max(200),
+    description: z.string().max(2000).optional(),
+    slug: z.string().min(1).max(100),
+    // ... other fields
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
+
+    if (!token) {
+      return c.json({
+        error: 'Unauthorized',
+      }, 401)
+    }
+
+    const userId = await verifyToken(token)
+    const user = await findUserById(userId)
+
+    // Authorization check
+    if (user.role !== 'ADMIN') {
+      return c.json({
+        error: 'Forbidden - Only admin users can create courses',
+      }, 403)
+    }
+
+    const body = c.req.valid('json')
+    const course = await createCourse({
+      ...body,
+      instructorId: userId,
+    })
+
+    return c.json({ course }, 201)
+  },
+)
+
+// Nested routes for sections and lessons
+coursesRouter.post(
+  '/courses/:courseId/sections',
+  zValidator('json', z.object({
+    title: z.string().min(1).max(200),
+    order: z.number().optional(),
+  })),
+  async (c) => {
+    // Authentication and authorization logic
+    // Direct Prisma usage for complex operations
+    const { prisma } = await import('@betterlms/database')
+    const section = await prisma.section.create({
+      data: {
+        title,
+        order: order || 0,
+        courseId: c.req.param('courseId'),
+      },
+      include: {
+        lessons: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    })
+
+    return c.json({ section }, 201)
+  },
+)
 ```
 
-## File Organization
+### 3. File Upload Routers
 
+For handling file uploads with external storage:
+
+```tsx
+// v1/router/posts.ts
+import { uploadImageToS3 } from '../../utils/upload-files'
+
+postsRouter.post(
+  '/posts/',
+  zValidator('form', z.object({
+    content: z.string().min(1).max(5000),
+    channelId: z.string().optional(),
+    parentId: z.string().optional(),
+    images: z.array(z.instanceof(File)).optional(),
+  })),
+  async (c) => {
+    const token = c.req.header('authorization')?.split(' ')[1]
+    const userId = await verifyToken(token)
+    const body = c.req.valid('form')
+    const { content, channelId, parentId, images } = body
+
+    const post = await createPost({
+      title: null,
+      content,
+      channelId,
+      parentId,
+      userId,
+    })
+
+    // Handle file uploads
+    if (images && images.length > 0) {
+      const mediaRecords = await Promise.all(
+        images.map(async (image: File) => {
+          const url = await uploadImageToS3(image, userId)
+          return createMedia(url, userId, post.id)
+        }),
+      )
+
+      const postWithMedia = await findPostWithMedia(post.id)
+      return c.json({ post: postWithMedia }, 201)
+    }
+
+    return c.json({ post }, 201)
+  },
+)
 ```
-src/
-├── index.ts                    # Main app setup
-└── v1/
-    └── router/                 # All route definitions
-        ├── auth.ts            # Auth routes
-        └── account.ts         # Account routes
+
+## Authentication & Authorization Pattern
+
+### 1. Token Extraction and Verification
+
+```tsx
+const token = c.req.header('authorization')?.split(' ')[1]
+
+if (!token) {
+  return c.json({
+    error: 'Unauthorized',
+  }, 401)
+}
+
+const userId = await verifyToken(token)
+const user = await findUserById(userId)
+
+if (!user) {
+  return c.json({
+    error: 'User not found',
+  }, 404)
+}
+
+// Role-based authorization
+if (user.role !== 'ADMIN') {
+  return c.json({
+    error: 'Forbidden - Admin access required',
+  }, 403)
+}
+```
+
+### 2. Optional Authentication
+
+For public endpoints that can optionally use authenticated user data:
+
+```tsx
+// Optionally get userId if user is authenticated
+let userId: string | undefined
+const token = c.req.header('authorization')?.split(' ')[1]
+if (token) {
+  try {
+    userId = await verifyToken(token)
+  } catch {
+    // If token is invalid, just continue without userId
+    userId = undefined
+  }
+}
 ```
 
 ## Application Setup
 
 ```tsx
 // src/index.ts
-export const app = new Elysia({ adapter: node() })
-  .use(cors({ origin: "http://localhost:3000" }))
-  .group("/api/v1", (app) => app.use(authRouter).use(accountRouter))
-  .get("/", () => "Hello Elysia")
-  .listen(PORT);
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { logger } from 'hono/logger'
+
+const app = new Hono()
+
+// Middleware
+app.use('*', logger())
+app.use('*', cors({
+  origin: ["http://localhost:3000", "http://localhost:4000"],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+}))
+
+// API v1 routes
+app.route('/api/v1', authRouter)
+app.route('/api/v1', accountRouter)
+app.route('/api/v1', coursesRouter)
+app.route('/api/v1', postsRouter)
+// ... other routers
+
+// Health check and error handling
+app.get('/health', (c) => {
+  return c.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+app.notFound((c) => {
+  return c.json({ error: 'Not Found' }, 404)
+})
+
+app.onError((err, c) => {
+  console.error(`${err}`)
+  return c.json({
+    error: 'Internal Server Error',
+    message: err.message
+  }, 500)
+})
+
+export default app
+```
+
+## Benefits
+
+1. **Simplicity**: Everything in one place - easy to understand and debug
+2. **Direct**: No abstraction layers - straightforward request to response
+3. **Fast Development**: Quick to write and modify
+4. **Type Safety**: Full TypeScript support with Hono and Zod
+5. **Validation**: Built-in request/response validation with Zod
+6. **Flexibility**: Easy to mix core functions with direct database access
+
+## Usage Pattern
+
+```tsx
+// 1. Create router
+const router = new Hono()
+
+// 2. Define route with validation
+router.post('/endpoint',
+  zValidator('json', z.object({
+    field1: z.string(),
+    field2: z.number().optional(),
+  })),
+  async (c) => {
+    // 3. Extract and validate request
+    const body = c.req.valid('json')
+
+    // 4. Authentication (if needed)
+    const token = c.req.header('authorization')?.split(' ')[1]
+    const userId = await verifyToken(token)
+
+    // 5. Business logic inline
+    const result = await someCoreFunction(body, userId)
+
+    // 6. Return response
+    return c.json({ result }, 201)
+  }
+)
 ```
 
 ## Key Technologies
 
-- **Elysia** - Web framework
+- **Hono** - Web framework
 - **TypeScript** - Type safety
-- **Prisma** - Database ORM
+- **Zod** - Schema validation
+- **@hono/zod-validator** - Request validation middleware
+- **@betterlms/core** - Core business logic functions
+- **@betterlms/database** - Prisma database access
+- **@betterlms/storages** - File storage utilities
 - **Jose** - JWT handling
 - **Bcrypt** - Password hashing
-- **Elysia TypeBox** - Request/response validation
 
-This pattern provides a simple, direct approach to building APIs with everything contained in the router handlers.
+This pattern provides a simple, direct approach to building APIs with everything contained in the router handlers while maintaining clean separation through core utility functions and proper validation.

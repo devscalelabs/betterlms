@@ -1,30 +1,31 @@
 {
-	"name": "better-openlms",
-	"version": "0.0.1",
-	"description": "",
-	"main": "index.js",
-	"scripts": {
-		"dev": "pnpm --parallel dev",
-		"platform:dev": "pnpm --filter platform dev",
-		"api:dev": "pnpm --filter api dev",
-		"db:generate": "pnpm --filter @betterlms/database db:generate",
-		"db:migrate": "pnpm --filter @betterlms/database db:migrate",
-		"db:reset": "pnpm --filter @betterlms/database db:reset",
-		"db:studio": "pnpm --filter @betterlms/database db:studio",
-		"seed:users": "pnpm --filter scripts seed:users",
-		"seed:content": "pnpm --filter scripts seed:content",
-		"seed:all": "pnpm --filter scripts seed:all",
-		"reset:db": "pnpm --filter scripts reset:db",
-		"test:email": "pnpm --filter scripts test:email",
-		"createsuperuser": "pnpm --filter scripts createsuperuser",
-		"format": "pnpm exec biome format --write",
-		"lint": "pnpm exec biome lint",
-		"lint:fix": "pnpm exec biome lint --write --unsafe"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"devDependencies": {
-		"@biomejs/biome": "2.2.5"
-	}
+  "name": "better-openlms",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm --parallel dev",
+    "platform:dev": "pnpm --filter platform dev",
+    "api:dev": "pnpm --filter api dev",
+    "db:generate": "pnpm --filter @betterlms/database db:generate",
+    "db:migrate": "pnpm --filter @betterlms/database db:migrate",
+    "db:reset": "pnpm --filter @betterlms/database db:reset",
+    "db:studio": "pnpm --filter @betterlms/database db:studio",
+    "seed:events": "pnpm --filter scripts seed:events",
+    "seed:users": "pnpm --filter scripts seed:users",
+    "seed:content": "pnpm --filter scripts seed:content",
+    "seed:all": "pnpm --filter scripts seed:all",
+    "reset:db": "pnpm --filter scripts reset:db",
+    "test:email": "pnpm --filter scripts test:email",
+    "createsuperuser": "pnpm --filter scripts createsuperuser",
+    "format": "pnpm exec biome format --write",
+    "lint": "pnpm exec biome lint",
+    "lint:fix": "pnpm exec biome lint --write --unsafe"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "2.2.5"
+  }
 }

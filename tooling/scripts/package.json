@@ -9,6 +9,7 @@
     "seed:content": "pnpm with-env tsx src/seed-content.ts",
     "seed:articles": "pnpm with-env tsx src/seed-articles.ts",
     "seed:courses": "pnpm with-env tsx src/seed-courses.ts",
+    "seed:events": "pnpm with-env tsx src/seed-events.ts",
     "seed:all": "pnpm with-env tsx src/seed-all.ts",
     "reset:db": "pnpm with-env tsx src/reset-db.ts",
     "createsuperuser": "pnpm with-env tsx src/createsuperuser.ts",
