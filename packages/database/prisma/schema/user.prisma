@@ -38,6 +38,9 @@ model User {
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsSent     Notification[] @relation("NotificationActor")
 
+  // Event relations
+  eventParticipants EventParticipant[]
+
   @@index([email])
   @@index([username])
 }

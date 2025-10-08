@@ -3,7 +3,6 @@ enum LessonType {
   TEXT
 }
 
-
 model Course {
   id String @id @default(cuid())
 
@@ -25,7 +24,6 @@ model Course {
   // Instructor/Author
   instructorId String
   instructor   User   @relation("CourseInstructor", fields: [instructorId], references: [id])
-
 
   // Timestamps
   createdAt   DateTime  @default(now())
@@ -67,9 +65,9 @@ model Section {
 model Lesson {
   id String @id @default(cuid())
 
-  title String
+  title   String
   content String? // For text-based lessons
-  order  Int // Order within the section
+  order   Int // Order within the section
 
   type LessonType @default(TEXT)
 

@@ -1,0 +1,34 @@
+enum EventType {
+  ONLINE
+  OFFLINE
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  type        EventType @default(OFFLINE)
+  date        DateTime
+  url         String?
+  city        String?
+  address     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  participants EventParticipant[]
+}
+
+model EventParticipant {
+  userId  String
+  eventId String
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  joinedAt DateTime @default(now())
+
+  @@id([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+}
