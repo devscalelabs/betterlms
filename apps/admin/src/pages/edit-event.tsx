@@ -1,10 +1,10 @@
 import { DashboardLayout } from "../components/dashboard-layout";
-import { EditCoursePage as EditCoursePageComponent } from "../features/courses/components/edit-course-page";
+import { EditEventPage as EditEventPageComponent } from "../features/events/components/edit-event-page";
 
-export const EditCoursePage = () => {
-	return (
-		<DashboardLayout>
-			<EditCoursePageComponent />
-		</DashboardLayout>
-	);
+export const EditEventPage = () => {
+  return (
+    <DashboardLayout>
+      <EditEventPageComponent />
+    </DashboardLayout>
+  );
 };

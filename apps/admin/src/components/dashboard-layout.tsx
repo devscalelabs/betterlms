@@ -3,10 +3,11 @@ import type { PropsWithChildren } from "react";
 import { Link, useLocation } from "react-router";
 
 const navigation = [
-	{ name: "Overview", href: "/dashboard" },
-	{ name: "Users", href: "/dashboard/users" },
-	{ name: "Articles", href: "/dashboard/articles" },
-	{ name: "Courses", href: "/dashboard/courses" },
+  { name: "Overview", href: "/dashboard" },
+  { name: "Users", href: "/dashboard/users" },
+  { name: "Articles", href: "/dashboard/articles" },
+  { name: "Courses", href: "/dashboard/courses" },
+  { name: "Events", href: "/dashboard/events" },
 ];
 
 export const DashboardLayout = ({ children }: PropsWithChildren) => {
@@ -32,8 +33,8 @@ export const DashboardLayout = ({ children }: PropsWithChildren) => {
                 <Link key={item.href} to={item.href}>
                   <div
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-                        ? "bg-gray-900 text-white"
-                        : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-700 hover:bg-gray-100"
                       }`}
                   >
                     {item.name}
