@@ -5,7 +5,7 @@
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.1-blue.svg)](https://reactjs.org/)
-[![Elysia](https://img.shields.io/badge/Elysia-1.4-green.svg)](https://elysiajs.com/)
+[![Hono](https://img.shields.io/badge/Hono-4.0-green.svg)](https://hono.dev/)
 
 ## 🚀 Overview
 
@@ -49,11 +49,12 @@ BetterLMS is built as a modern monorepo using a microservices architecture:
 better-openlms/
 ├── apps/
 │   ├── admin/          # Admin dashboard (React + Vite)
-│   ├── api/            # Backend API (Elysia + TypeScript)
+│   ├── api/            # Backend API (Hono + TypeScript)
 │   ├── platform/       # Main platform (React + Vite)
 │   └── worker/         # Background job processor
 ├── packages/
 │   ├── common/         # Shared utilities
+│   ├── core/           # Core business logic and services
 │   ├── database/       # Prisma ORM + PostgreSQL
 │   ├── email/          # Email service (Nodemailer)
 │   ├── storages/       # S3 file storage
@@ -73,7 +74,7 @@ better-openlms/
 - **React Router** - Client-side routing
 
 ### Backend
-- **Elysia** - Fast, lightweight web framework
+- **Hono** - Fast, lightweight web framework
 - **TypeScript** - Type-safe server development
 - **Prisma** - Modern database ORM
 - **PostgreSQL** - Robust relational database
@@ -89,7 +90,7 @@ better-openlms/
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - pnpm
 - PostgreSQL database
 - AWS S3 bucket (for file storage)
@@ -112,27 +113,27 @@ better-openlms/
    ```bash
    cp .env.example .env
    ```
-   
+
    Configure your `.env` file with:
    ```env
    # Database
    DATABASE_URL="postgresql://username:password@localhost:5432/betterlms"
-   
+
    # JWT
    JWT_SECRET="your-jwt-secret"
-   
+
    # AWS S3
    AWS_ACCESS_KEY_ID="your-access-key"
    AWS_SECRET_ACCESS_KEY="your-secret-key"
    AWS_REGION="your-region"
    AWS_S3_BUCKET="your-bucket-name"
-   
+
    # Email
    SMTP_HOST="your-smtp-host"
    SMTP_PORT="587"
    SMTP_USER="your-email"
    SMTP_PASS="your-password"
-   
+
    # Ports
    BACKEND_PORT="8000"
    ```
@@ -141,10 +142,10 @@ better-openlms/
    ```bash
    # Generate Prisma client
    pnpm db:generate
-   
+
    # Run migrations
    pnpm db:migrate
-   
+
    # Seed initial data (optional)
    pnpm seed:all
    ```
@@ -153,7 +154,7 @@ better-openlms/
    ```bash
    # Start all services
    pnpm dev
-   
+
    # Or start individually
    pnpm api:dev      # Backend API (port 8000)
    pnpm platform:dev # Main platform
@@ -175,6 +176,7 @@ better-openlms/
 - **`packages/database/`** - Database schema, migrations, and Prisma client
 - **`packages/ui/`** - Reusable UI components and design system
 - **`packages/common/`** - Shared utilities and helper functions
+- **`packages/core/`** - Core business logic and services
 - **`packages/email/`** - Email service integration
 - **`packages/storages/`** - File upload and storage management
 
