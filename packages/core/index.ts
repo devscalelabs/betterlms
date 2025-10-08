@@ -5,6 +5,8 @@ export * from "./src/channels";
 export * from "./src/courses";
 export * from "./src/emails";
 export * from "./src/enrollments";
+export * from "./src/event-participants";
+export * from "./src/events";
 export * from "./src/follows";
 export * from "./src/jwt";
 export * from "./src/lessons";

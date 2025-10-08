@@ -7,6 +7,8 @@ import { authRouter } from './v1/router/auth'
 import { channelsRouter } from './v1/router/channels'
 import { coursesRouter } from './v1/router/courses'
 import { enrollmentsRouter } from './v1/router/enrollments'
+import { eventParticipantsRouter } from './v1/router/event-participants'
+import { eventsRouter } from './v1/router/events'
 import { lessonsRouter } from './v1/router/lessons'
 import { linkPreviewRouter } from './v1/router/link-preview'
 import { mediaRouter } from './v1/router/media'
@@ -37,6 +39,8 @@ app.route('/api/v1', notificationsRouter)
 app.route('/api/v1', postsRouter)
 app.route('/api/v1', profileRouter)
 app.route('/api/v1', linkPreviewRouter)
+app.route('/api/v1', eventsRouter)
+app.route('/api/v1', eventParticipantsRouter)
 
 
 // Health check endpoint
