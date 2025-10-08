@@ -1,9 +1,9 @@
-import { CoursesList } from "./courses-list";
+import { EventsList } from "./events-list";
 
-export const CoursesPage = () => {
-	return (
-		<div className="container mx-auto py-6">
-			<CoursesList />
-		</div>
-	);
+export const EventsPage = () => {
+  return (
+    <div className="container mx-auto py-6">
+      <EventsList />
+    </div>
+  );
 };

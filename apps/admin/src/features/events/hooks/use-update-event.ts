@@ -1,16 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/utils/api-client";
-import type { CourseResponse } from "../types";
+import type { UpdateEventRequest, UpdateEventResponse } from "../types";
 
-export const useCourse = (courseId: string) => {
-	const { data: courseData, isLoading: isCourseLoading } = useQuery({
-		queryKey: ["course", courseId],
-		queryFn: () => api.get<CourseResponse>(`api/v1/courses/${courseId}`).json(),
-		enabled: !!courseId,
-	});
+export const useUpdateEvent = () => {
+  const queryClient = useQueryClient();
 
-	return {
-		course: courseData?.course,
-		isCourseLoading,
-	};
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateEventRequest }) =>
+      api.put<UpdateEventResponse>(`api/v1/events/${id}`, { json: data }).json(),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["event", id] });
+    },
+  });
 };
