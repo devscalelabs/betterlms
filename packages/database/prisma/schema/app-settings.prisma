@@ -1,0 +1,45 @@
+model AppSetting {
+  id String @id @default(cuid())
+
+  // Core app settings
+  appName        String?
+  appLogoUrl     String?
+  appDescription String?
+  appUrl         String?
+
+  // Feature flags
+  enableRegistration  Boolean @default(true)
+  enableComments      Boolean @default(true)
+  enableLikes         Boolean @default(true)
+  enableNotifications Boolean @default(true)
+
+  // Email settings
+  smtpHost     String?
+  smtpPort     Int?
+  smtpUser     String?
+  smtpPassword String?
+
+  // Social media
+  githubUrl String?
+
+  // Analytics
+  googleAnalyticsId String?
+  mixpanelToken     String?
+
+  // Payment settings
+  stripePublishableKey String?
+  stripeSecretKey      String?
+
+  // Contact information
+  supportEmail   String?
+  contactEmail   String?
+  privacyPolicy  String?
+  termsOfService String?
+
+  // Metadata
+  version   String?
+  updatedBy String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,31 @@
+-- CreateTable
+CREATE TABLE "AppSetting" (
+    "id" TEXT NOT NULL,
+    "appName" TEXT,
+    "appLogoUrl" TEXT,
+    "appDescription" TEXT,
+    "appUrl" TEXT,
+    "enableRegistration" BOOLEAN NOT NULL DEFAULT true,
+    "enableComments" BOOLEAN NOT NULL DEFAULT true,
+    "enableLikes" BOOLEAN NOT NULL DEFAULT true,
+    "enableNotifications" BOOLEAN NOT NULL DEFAULT true,
+    "smtpHost" TEXT,
+    "smtpPort" INTEGER,
+    "smtpUser" TEXT,
+    "smtpPassword" TEXT,
+    "githubUrl" TEXT,
+    "googleAnalyticsId" TEXT,
+    "mixpanelToken" TEXT,
+    "stripePublishableKey" TEXT,
+    "stripeSecretKey" TEXT,
+    "supportEmail" TEXT,
+    "contactEmail" TEXT,
+    "privacyPolicy" TEXT,
+    "termsOfService" TEXT,
+    "version" TEXT,
+    "updatedBy" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AppSetting_pkey" PRIMARY KEY ("id")
+);
