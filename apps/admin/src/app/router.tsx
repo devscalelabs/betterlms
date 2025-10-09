@@ -16,115 +16,115 @@ import { LoginPage } from "../pages/login";
 import { UsersPage } from "../pages/users";
 
 export const AppRouter = () => {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/users"
-          element={
-            <ProtectedRoute>
-              <UsersPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/articles"
-          element={
-            <ProtectedRoute>
-              <ArticlesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/articles/create"
-          element={
-            <ProtectedRoute>
-              <CreateArticlePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/articles/edit/:articleId"
-          element={
-            <ProtectedRoute>
-              <EditArticlePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/courses"
-          element={
-            <ProtectedRoute>
-              <CoursesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/courses/create"
-          element={
-            <ProtectedRoute>
-              <CreateCoursePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/courses/:courseId/edit"
-          element={
-            <ProtectedRoute>
-              <EditCoursePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/events"
-          element={
-            <ProtectedRoute>
-              <EventsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/events/create"
-          element={
-            <ProtectedRoute>
-              <CreateEventPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/events/:id/edit"
-          element={
-            <ProtectedRoute>
-              <EditEventPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/edit-lesson/:lessonId"
-          element={
-            <ProtectedRoute>
-              <EditLessonPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/channels"
-          element={
-            <ProtectedRoute>
-              <ChannelsPage />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
-  );
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route path="/" element={<LoginPage />} />
+				<Route
+					path="/dashboard"
+					element={
+						<ProtectedRoute>
+							<DashboardPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/users"
+					element={
+						<ProtectedRoute>
+							<UsersPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/articles"
+					element={
+						<ProtectedRoute>
+							<ArticlesPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/articles/create"
+					element={
+						<ProtectedRoute>
+							<CreateArticlePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/articles/edit/:articleId"
+					element={
+						<ProtectedRoute>
+							<EditArticlePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/courses"
+					element={
+						<ProtectedRoute>
+							<CoursesPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/courses/create"
+					element={
+						<ProtectedRoute>
+							<CreateCoursePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/courses/:courseId/edit"
+					element={
+						<ProtectedRoute>
+							<EditCoursePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/events"
+					element={
+						<ProtectedRoute>
+							<EventsPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/events/create"
+					element={
+						<ProtectedRoute>
+							<CreateEventPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/events/:id/edit"
+					element={
+						<ProtectedRoute>
+							<EditEventPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/edit-lesson/:lessonId"
+					element={
+						<ProtectedRoute>
+							<EditLessonPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/channels"
+					element={
+						<ProtectedRoute>
+							<ChannelsPage />
+						</ProtectedRoute>
+					}
+				/>
+			</Routes>
+		</BrowserRouter>
+	);
 };

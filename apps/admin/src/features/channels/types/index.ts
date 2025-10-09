@@ -1,40 +1,40 @@
 export interface Channel {
-  id: string;
-  name: string;
-  isPrivate: boolean;
-  members: ChannelMember[];
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	name: string;
+	isPrivate: boolean;
+	members: ChannelMember[];
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface ChannelMember {
-  id: string;
-  userId: string;
-  channelId: string;
-  joinedAt: string;
+	id: string;
+	userId: string;
+	channelId: string;
+	joinedAt: string;
 }
 
 export interface CreateChannelRequest {
-  name: string;
-  isPrivate?: boolean;
+	name: string;
+	isPrivate?: boolean;
 }
 
 export interface CreateChannelResponse {
-  channel: Channel;
+	channel: Channel;
 }
 
 export interface ChannelsResponse {
-  channels: Channel[];
+	channels: Channel[];
 }
 
 export interface ChannelResponse {
-  channel: Channel;
+	channel: Channel;
 }
 
 export interface JoinChannelResponse {
-  member: ChannelMember;
+	member: ChannelMember;
 }
 
 export interface ApiError {
-  error: string;
+	error: string;
 }

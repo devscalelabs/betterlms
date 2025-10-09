@@ -3,20 +3,20 @@ import { api } from "../../../utils/api-client";
 import type { ChannelResponse } from "../types";
 
 interface UseChannelOptions {
-  id: string;
+	id: string;
 }
 
 export const useChannel = ({ id }: UseChannelOptions) => {
-  const { data: channelData, isLoading: isLoadingChannel } = useQuery({
-    queryKey: ["channels", id],
-    queryFn: () => {
-      return api.get<ChannelResponse>(`api/v1/channels/${id}`).json();
-    },
-    enabled: !!id,
-  });
+	const { data: channelData, isLoading: isLoadingChannel } = useQuery({
+		queryKey: ["channels", id],
+		queryFn: () => {
+			return api.get<ChannelResponse>(`api/v1/channels/${id}`).json();
+		},
+		enabled: !!id,
+	});
 
-  return {
-    channel: channelData?.channel,
-    isLoadingChannel,
-  };
+	return {
+		channel: channelData?.channel,
+		isLoadingChannel,
+	};
 };
