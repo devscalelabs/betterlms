@@ -19,7 +19,7 @@ export const SidebarLeft = () => {
 	const { unreadCount } = useNotifications();
 
 	return (
-		<aside className="sticky top-0 h-screen w-52 pr-4 flex flex-col justify-between pb-4">
+		<aside className="sticky top-0 h-screen w-54 pr-4 flex flex-col justify-between pb-4">
 			<section className="space-y-2">
 				<button
 					type="button"
@@ -34,26 +34,42 @@ export const SidebarLeft = () => {
 					</div>
 					<div>BetterLMS</div>
 				</button>
-				<nav>
+				<nav className="space-y-1">
 					<MenuItem
 						onClick={() => {
 							setChannel(null);
 							navigate("/");
 						}}
 					>
-						<HugeiconsIcon icon={ZapFreeIcons} strokeWidth={2} />
+						<HugeiconsIcon
+							icon={ZapFreeIcons}
+							strokeWidth={2}
+							className="scale-125"
+						/>
 						<p>Timeline</p>
 					</MenuItem>
 					<MenuItem onClick={() => navigate("/articles")}>
-						<HugeiconsIcon icon={TissuePaperFreeIcons} strokeWidth={2} />
+						<HugeiconsIcon
+							icon={TissuePaperFreeIcons}
+							strokeWidth={2}
+							className="scale-125"
+						/>
 						<p>Articles</p>
 					</MenuItem>
 					<MenuItem onClick={() => navigate("/courses")}>
-						<HugeiconsIcon icon={Video01FreeIcons} strokeWidth={2} />
+						<HugeiconsIcon
+							icon={Video01FreeIcons}
+							strokeWidth={2}
+							className="scale-125"
+						/>
 						<p>Courses</p>
 					</MenuItem>
 					<MenuItem onClick={() => navigate("/notifications")}>
-						<HugeiconsIcon icon={Notification01FreeIcons} strokeWidth={2} />
+						<HugeiconsIcon
+							icon={Notification01FreeIcons}
+							strokeWidth={2}
+							className="scale-125"
+						/>
 						<p>Notifications</p>
 						{unreadCount > 0 && (
 							<div className="border border-emerald-400 w-5 h-5 text-xs font-bold bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
@@ -72,7 +88,7 @@ export const SidebarLeft = () => {
 					<div>Support</div>
 					<div>Help</div>
 				</div>
-				<Card className="p-5">
+				<Card className="p-5 bg-gradient-to-bl from-indigo-500/10 to-primary/5">
 					<CardContent className="p-0">
 						<div className="text-xs">
 							BetterLMS is built with ❤️
@@ -85,6 +101,7 @@ export const SidebarLeft = () => {
 								<HugeiconsIcon
 									icon={Github01FreeIcons}
 									strokeWidth={2}
+									className="scale-125"
 									size={12}
 								/>
 								Devscalelabs

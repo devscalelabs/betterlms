@@ -13,16 +13,19 @@ export const ChannelsList = () => {
 	}
 
 	return (
-		<div className="space-y-2 ml-3">
+		<div className="space-y-3 ml-3">
 			{channels.map((channel) => (
 				<Button
 					key={channel.id}
-					size="xs"
+					size="sm"
 					variant="secondary"
 					className="w-fit block"
 					onClick={() => {
 						setChannel(channel.slug);
 						navigate("/");
+					}}
+					style={{
+						backgroundColor: channel.color ?? "#f1f1f1",
 					}}
 				>
 					{channel.name}

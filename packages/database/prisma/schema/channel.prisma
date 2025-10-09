@@ -3,6 +3,7 @@ model Channel {
 
   name      String
   slug      String? @unique
+  color     String?
   isPrivate Boolean @default(false)
 
   createdAt DateTime @default(now())

@@ -8,7 +8,7 @@ export const Layout = () => {
 	const isMobile = useMobile();
 
 	return (
-		<main className="relative flex min-h-screen max-w-7xl mx-auto">
+		<main className="relative flex min-h-screen max-w-6xl mx-auto">
 			{isMobile ? (
 				<>
 					<MobileMenu />

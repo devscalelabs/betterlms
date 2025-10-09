@@ -4,26 +4,31 @@ const SAMPLE_CHANNELS = [
 	{
 		name: "General",
 		slug: "general",
+		color: "#D4E6F0",
 		isPrivate: false,
 	},
 	{
 		name: "JavaScript",
 		slug: "javascript",
+		color: "#F5F5D8",
 		isPrivate: false,
 	},
 	{
 		name: "Python",
 		slug: "python",
+		color: "#D8F0D8",
 		isPrivate: false,
 	},
 	{
 		name: "AI & LLMs",
 		slug: "ai-and-llms",
+		color: "#E8D8F0",
 		isPrivate: false,
 	},
 	{
 		name: "Random & Memes",
 		slug: "random",
+		color: "#F0D8DC",
 		isPrivate: false,
 	},
 ];

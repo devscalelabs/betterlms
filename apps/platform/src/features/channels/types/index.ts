@@ -2,6 +2,7 @@ export type Channel = {
 	id: string;
 	name: string;
 	slug: string | null;
+	color: string | null;
 	isPrivate: boolean;
 	createdAt: string;
 	updatedAt: string;

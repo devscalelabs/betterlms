@@ -10,7 +10,7 @@ export const SidebarRight = () => {
 	const { theme, setTheme } = useTheme();
 
 	return (
-		<aside className="sticky top-0 h-screen w-80 border-r border-border overflow-auto">
+		<aside className="sticky top-0 h-screen w-90 border-r border-border overflow-auto">
 			<HeadingBox>
 				<Switch
 					checked={theme === "dark"}

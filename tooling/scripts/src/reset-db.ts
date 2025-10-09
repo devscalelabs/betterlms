@@ -22,6 +22,8 @@ async function resetDatabase() {
 	console.log("  - All channels");
 	console.log("  - All posts and replies");
 	console.log("  - All media");
+	console.log("  - All notifications");
+	console.log("  - All events and event participants");
 	console.log("  - All channel memberships");
 	console.log("  - All courses, sections, and lessons");
 	console.log("  - All course enrollments and progress");
@@ -50,6 +52,10 @@ async function resetDatabase() {
 		const mediaCount = await prisma.media.deleteMany();
 		console.log(`✅ Deleted ${mediaCount.count} media records`);
 
+		console.log("Deleting notifications...");
+		const notificationsCount = await prisma.notification.deleteMany();
+		console.log(`✅ Deleted ${notificationsCount.count} notifications`);
+
 		console.log("Deleting posts...");
 		const postsCount = await prisma.post.deleteMany();
 		console.log(`✅ Deleted ${postsCount.count} posts`);
@@ -61,6 +67,17 @@ async function resetDatabase() {
 		console.log("Deleting channels...");
 		const channelsCount = await prisma.channel.deleteMany();
 		console.log(`✅ Deleted ${channelsCount.count} channels`);
+
+		// Delete event-related data before users (due to foreign key constraints)
+		console.log("Deleting event participants...");
+		const eventParticipantsCount = await prisma.eventParticipant.deleteMany();
+		console.log(
+			`✅ Deleted ${eventParticipantsCount.count} event participants`,
+		);
+
+		console.log("Deleting events...");
+		const eventsCount = await prisma.event.deleteMany();
+		console.log(`✅ Deleted ${eventsCount.count} events`);
 
 		// Delete course-related data before users (due to foreign key constraints)
 		console.log("Deleting lesson progress...");

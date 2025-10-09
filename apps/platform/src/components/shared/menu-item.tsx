@@ -12,7 +12,7 @@ export const MenuItem = ({
 		<Button
 			type="button"
 			variant="ghost"
-			className="w-full justify-start text-base"
+			className="w-full justify-start text-lg gap-3"
 			onClick={onClick}
 		>
 			{children}
