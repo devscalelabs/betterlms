@@ -1,6 +1,7 @@
 // Core package exports for BetterLMS
 // This file serves as the main entry point for the @betterlms/core package
 
+export * from "./src/app-settings";
 export * from "./src/channels";
 export * from "./src/courses";
 export * from "./src/emails";

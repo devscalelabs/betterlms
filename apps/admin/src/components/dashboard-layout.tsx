@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router";
 
 const navigation = [
 	{ name: "Overview", href: "/dashboard" },
+	{ name: "App Settings", href: "/dashboard/app-settings" },
 	{ name: "Users", href: "/dashboard/users" },
 	{ name: "Articles", href: "/dashboard/articles" },
 	{ name: "Courses", href: "/dashboard/courses" },

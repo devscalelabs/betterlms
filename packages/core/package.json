@@ -6,6 +6,7 @@
   "main": "index.ts",
   "exports": {
     ".": "./index.ts",
+    "./app-settings": "./src/app-settings.ts",
     "./channels": "./src/channels.ts",
     "./courses": "./src/courses.ts",
     "./emails": "./src/emails.ts",

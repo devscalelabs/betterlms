@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { accountRouter } from "./v1/router/account";
+import { appSettingsRouter } from "./v1/router/app-settings";
 import { articlesRouter } from "./v1/router/articles";
 import { authRouter } from "./v1/router/auth";
 import { channelsRouter } from "./v1/router/channels";
@@ -30,20 +31,21 @@ app.use(
 );
 
 // API v1 routes
-app.route("/api/v1", authRouter);
+app.route("/api/v1", appSettingsRouter);
 app.route("/api/v1", accountRouter);
 app.route("/api/v1", articlesRouter);
+app.route("/api/v1", authRouter);
 app.route("/api/v1", channelsRouter);
 app.route("/api/v1", coursesRouter);
 app.route("/api/v1", enrollmentsRouter);
+app.route("/api/v1", eventsRouter);
+app.route("/api/v1", eventParticipantsRouter);
 app.route("/api/v1", lessonsRouter);
+app.route("/api/v1", linkPreviewRouter);
 app.route("/api/v1", mediaRouter);
 app.route("/api/v1", notificationsRouter);
 app.route("/api/v1", postsRouter);
 app.route("/api/v1", profileRouter);
-app.route("/api/v1", linkPreviewRouter);
-app.route("/api/v1", eventsRouter);
-app.route("/api/v1", eventParticipantsRouter);
 
 // Health check endpoint
 app.get("/health", (c) => {
