@@ -31,7 +31,7 @@ export const useEditLesson = ({
 		queryKey: ["lesson", lessonId],
 		queryFn: async () => {
 			const response = await api
-				.get<{ lesson: Lesson }>(`api/v1/lessons/${lessonId}`)
+				.get<{ lesson: Lesson }>(`api/v1/lessons/${lessonId}/`)
 				.json();
 			return response.lesson;
 		},
@@ -64,7 +64,7 @@ export const useEditLesson = ({
 			};
 
 			const response = await api
-				.put<EditLessonResponse>(`api/v1/lessons/${lessonId}`, {
+				.put<EditLessonResponse>(`api/v1/lessons/${lessonId}/`, {
 					json: updateData,
 				})
 				.json();

@@ -13,7 +13,7 @@ export const useLogin = () => {
 	const { mutate: login, isPending: isLoggingIn } = useMutation({
 		mutationFn: async (credentials: LoginRequest) => {
 			const response = await api
-				.post<LoginResponse>("api/v1/auth/login", {
+				.post<LoginResponse>("api/v1/auth/login/", {
 					json: credentials,
 				})
 				.json();

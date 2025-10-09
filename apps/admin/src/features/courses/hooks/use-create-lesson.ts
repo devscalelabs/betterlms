@@ -29,7 +29,7 @@ export const useCreateLesson = ({
 		mutationFn: async () => {
 			const response = await api
 				.post<CreateLessonResponse>(
-					`api/v1/courses/${courseId}/sections/${sectionId}/lessons`,
+					`api/v1/courses/${courseId}/sections/${sectionId}/lessons/`,
 					{
 						json: formData,
 					},

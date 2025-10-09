@@ -50,7 +50,7 @@ export const useEditArticle = ({
 		queryKey: ["article", articleId],
 		queryFn: async () => {
 			const response = await api
-				.get<ArticleResponse>(`api/v1/articles/${articleId}`)
+				.get<ArticleResponse>(`api/v1/articles/${articleId}/`)
 				.json();
 			return response.article;
 		},

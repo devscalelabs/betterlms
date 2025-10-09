@@ -5,7 +5,7 @@ import type { EventResponse } from "../types";
 export const useEvent = (id: string) => {
 	const { data: eventData, isLoading: isEventLoading } = useQuery({
 		queryKey: ["event", id],
-		queryFn: () => api.get<EventResponse>(`api/v1/events/${id}`).json(),
+		queryFn: () => api.get<EventResponse>(`api/v1/events/${id}/`).json(),
 		enabled: !!id,
 	});
 

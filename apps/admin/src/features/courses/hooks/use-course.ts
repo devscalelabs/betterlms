@@ -5,7 +5,8 @@ import type { CourseResponse } from "../types";
 export const useCourse = (courseId: string) => {
 	const { data: courseData, isLoading: isCourseLoading } = useQuery({
 		queryKey: ["course", courseId],
-		queryFn: () => api.get<CourseResponse>(`api/v1/courses/${courseId}`).json(),
+		queryFn: () =>
+			api.get<CourseResponse>(`api/v1/courses/${courseId}/`).json(),
 		enabled: !!courseId,
 	});
 

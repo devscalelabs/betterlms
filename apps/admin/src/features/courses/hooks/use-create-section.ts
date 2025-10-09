@@ -22,7 +22,7 @@ export const useCreateSection = ({
 	const { mutate: createSection, isPending: isCreatingSection } = useMutation({
 		mutationFn: async () => {
 			const response = await api
-				.post<CreateSectionResponse>(`api/v1/courses/${courseId}/sections`, {
+				.post<CreateSectionResponse>(`api/v1/courses/${courseId}/sections/`, {
 					json: formData,
 				})
 				.json();

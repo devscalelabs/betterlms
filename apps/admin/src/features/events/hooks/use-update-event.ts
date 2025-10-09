@@ -8,7 +8,7 @@ export const useUpdateEvent = () => {
 	return useMutation({
 		mutationFn: ({ id, data }: { id: string; data: UpdateEventRequest }) =>
 			api
-				.put<UpdateEventResponse>(`api/v1/events/${id}`, { json: data })
+				.put<UpdateEventResponse>(`api/v1/events/${id}/`, { json: data })
 				.json(),
 		onSuccess: (_, { id }) => {
 			queryClient.invalidateQueries({ queryKey: ["events"] });
