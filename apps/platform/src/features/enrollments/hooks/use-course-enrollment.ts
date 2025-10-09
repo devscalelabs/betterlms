@@ -22,7 +22,7 @@ export const useCourseEnrollment = (courseId: string) => {
 		queryKey: ["enrollment", "course", courseId],
 		queryFn: async () => {
 			const enrollments = await api
-				.get<EnrollmentsResponse>("api/v1/enrollments/my-enrollments")
+				.get<EnrollmentsResponse>("api/v1/enrollments/my-enrollments/")
 				.json();
 
 			return (
@@ -38,7 +38,7 @@ export const useCourseEnrollment = (courseId: string) => {
 	const { mutate: enrollInCourse, isPending: isEnrolling } = useMutation({
 		mutationFn: async (data: CreateEnrollmentRequest) => {
 			const response = await api
-				.post<EnrollmentResponse>("api/v1/enrollments", {
+				.post<EnrollmentResponse>("api/v1/enrollments/", {
 					json: data,
 				})
 				.json();
@@ -70,7 +70,7 @@ export const useCourseEnrollment = (courseId: string) => {
 			}) => {
 				const response = await api
 					.put<EnrollmentResponse>(
-						`api/v1/enrollments/${enrollmentId}/progress`,
+						`api/v1/enrollments/${enrollmentId}/progress/`,
 						{
 							json: data,
 						},
@@ -93,7 +93,7 @@ export const useCourseEnrollment = (courseId: string) => {
 	// Cancel enrollment mutation
 	const { mutate: cancelEnrollment, isPending: isCancelling } = useMutation({
 		mutationFn: async (enrollmentId: string) => {
-			await api.delete(`api/v1/enrollments/${enrollmentId}`);
+			await api.delete(`api/v1/enrollments/${enrollmentId}/`);
 		},
 		onSuccess: () => {
 			// Invalidate and refetch enrollment data

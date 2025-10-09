@@ -7,7 +7,7 @@ export const useArticle = (id: string) => {
 		queryKey: ["article", id],
 		queryFn: async () => {
 			const response = await api
-				.get<ArticleResponse>(`api/v1/articles/${id}`)
+				.get<ArticleResponse>(`api/v1/articles/${id}/`)
 				.json();
 			return response.article;
 		},

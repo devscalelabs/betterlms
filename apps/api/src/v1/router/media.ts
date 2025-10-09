@@ -7,7 +7,7 @@ import { uploadImageToS3 } from "../../utils/upload-files";
 const mediaRouter = new Hono();
 
 mediaRouter.post(
-	"/media",
+	"/media/",
 	zValidator(
 		"form",
 		z.object({

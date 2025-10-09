@@ -7,7 +7,7 @@ export const useChannel = (channelId: string) => {
 		enabled: !!localStorage.getItem("token") && !!channelId,
 		queryKey: ["channel", channelId],
 		queryFn: () =>
-			api.get<ChannelResponse>(`api/v1/channels/${channelId}`).json(),
+			api.get<ChannelResponse>(`api/v1/channels/${channelId}/`).json(),
 	});
 
 	return {

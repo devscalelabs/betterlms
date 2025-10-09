@@ -29,7 +29,7 @@ notificationsRouter.get("/notifications/", async (c) => {
 });
 
 notificationsRouter.put(
-	"/notifications/:id/read",
+	"/notifications/:id/read/",
 	zValidator(
 		"param",
 		z.object({
@@ -64,7 +64,7 @@ notificationsRouter.put(
 	},
 );
 
-notificationsRouter.put("/notifications/read-all", async (c) => {
+notificationsRouter.put("/notifications/read-all/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];
 
 	if (!token) {

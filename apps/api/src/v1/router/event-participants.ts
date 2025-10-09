@@ -12,7 +12,7 @@ import { z } from "zod";
 const eventParticipantsRouter = new Hono();
 
 eventParticipantsRouter.get(
-	"/event-participants",
+	"/event-participants/",
 	zValidator(
 		"query",
 		z.object({
@@ -32,7 +32,7 @@ eventParticipantsRouter.get(
 );
 
 eventParticipantsRouter.get(
-	"/event-participants/my-participations",
+	"/event-participants/my-participations/",
 	async (c) => {
 		const token = c.req.header("authorization")?.split(" ")[1];
 
@@ -53,7 +53,7 @@ eventParticipantsRouter.get(
 );
 
 eventParticipantsRouter.post(
-	"/event-participants",
+	"/event-participants/",
 	zValidator(
 		"json",
 		z.object({
@@ -101,7 +101,7 @@ eventParticipantsRouter.post(
 );
 
 eventParticipantsRouter.delete(
-	"/event-participants",
+	"/event-participants/",
 	zValidator(
 		"query",
 		z.object({

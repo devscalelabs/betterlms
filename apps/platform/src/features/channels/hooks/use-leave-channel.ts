@@ -8,7 +8,7 @@ export const useLeaveChannel = () => {
 	const { mutate: leaveChannel, isPending: isLeavingChannel } = useMutation({
 		mutationFn: async (channelId: string) => {
 			const response = await api
-				.delete<LeaveChannelResponse>(`api/v1/channels/${channelId}/leave`)
+				.delete<LeaveChannelResponse>(`api/v1/channels/${channelId}/leave/`)
 				.json();
 			return response;
 		},

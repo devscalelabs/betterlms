@@ -92,7 +92,7 @@ postsRouter.get(
 	},
 );
 
-postsRouter.get("/posts/:id", async (c) => {
+postsRouter.get("/posts/:id/", async (c) => {
 	// Optionally get userId if user is authenticated
 	let userId: string | undefined;
 	const token = c.req.header("authorization")?.split(" ")[1];
@@ -205,7 +205,7 @@ postsRouter.post(
 	},
 );
 
-postsRouter.delete("/posts/:id", async (c) => {
+postsRouter.delete("/posts/:id/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];
 
 	if (!token) {
@@ -254,7 +254,7 @@ postsRouter.delete("/posts/:id", async (c) => {
 	return c.json({ message: "Post deleted successfully" });
 });
 
-postsRouter.post("/posts/:id/like", async (c) => {
+postsRouter.post("/posts/:id/like/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];
 
 	if (!token) {
@@ -295,7 +295,7 @@ postsRouter.post("/posts/:id/like", async (c) => {
 	return c.json({ message: "Post liked successfully" }, 201);
 });
 
-postsRouter.delete("/posts/:id/like", async (c) => {
+postsRouter.delete("/posts/:id/like/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];
 
 	if (!token) {

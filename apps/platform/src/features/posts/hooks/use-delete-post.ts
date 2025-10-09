@@ -8,7 +8,7 @@ export const useDeletePost = () => {
 	const { mutate: deletePost, isPending: isDeletingPost } = useMutation({
 		mutationFn: async (postId: string) => {
 			const response = await api
-				.delete<DeletePostResponse>(`api/v1/posts/${postId}`)
+				.delete<DeletePostResponse>(`api/v1/posts/${postId}/`)
 				.json();
 			return response;
 		},

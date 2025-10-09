@@ -10,7 +10,7 @@ import { z } from "zod";
 
 const lessonsRouter = new Hono();
 
-lessonsRouter.get("/lessons/:lessonId", async (c) => {
+lessonsRouter.get("/lessons/:lessonId/", async (c) => {
 	const lessonId = c.req.param("lessonId");
 
 	const lesson = await findLessonById(lessonId);
@@ -28,7 +28,7 @@ lessonsRouter.get("/lessons/:lessonId", async (c) => {
 });
 
 lessonsRouter.put(
-	"/lessons/:lessonId",
+	"/lessons/:lessonId/",
 	zValidator(
 		"json",
 		z.object({

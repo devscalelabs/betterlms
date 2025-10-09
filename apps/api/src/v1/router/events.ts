@@ -31,7 +31,7 @@ eventsRouter.get(
 	},
 );
 
-eventsRouter.get("/events/:id", async (c) => {
+eventsRouter.get("/events/:id/", async (c) => {
 	const event = await findEventById(c.req.param("id"));
 
 	if (!event) {
@@ -112,7 +112,7 @@ eventsRouter.post(
 );
 
 eventsRouter.put(
-	"/events/:id",
+	"/events/:id/",
 	zValidator(
 		"json",
 		z.object({
@@ -196,7 +196,7 @@ eventsRouter.put(
 	},
 );
 
-eventsRouter.delete("/events/:id", async (c) => {
+eventsRouter.delete("/events/:id/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];
 
 	if (!token) {

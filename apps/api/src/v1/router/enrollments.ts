@@ -17,7 +17,7 @@ import { z } from "zod";
 const enrollmentsRouter = new Hono();
 
 enrollmentsRouter.get(
-	"/enrollments",
+	"/enrollments/",
 	zValidator(
 		"query",
 		z.object({
@@ -73,7 +73,7 @@ enrollmentsRouter.get(
 	},
 );
 
-enrollmentsRouter.get("/enrollments/my-enrollments", async (c) => {
+enrollmentsRouter.get("/enrollments/my-enrollments/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];
 
 	if (!token) {
@@ -91,7 +91,7 @@ enrollmentsRouter.get("/enrollments/my-enrollments", async (c) => {
 	return c.json({ enrollments });
 });
 
-enrollmentsRouter.get("/enrollments/:id", async (c) => {
+enrollmentsRouter.get("/enrollments/:id/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];
 
 	if (!token) {
@@ -140,7 +140,7 @@ enrollmentsRouter.get("/enrollments/:id", async (c) => {
 });
 
 enrollmentsRouter.post(
-	"/enrollments",
+	"/enrollments/",
 	zValidator(
 		"json",
 		z.object({
@@ -217,7 +217,7 @@ enrollmentsRouter.post(
 );
 
 enrollmentsRouter.put(
-	"/enrollments/:id/status",
+	"/enrollments/:id/status/",
 	zValidator(
 		"json",
 		z.object({
@@ -280,7 +280,7 @@ enrollmentsRouter.put(
 );
 
 enrollmentsRouter.put(
-	"/enrollments/:id/progress",
+	"/enrollments/:id/progress/",
 	zValidator(
 		"json",
 		z.object({
@@ -337,7 +337,7 @@ enrollmentsRouter.put(
 	},
 );
 
-enrollmentsRouter.delete("/enrollments/:id", async (c) => {
+enrollmentsRouter.delete("/enrollments/:id/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];
 
 	if (!token) {

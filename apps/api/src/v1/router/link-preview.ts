@@ -40,7 +40,7 @@ async function fetchOpenGraphData(url: string): Promise<OpenGraphData | null> {
 const linkPreviewRouter = new Hono();
 
 linkPreviewRouter.get(
-	"/link-preview",
+	"/link-preview/",
 	zValidator(
 		"query",
 		z.object({

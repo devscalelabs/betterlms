@@ -9,7 +9,7 @@ interface PostResponse {
 export const usePost = (postId: string) => {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["post", postId],
-		queryFn: () => api.get<PostResponse>(`api/v1/posts/${postId}`).json(),
+		queryFn: () => api.get<PostResponse>(`api/v1/posts/${postId}/`).json(),
 	});
 
 	return { post: data?.post, isLoading, error };

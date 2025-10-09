@@ -7,7 +7,7 @@ export const useEvent = (id: string) => {
 		queryKey: ["event", id],
 		queryFn: async () => {
 			const response = await api
-				.get<EventResponse>(`api/v1/events/${id}`)
+				.get<EventResponse>(`api/v1/events/${id}/`)
 				.json();
 			return response.event;
 		},

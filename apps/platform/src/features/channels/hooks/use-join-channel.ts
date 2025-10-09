@@ -8,7 +8,7 @@ export const useJoinChannel = () => {
 	const { mutate: joinChannel, isPending: isJoiningChannel } = useMutation({
 		mutationFn: async (channelId: string) => {
 			const response = await api
-				.post<JoinChannelResponse>(`api/v1/channels/${channelId}/join`)
+				.post<JoinChannelResponse>(`api/v1/channels/${channelId}/join/`)
 				.json();
 			return response;
 		},

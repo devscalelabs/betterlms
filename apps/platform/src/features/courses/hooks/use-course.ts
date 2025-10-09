@@ -9,7 +9,8 @@ export const useCourse = (courseId: string) => {
 		error,
 	} = useQuery({
 		queryKey: ["course", courseId],
-		queryFn: () => api.get<CourseResponse>(`api/v1/courses/${courseId}`).json(),
+		queryFn: () =>
+			api.get<CourseResponse>(`api/v1/courses/${courseId}/`).json(),
 		enabled: !!courseId,
 	});
 

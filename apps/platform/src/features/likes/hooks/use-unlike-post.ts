@@ -8,7 +8,7 @@ export const useUnlikePost = () => {
 	const { mutate: unlikePost, isPending: isUnlikingPost } = useMutation({
 		mutationFn: async (postId: string) => {
 			const response = await api
-				.delete<UnlikePostResponse>(`api/v1/posts/${postId}/like`)
+				.delete<UnlikePostResponse>(`api/v1/posts/${postId}/like/`)
 				.json();
 			return response;
 		},

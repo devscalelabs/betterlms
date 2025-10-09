@@ -8,7 +8,7 @@ export const useMarkNotificationRead = () => {
 	const markReadMutation = useMutation({
 		mutationFn: async (notificationId: string) => {
 			const response = await api
-				.put<MarkReadResponse>(`api/v1/notifications/${notificationId}/read`)
+				.put<MarkReadResponse>(`api/v1/notifications/${notificationId}/read/`)
 				.json();
 			return response;
 		},
@@ -23,7 +23,7 @@ export const useMarkNotificationRead = () => {
 	const markAllReadMutation = useMutation({
 		mutationFn: async () => {
 			const response = await api
-				.put<MarkAllReadResponse>("api/v1/notifications/read-all")
+				.put<MarkAllReadResponse>("api/v1/notifications/read-all/")
 				.json();
 			return response;
 		},

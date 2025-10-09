@@ -10,7 +10,7 @@ export const useMyEnrollments = () => {
 	} = useQuery({
 		queryKey: ["enrollments", "my-enrollments"],
 		queryFn: () =>
-			api.get<EnrollmentsResponse>("api/v1/enrollments/my-enrollments").json(),
+			api.get<EnrollmentsResponse>("api/v1/enrollments/my-enrollments/").json(),
 		enabled: !!localStorage.getItem("token"),
 	});
 

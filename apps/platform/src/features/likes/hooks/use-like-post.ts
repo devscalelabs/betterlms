@@ -8,7 +8,7 @@ export const useLikePost = () => {
 	const { mutate: likePost, isPending: isLikingPost } = useMutation({
 		mutationFn: async (postId: string) => {
 			const response = await api
-				.post<LikePostResponse>(`api/v1/posts/${postId}/like`)
+				.post<LikePostResponse>(`api/v1/posts/${postId}/like/`)
 				.json();
 			return response;
 		},
