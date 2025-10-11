@@ -1,3 +1,5 @@
+![Cover](assets/public.png)
+
 # BetterLMS
 
 > A modern Social Media + Learning Management System for creators to build private communities
