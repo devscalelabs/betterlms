@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm with-env tsx watch src/worker.ts",
     "build": "rm -rf dist && tsup",
-    "start": "node --env-file=../../.env dist/worker.js",
+    "start": "node dist/worker.js",
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
     "with-env": "dotenv -e ../../.env --"
