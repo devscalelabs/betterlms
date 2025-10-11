@@ -1,315 +1,85 @@
 # BetterLMS
 
-> A modern Social Media + Learning Management System built to help creators build private communities
+> A modern Social Media + Learning Management System for creators to build private communities
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.1-blue.svg)](https://reactjs.org/)
 [![Hono](https://img.shields.io/badge/Hono-4.0-green.svg)](https://hono.dev/)
 
-## 🚀 Overview
+## Overview
 
-BetterLMS is a comprehensive platform that combines social media features with learning management capabilities. It's designed to help content creators, educators, and community leaders build engaging private communities where they can share knowledge, interact with members, and deliver educational content.
+BetterLMS combines social media with LMS features for content creators to engage communities, share knowledge, and deliver education.
 
 ### Key Features
 
-- **📱 Social Media Features**
-  - Timeline-based content feed
-  - Post creation with rich text editor
-  - Like and comment system
-  - User profiles and following system
-  - Media upload and sharing
-  - User mention system (@username mentions)
-  - Link preview functionality
-  - Notification system
+- **Social Media**: Timeline feed, posts, likes, comments, profiles, mentions, notifications
+- **Learning**: Articles, courses, channels, enrollment
+- **Community**: Roles (Admin, Mentor, User), moderation, analytics
+- **Admin**: Dashboard, user/content management
 
-- **📚 Learning Management**
-  - Article creation and management
-  - Course organization and enrollment
-  - Channel-based content grouping
-  - Private and public communities
+## Architecture
 
-- **👥 Community Management**
-  - User roles (Admin, Mentor, User)
-  - Channel membership system
-  - Content moderation tools
-  - Analytics dashboard
-
-- **🔧 Admin Features**
-  - Comprehensive dashboard
-  - User management
-  - Content oversight
-  - Platform statistics
-
-## 🏗️ Architecture
-
-BetterLMS is built as a modern monorepo using a microservices architecture:
+Monorepo with microservices:
 
 ```
 betterlms/
-├── apps/
-│   ├── admin/          # Admin dashboard (React + Vite)
-│   ├── api/            # Backend API (Hono + TypeScript)
-│   ├── platform/       # Main platform (React + Vite)
-│   └── worker/         # Background job processor
-├── packages/
-│   ├── common/         # Shared utilities
-│   ├── core/           # Core business logic and services
-│   ├── database/       # Prisma ORM + PostgreSQL
-│   ├── email/          # Email service (Nodemailer)
-│   ├── storages/       # S3 file storage
-│   └── ui/             # Shared UI components
-└── tooling/            # Development tools and scripts
+├── apps/ (admin, api, platform, worker)
+├── packages/ (common, core, database, email, storages, ui)
+└── tooling/
 ```
 
-## 🛠️ Technology Stack
+## Tech Stack
 
-### Frontend
-- **React 19** - Modern React with latest features
-- **TypeScript** - Type-safe development
-- **Vite** - Fast build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **Radix UI** - Accessible component primitives
-- **TanStack Query** - Server state management
-- **React Router** - Client-side routing
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Radix UI, TanStack Query
+- **Backend**: Hono, TypeScript, Prisma, PostgreSQL, JWT, bcrypt
+- **Infra**: AWS S3, SMTP, pnpm
 
-### Backend
-- **Hono** - Fast, lightweight web framework
-- **TypeScript** - Type-safe server development
-- **Prisma** - Modern database ORM
-- **PostgreSQL** - Robust relational database
-- **JWT** - Secure authentication
-- **bcrypt** - Password hashing
-
-### Infrastructure
-- **AWS S3** - File storage and media hosting
-- **SMTP** - Email delivery service
-- **pnpm** - Fast, efficient package manager
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
+- Node.js 18+, pnpm, PostgreSQL, AWS S3, SMTP
 
-- Node.js 18+
-- pnpm
-- PostgreSQL database
-- AWS S3 bucket (for file storage)
-- SMTP email service
+### Setup
+1. Clone: `git clone https://github.com/devscalelabs/betterlms.git && cd betterlms`
+2. Install: `pnpm install`
+3. Env: Copy `.env.example` and configure
+4. DB: `pnpm db:generate && pnpm db:migrate && pnpm seed:all` (optional)
+5. Dev: `pnpm dev`
 
-### Installation
+## Project Structure
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/devscalelabs/betterlms.git
-   cd betterlms
-   ```
+- `apps/`: Admin, API, Platform, Worker
+- `packages/`: Database, UI, Core, Email, Storages, Common
+- `tooling/`: Scripts, TypeScript configs
 
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
+## Development
 
-3. **Environment Setup**
-   ```bash
-   cp .env.example .env
-   ```
+Scripts: `pnpm dev`, `pnpm api:dev`, etc.
+Database: `pnpm db:migrate`, `pnpm db:studio`
+Code: Biome for formatting/linting
 
-   Configure your `.env` file with:
-   ```env
-   # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/betterlms"
+## Security
 
-   # JWT
-   JWT_SECRET="your-jwt-secret"
+JWT auth, bcrypt hashing, CORS, Zod validation, Prisma ORM.
 
-   # AWS S3
-   AWS_ACCESS_KEY_ID="your-access-key"
-   AWS_SECRET_ACCESS_KEY="your-secret-key"
-   AWS_REGION="your-region"
-   AWS_S3_BUCKET="your-bucket-name"
+## Database
 
-   # Email
-   SMTP_HOST="your-smtp-host"
-   SMTP_PORT="587"
-   SMTP_USER="your-email"
-   SMTP_PASS="your-password"
+PostgreSQL with entities: Users, Posts, Channels, Articles, Media, Likes, Follows.
 
-   # Ports
-   BACKEND_PORT="8000"
-   ```
+## Deployment
 
-4. **Database Setup**
-   ```bash
-   # Generate Prisma client
-   pnpm db:generate
+Build: `pnpm --filter api build` etc.
+Configure env vars for production.
 
-   # Run migrations
-   pnpm db:migrate
+## Contributing
 
-   # Seed initial data (optional)
-   pnpm seed:all
-   ```
+Not accepting external contributors. For issues, fork for personal use.
 
-5. **Start Development Servers**
-   ```bash
-   # Start all services
-   pnpm dev
+## License
 
-   # Or start individually
-   pnpm api:dev      # Backend API (port 8000)
-   pnpm platform:dev # Main platform
-   pnpm admin:dev    # Admin dashboard
-   pnpm worker:dev   # Background worker
-   ```
+Licensed under MIT - see [LICENSE](LICENSE).
 
-## 📁 Project Structure
+## Acknowledgments
 
-### Apps
-
-- **`apps/admin/`** - Administrative dashboard for platform management
-- **`apps/api/`** - RESTful API server with authentication and business logic
-- **`apps/platform/`** - Main user-facing application
-- **`apps/worker/`** - Background job processor for asynchronous tasks
-
-### Packages
-
-- **`packages/database/`** - Database schema, migrations, and Prisma client
-- **`packages/ui/`** - Reusable UI components and design system
-- **`packages/common/`** - Shared utilities and helper functions
-- **`packages/core/`** - Core business logic and services
-- **`packages/email/`** - Email service integration
-- **`packages/storages/`** - File upload and storage management
-
-### Tooling
-
-- **`tooling/scripts/`** - Development and utility scripts
-- **`tooling/typescript/`** - TypeScript configuration presets
-
-### Key Features Implementation
-
-#### Authentication & Authorization
-- JWT-based authentication
-- Role-based access control (Admin, Mentor, User)
-- Protected routes and API endpoints
-
-#### Content Management
-- Rich text editor with TipTap
-- Media upload to S3
-- Article and post creation
-- Channel-based organization
-
-#### Social Features
-- User profiles and following system
-- Like and comment functionality
-- Timeline feed
-- User mention system (@username mentions)
-- Link preview functionality
-- Notification system
-
-## 🧪 Development
-
-### Available Scripts
-
-```bash
-# Development
-pnpm dev                 # Start all services
-pnpm api:dev            # Start API server only
-pnpm platform:dev       # Start platform only
-pnpm admin:dev          # Start admin dashboard only
-pnpm worker:dev         # Start background worker only
-
-# Database
-pnpm db:generate        # Generate Prisma client
-pnpm db:migrate         # Run database migrations
-pnpm db:reset           # Reset database
-pnpm db:studio          # Open Prisma Studio
-
-# Seeding
-pnpm seed:users         # Seed user data
-pnpm seed:content       # Seed content data
-pnpm seed:all           # Seed all data
-
-# Utilities
-pnpm createsuperuser    # Create admin user
-pnpm test:email         # Test email configuration
-pnpm reset:db           # Reset and seed database
-
-# Code Quality
-pnpm format             # Format code with Biome
-pnpm lint               # Lint code
-pnpm lint:fix           # Fix linting issues
-```
-
-### Code Style
-
-This project uses [Biome](https://biomejs.dev/) for code formatting and linting:
-
-- **Indentation**: Tabs
-- **Quotes**: Double quotes
-- **Semicolons**: Required
-- **Import organization**: Automatic
-
-## 🔒 Security
-
-- JWT-based authentication with secure token handling
-- Password hashing with bcrypt
-- CORS configuration for API security
-- Input validation with Zod schemas
-- SQL injection prevention with Prisma ORM
-
-## 📊 Database Schema
-
-The application uses PostgreSQL with the following main entities:
-
-- **Users** - User accounts with roles and profiles
-- **Posts** - Social media posts with threading support
-- **Channels** - Community groups (public/private)
-- **Articles** - Educational content
-- **Media** - File attachments and images
-- **Likes** - Post engagement tracking
-- **Follows** - User relationship system
-
-## 🚀 Deployment
-
-### Production Build
-
-```bash
-# Build all applications
-pnpm --filter api build
-pnpm --filter platform build
-pnpm --filter admin build
-```
-
-### Environment Variables
-
-Ensure all required environment variables are configured for production:
-
-- Database connection string
-- JWT secret key
-- AWS S3 credentials
-- SMTP email configuration
-- CORS origins for production domains
-
-## 🤝 Contributing
-
-**Note**: This project is currently not accepting external contributors. The codebase is provided for reference and educational purposes.
-
-If you're interested in the project or have questions, please feel free to:
-
-- Open issues for bug reports or feature requests
-- Fork the repository for your own use
-- Study the codebase for learning purposes
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with modern web technologies and best practices
-- Inspired by the need for better community-driven learning platforms
-- Thanks to all the open-source projects that made this possible
-
----
-
-**BetterLMS** - Empowering creators to build meaningful communities through technology.
+Built with modern tech, inspired by community learning needs.
