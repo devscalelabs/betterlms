@@ -11,7 +11,8 @@
 			"**/*.ts",
 			"!packages/ui/**/*.ts",
 			"!packages/ui/**/*.tsx",
-			"!packages/database/**/*.ts"
+			"!packages/database/**/*.ts",
+			"!**/dist/**/*"
 		],
 		"ignoreUnknown": false
 	},

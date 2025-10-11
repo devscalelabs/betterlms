@@ -19,18 +19,18 @@ import { profileRouter } from "./v1/router/profile";
 
 const app = new Hono();
 
-const ORIGIN = process.env.CORS_ORIGIN!.split(",");
+const ORIGIN = process.env.CORS_ORIGIN?.split(",");
 console.log(ORIGIN);
 
 // Middleware
 app.use("*", logger());
 app.use(
-  "*",
-  cors({
-    origin: ORIGIN,
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
-  }),
+	"*",
+	cors({
+		origin: ORIGIN,
+		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		allowHeaders: ["Content-Type", "Authorization"],
+	}),
 );
 
 // API v1 routes
@@ -52,24 +52,24 @@ app.route("/api/v1", profileRouter);
 
 // Health check endpoint
 app.get("/health", (c) => {
-  return c.json({ status: "ok", timestamp: new Date().toISOString() });
+	return c.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 // 404 handler
 app.notFound((c) => {
-  return c.json({ error: "Not Found" }, 404);
+	return c.json({ error: "Not Found" }, 404);
 });
 
 // Error handler
 app.onError((err, c) => {
-  console.error(`${err}`);
-  return c.json(
-    {
-      error: "Internal Server Error",
-      message: err.message,
-    },
-    500,
-  );
+	console.error(`${err}`);
+	return c.json(
+		{
+			error: "Internal Server Error",
+			message: err.message,
+		},
+		500,
+	);
 });
 
 export default app;
