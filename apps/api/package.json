@@ -1,7 +1,7 @@
 {
-  "name": "@better-openlms/apiv2",
+  "name": "api",
   "version": "1.0.0",
-  "description": "Better OpenLMS API v2 built with Hono framework",
+  "description": "BetterLMS API",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {

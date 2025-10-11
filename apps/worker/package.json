@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/worker.ts",
+  "license": "MIT",
   "scripts": {
     "dev": "pnpm with-env tsx watch src/worker.ts",
     "build": "rm -rf dist && tsup",
@@ -13,7 +14,6 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@betterlms/database": "workspace:*",
     "@betterlms/typescript": "workspace:*",

@@ -2,7 +2,7 @@
 
 > A modern Social Media + Learning Management System built to help creators build private communities
 
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.1-blue.svg)](https://reactjs.org/)
 [![Hono](https://img.shields.io/badge/Hono-4.0-green.svg)](https://hono.dev/)
@@ -46,7 +46,7 @@ BetterLMS is a comprehensive platform that combines social media features with l
 BetterLMS is built as a modern monorepo using a microservices architecture:
 
 ```
-better-openlms/
+betterlms/
 ├── apps/
 │   ├── admin/          # Admin dashboard (React + Vite)
 │   ├── api/            # Backend API (Hono + TypeScript)
@@ -100,8 +100,8 @@ better-openlms/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-org/better-openlms.git
-   cd better-openlms
+   git clone https://github.com/devscalelabs/betterlms.git
+   cd betterlms
    ```
 
 2. **Install dependencies**
@@ -302,7 +302,7 @@ If you're interested in the project or have questions, please feel free to:
 
 ## 📄 License
 
-This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 

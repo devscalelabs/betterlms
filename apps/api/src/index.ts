@@ -19,8 +19,7 @@ import { profileRouter } from "./v1/router/profile";
 
 const app = new Hono();
 
-const ORIGIN = process.env.CORS_ORIGIN?.split(",");
-console.log(ORIGIN);
+const ORIGIN = process.env.CORS_ORIGIN!.split(",");
 
 // Middleware
 app.use("*", logger());
