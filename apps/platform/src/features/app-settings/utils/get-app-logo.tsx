@@ -1,4 +1,3 @@
-import React from "react";
 import type { AppSettings } from "../types";
 
 interface GetAppLogoProps {
