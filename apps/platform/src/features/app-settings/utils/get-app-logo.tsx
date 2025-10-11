@@ -26,13 +26,13 @@ export const GetAppLogo = ({
 	// If appName exists and appLogo exists, use appLogo
 	if (settings?.appName && settings?.appLogoUrl) {
 		return (
-			<img
-				src={settings.appLogoUrl}
-				alt="App Logo"
-				className={imgClassName}
-				onClick={handleClick}
-				style={{ cursor: onLogoClick ? "pointer" : "default" }}
-			/>
+			<div onClick={handleClick} className="cursor-pointer">
+				<img
+					src={settings.appLogoUrl}
+					alt="App Logo"
+					className={imgClassName}
+				/>
+			</div>
 		);
 	}
 

@@ -22,12 +22,14 @@
     "createsuperuser": "pnpm --filter scripts createsuperuser",
     "format": "pnpm exec biome format --write",
     "lint": "pnpm exec biome lint",
-    "lint:fix": "pnpm exec biome lint --write --unsafe"
+    "lint:fix": "pnpm exec biome lint --write --unsafe",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@biomejs/biome": "2.2.5"
+    "@biomejs/biome": "2.2.5",
+    "husky": "^9.1.7"
   }
 }

@@ -256,8 +256,6 @@ export const PostCard = ({ post, isDetailView = false }: PostCardProps) => {
 
 					{/* Reply Form */}
 					{showReplyForm && (
-						// biome-ignore lint/a11y/noStaticElementInteractions: This is a static element that is used to stop event propagation
-						// biome-ignore lint/a11y/useKeyWithClickEvents: onClick is used to stop event propagation, not for interaction
 						<div
 							className="mt-3 pl-2 border-l-2 border-border"
 							onClick={(e) => e.stopPropagation()}
