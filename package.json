@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "pnpm --parallel dev",
+    "build": "pnpm --parallel build",
+    "start": "pnpm --parallel start",
     "platform:dev": "pnpm --filter platform dev",
     "api:dev": "pnpm --filter api dev",
     "db:generate": "pnpm --filter @betterlms/database db:generate",

@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": "./dist/index.js"
   },
   "scripts": {
     "db:generate": "pnpm with-env prisma migrate dev --create-only",
@@ -23,7 +24,8 @@
   },
   "devDependencies": {
     "@betterlms/typescript": "workspace:*",
-    "@types/node": "^24.6.2",
-    "typescript": "^5.9.3"
+    "@types/node": "24.6.2",
+    "tsup": "^8.5.0",
+    "typescript": "5.9.3"
   }
 }

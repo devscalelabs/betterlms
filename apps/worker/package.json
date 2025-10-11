@@ -5,11 +5,8 @@
   "main": "src/worker.ts",
   "scripts": {
     "dev": "pnpm with-env tsx watch src/worker.ts",
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "build:clean": "rm -rf dist",
-    "build:clean-build": "pnpm build:clean && pnpm build",
-    "start": "NODE_ENV=production node dist/worker.js",
+    "build": "rm -rf dist && tsup",
+    "start": "node --env-file=../../.env dist/worker.js",
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
     "with-env": "dotenv -e ../../.env --"
@@ -21,12 +18,13 @@
     "@betterlms/database": "workspace:*",
     "@betterlms/typescript": "workspace:*",
     "@types/node": "^24.6.2",
+    "tsup": "^8.5.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "dotenv": "^17.2.3",
     "bullmq": "^5.61.0",
-		"ioredis": "^5.8.1"
-	}
+    "dotenv": "^17.2.3",
+    "ioredis": "^5.8.1"
+  }
 }
