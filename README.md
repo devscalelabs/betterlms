@@ -9,7 +9,8 @@
 [![React](https://img.shields.io/badge/React-19.1-blue.svg)](https://reactjs.org/)
 [![Hono](https://img.shields.io/badge/Hono-4.0-green.svg)](https://hono.dev/)
 
-[!IMPORTANT] This project is still in development and not ready for production use.
+> [!WARNING]
+> This project is still in development and not ready for production use.
 
 ## Overview
 
