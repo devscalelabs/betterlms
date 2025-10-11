@@ -155,7 +155,12 @@ postsRouter.post(
 			content: z.string().min(1).max(5000),
 			channelId: z.string().optional(),
 			parentId: z.string().optional(),
-			images: z.array(z.instanceof(File)).optional(),
+			images: z
+				.union([
+					z.array(z.instanceof(File)),
+					z.instanceof(File).transform((file) => [file]),
+				])
+				.optional(),
 		}),
 	),
 	async (c) => {

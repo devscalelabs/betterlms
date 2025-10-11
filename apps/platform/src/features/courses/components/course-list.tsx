@@ -1,5 +1,13 @@
+import { Video } from "lucide-react";
 import { useCourses } from "../hooks/use-courses";
 import { CourseCard } from "./course-card";
+import {
+	Empty,
+	EmptyHeader,
+	EmptyDescription,
+	EmptyMedia,
+	EmptyTitle,
+} from "@betterlms/ui";
 
 interface CourseListProps {
 	instructorId?: string;
@@ -48,25 +56,27 @@ export const CourseList = ({
 		);
 	}
 
-	if (courses.length === 0) {
-		return (
-			<div className="flex flex-col items-center justify-center py-12 text-center">
-				<div className="text-6xl mb-4">📚</div>
-				<h3 className="text-lg font-semibold mb-2">No courses found</h3>
-				<p className="text-muted-foreground">
-					{isPublished === false
-						? "No draft courses available"
-						: "No published courses available at the moment"}
-				</p>
-			</div>
-		);
-	}
-
 	return (
-		<div className="grid grid-cols-1 gap-6 p-6">
-			{courses.map((course) => (
-				<CourseCard key={course.id} course={course} />
-			))}
-		</div>
+		<>
+			<div className="grid grid-cols-1 gap-6 p-6">
+				{courses.map((course) => (
+					<CourseCard key={course.id} course={course} />
+				))}
+			</div>
+
+			{courses.length === 0 && (
+				<Empty>
+					<EmptyHeader>
+						<EmptyMedia variant="icon">
+							<Video />
+						</EmptyMedia>
+						<EmptyTitle>No Notification</EmptyTitle>
+						<EmptyDescription>
+							All notifications have been would shown here.
+						</EmptyDescription>
+					</EmptyHeader>
+				</Empty>
+			)}
+		</>
 	);
 };

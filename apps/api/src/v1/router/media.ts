@@ -11,7 +11,10 @@ mediaRouter.post(
 	zValidator(
 		"form",
 		z.object({
-			images: z.array(z.instanceof(File)),
+			images: z.union([
+				z.array(z.instanceof(File)),
+				z.instanceof(File).transform((file) => [file]),
+			]),
 		}),
 	),
 	async (c) => {

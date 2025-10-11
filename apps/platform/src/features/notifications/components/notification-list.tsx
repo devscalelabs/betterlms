@@ -1,8 +1,16 @@
-import { Button } from "@betterlms/ui";
+import {
+	Button,
+	Empty,
+	EmptyDescription,
+	EmptyMedia,
+	EmptyTitle,
+	EmptyHeader,
+} from "@betterlms/ui";
 import { HeadingBox } from "@/components/shared/heading-box";
 import { useMarkNotificationRead } from "../hooks/use-mark-notification-read";
 import { useNotifications } from "../hooks/use-notifications";
 import { NotificationItem } from "./notification-item";
+import { Bell } from "lucide-react";
 
 export const NotificationList = () => {
 	const { notifications, unreadCount, isLoadingNotifications } =
@@ -23,19 +31,6 @@ export const NotificationList = () => {
 						</div>
 					</div>
 				))}
-			</div>
-		);
-	}
-
-	if (notifications.length === 0) {
-		return (
-			<div className="flex flex-col items-center justify-center py-12 text-center">
-				<div className="text-4xl mb-4">🔔</div>
-				<h3 className="text-lg font-semibold mb-2">No notifications yet</h3>
-				<p className="text-muted-foreground text-sm">
-					You'll see notifications here when someone interacts with your
-					content.
-				</p>
 			</div>
 		);
 	}
@@ -69,6 +64,20 @@ export const NotificationList = () => {
 					<NotificationItem key={notification.id} notification={notification} />
 				))}
 			</div>
+
+			{notifications.length === 0 && (
+				<Empty>
+					<EmptyHeader>
+						<EmptyMedia variant="icon">
+							<Bell />
+						</EmptyMedia>
+						<EmptyTitle>No Notification</EmptyTitle>
+						<EmptyDescription>
+							All notifications have been would shown here.
+						</EmptyDescription>
+					</EmptyHeader>
+				</Empty>
+			)}
 		</div>
 	);
 };

@@ -48,14 +48,15 @@ export const EventList = () => {
 
 	if (!events || events.length === 0) {
 		return (
-			<Card className="p-6">
-				<div className="flex flex-col items-center justify-center py-12">
-					<div className="text-muted-foreground text-center">
-						<h3 className="text-lg font-semibold mb-2">No events available</h3>
-						<p>Check back later for upcoming events</p>
+			<div className="p-6">
+				<Card className="p-6">
+					<div className="flex flex-col items-center justify-center py-12">
+						<div className="text-muted-foreground text-center">
+							<p className="text-sm font-medium mb-1">No events available</p>
+						</div>
 					</div>
-				</div>
-			</Card>
+				</Card>
+			</div>
 		);
 	}
 
