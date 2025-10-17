@@ -27,6 +27,33 @@ export async function findPublicChannels() {
 	});
 }
 
+export async function findAllChannels() {
+	return await prisma.channel.findMany({
+		include: {
+			members: {
+				include: {
+					user: {
+						select: {
+							id: true,
+							name: true,
+							username: true,
+							imageUrl: true,
+						},
+					},
+				},
+			},
+			_count: {
+				select: {
+					posts: true,
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+}
+
 export async function createChannel(name: string, isPrivate: boolean) {
 	return await prisma.channel.create({
 		data: {

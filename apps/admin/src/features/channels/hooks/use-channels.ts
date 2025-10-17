@@ -6,7 +6,9 @@ export const useChannels = () => {
 	const { data: channelsData, isLoading: isLoadingChannels } = useQuery({
 		queryKey: ["channels"],
 		queryFn: () => {
-			return api.get<ChannelsResponse>("api/v1/channels/").json();
+			return api
+				.get<ChannelsResponse>("api/v1/channels/?includePrivate=1")
+				.json();
 		},
 	});
 

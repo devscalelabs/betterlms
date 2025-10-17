@@ -12,6 +12,12 @@ export interface ChannelMember {
 	userId: string;
 	channelId: string;
 	joinedAt: string;
+	user?: {
+		id: string;
+		name: string;
+		username: string;
+		imageUrl?: string | null;
+	};
 }
 
 export interface CreateChannelRequest {
