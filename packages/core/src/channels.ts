@@ -101,3 +101,17 @@ export async function removeChannelMember(userId: string, channelId: string) {
 		},
 	});
 }
+
+export async function updateChannel(
+	id: string,
+	data: { name?: string; isPrivate?: boolean },
+) {
+	const updateData: { name?: string; isPrivate?: boolean } = {};
+	if (data.name !== undefined) updateData.name = data.name;
+	if (data.isPrivate !== undefined) updateData.isPrivate = data.isPrivate;
+
+	return await prisma.channel.update({
+		where: { id },
+		data: updateData,
+	});
+}

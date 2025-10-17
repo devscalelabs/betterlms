@@ -5,6 +5,7 @@ import {
 	findChannelMember,
 	findPublicChannels,
 	removeChannelMember,
+	updateChannel,
 	verifyToken,
 } from "@betterlms/core";
 import { zValidator } from "@hono/zod-validator";
@@ -89,6 +90,50 @@ channelsRouter.get("/channels/:id/", async (c) => {
 
 	return c.json({ channel });
 });
+
+channelsRouter.put(
+	"/channels/:id/",
+	zValidator(
+		"json",
+		z.object({
+			name: z.string().min(1).max(100).optional(),
+			isPrivate: z.boolean().optional(),
+		}),
+	),
+	async (c) => {
+		const token = c.req.header("authorization")?.split(" ")[1];
+
+		if (!token) {
+			return c.json(
+				{
+					error: "Unauthorized",
+				},
+				401,
+			);
+		}
+
+		await verifyToken(token);
+		const body = c.req.valid("json");
+		const id = c.req.param("id");
+
+		const existing = await findChannelById(id);
+		if (!existing) {
+			return c.json(
+				{
+					error: "Channel not found",
+				},
+				404,
+			);
+		}
+
+		const channel = await updateChannel(id, {
+			name: body.name,
+			isPrivate: body.isPrivate,
+		});
+
+		return c.json({ channel });
+	},
+);
 
 channelsRouter.post("/channels/:id/join/", async (c) => {
 	const token = c.req.header("authorization")?.split(" ")[1];

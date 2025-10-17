@@ -1,13 +1,13 @@
-import { Video } from "lucide-react";
-import { useCourses } from "../hooks/use-courses";
-import { CourseCard } from "./course-card";
 import {
 	Empty,
-	EmptyHeader,
 	EmptyDescription,
+	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@betterlms/ui";
+import { Video } from "lucide-react";
+import { useCourses } from "../hooks/use-courses";
+import { CourseCard } from "./course-card";
 
 interface CourseListProps {
 	instructorId?: string;
@@ -73,7 +73,7 @@ export const CourseList = ({
 	}
 
 	return (
-		<div className="grid grid-cols-1 gap-6">
+		<div className="grid grid-cols-1 gap-6 p-6">
 			{courses.map((course) => (
 				<CourseCard key={course.id} course={course} />
 			))}
