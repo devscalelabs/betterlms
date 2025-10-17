@@ -19,21 +19,11 @@ export const AppSettingsForm = () => {
 		enableComments?: boolean;
 		enableLikes?: boolean;
 		enableNotifications?: boolean;
-		smtpHost?: string;
-		smtpPort?: number;
-		smtpUser?: string;
-		smtpPassword?: string;
-		githubUrl?: string;
-		googleAnalyticsId?: string;
-		mixpanelToken?: string;
-		stripePublishableKey?: string;
-		stripeSecretKey?: string;
 		supportEmail?: string;
 		contactEmail?: string;
+		githubUrl?: string;
 		privacyPolicy?: string;
 		termsOfService?: string;
-		version?: string;
-		updatedBy?: string;
 	}>({
 		appName: "",
 		appLogoUrl: "",
@@ -43,20 +33,11 @@ export const AppSettingsForm = () => {
 		enableComments: true,
 		enableLikes: true,
 		enableNotifications: true,
-		smtpHost: "",
-		smtpUser: "",
-		smtpPassword: "",
-		githubUrl: "",
-		googleAnalyticsId: "",
-		mixpanelToken: "",
-		stripePublishableKey: "",
-		stripeSecretKey: "",
 		supportEmail: "",
 		contactEmail: "",
+		githubUrl: "",
 		privacyPolicy: "",
 		termsOfService: "",
-		version: "",
-		updatedBy: "",
 	});
 
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -70,20 +51,11 @@ export const AppSettingsForm = () => {
 	const enableCommentsId = useId();
 	const enableLikesId = useId();
 	const enableNotificationsId = useId();
-	const smtpHostId = useId();
-	const smtpPortId = useId();
-	const smtpUserId = useId();
-	const smtpPasswordId = useId();
 	const githubUrlId = useId();
-	const googleAnalyticsId = useId();
-	const mixpanelTokenId = useId();
-	const stripePublishableKeyId = useId();
-	const stripeSecretKeyId = useId();
 	const supportEmailId = useId();
 	const contactEmailId = useId();
 	const privacyPolicyId = useId();
 	const termsOfServiceId = useId();
-	const versionId = useId();
 
 	// Initialize form data when app settings are loaded
 	React.useEffect(() => {
@@ -97,21 +69,11 @@ export const AppSettingsForm = () => {
 				enableComments: appSettings.enableComments,
 				enableLikes: appSettings.enableLikes,
 				enableNotifications: appSettings.enableNotifications,
-				smtpHost: appSettings.smtpHost || "",
-				smtpUser: appSettings.smtpUser || "",
-				smtpPassword: appSettings.smtpPassword || "",
-				githubUrl: appSettings.githubUrl || "",
-				googleAnalyticsId: appSettings.googleAnalyticsId || "",
-				mixpanelToken: appSettings.mixpanelToken || "",
-				stripePublishableKey: appSettings.stripePublishableKey || "",
-				stripeSecretKey: appSettings.stripeSecretKey || "",
 				supportEmail: appSettings.supportEmail || "",
 				contactEmail: appSettings.contactEmail || "",
+				githubUrl: appSettings.githubUrl || "",
 				privacyPolicy: appSettings.privacyPolicy || "",
 				termsOfService: appSettings.termsOfService || "",
-				version: appSettings.version || "",
-				updatedBy: appSettings.updatedBy || "",
-				...(appSettings.smtpPort && { smtpPort: appSettings.smtpPort }),
 			});
 			setHasUnsavedChanges(false);
 		}
@@ -342,169 +304,6 @@ export const AppSettingsForm = () => {
 					</div>
 				</Card>
 
-				{/* Email Settings */}
-				<Card className="p-6">
-					<div className="mb-6">
-						<h2 className="text-xl font-semibold">Email Settings</h2>
-						<p className="text-sm text-muted-foreground">
-							SMTP configuration for sending emails
-						</p>
-					</div>
-					<div className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<label htmlFor={smtpHostId} className="text-sm font-medium">
-									SMTP Host
-								</label>
-								<Input
-									id={smtpHostId}
-									value={formData.smtpHost || ""}
-									onChange={(e) =>
-										handleInputChange("smtpHost", e.target.value)
-									}
-									placeholder="smtp.gmail.com"
-								/>
-							</div>
-							<div className="space-y-2">
-								<label htmlFor={smtpPortId} className="text-sm font-medium">
-									SMTP Port
-								</label>
-								<Input
-									id={smtpPortId}
-									type="number"
-									value={formData.smtpPort || ""}
-									onChange={(e) =>
-										handleInputChange("smtpPort", Number(e.target.value))
-									}
-									placeholder="587"
-								/>
-							</div>
-						</div>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<label htmlFor={smtpUserId} className="text-sm font-medium">
-									SMTP Username
-								</label>
-								<Input
-									id={smtpUserId}
-									value={formData.smtpUser || ""}
-									onChange={(e) =>
-										handleInputChange("smtpUser", e.target.value)
-									}
-									placeholder="your-email@gmail.com"
-								/>
-							</div>
-							<div className="space-y-2">
-								<label htmlFor={smtpPasswordId} className="text-sm font-medium">
-									SMTP Password
-								</label>
-								<Input
-									id={smtpPasswordId}
-									type="password"
-									value={formData.smtpPassword || ""}
-									onChange={(e) =>
-										handleInputChange("smtpPassword", e.target.value)
-									}
-									placeholder="your-app-password"
-								/>
-							</div>
-						</div>
-					</div>
-				</Card>
-
-				{/* Analytics & Tracking */}
-				<Card className="p-6">
-					<div className="mb-6">
-						<h2 className="text-xl font-semibold">Analytics & Tracking</h2>
-						<p className="text-sm text-muted-foreground">
-							Configure analytics and tracking services
-						</p>
-					</div>
-					<div className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<label
-									htmlFor={googleAnalyticsId}
-									className="text-sm font-medium"
-								>
-									Google Analytics ID
-								</label>
-								<Input
-									id={googleAnalyticsId}
-									value={formData.googleAnalyticsId || ""}
-									onChange={(e) =>
-										handleInputChange("googleAnalyticsId", e.target.value)
-									}
-									placeholder="GA-XXXXXXXXXX"
-								/>
-							</div>
-							<div className="space-y-2">
-								<label
-									htmlFor={mixpanelTokenId}
-									className="text-sm font-medium"
-								>
-									Mixpanel Token
-								</label>
-								<Input
-									id={mixpanelTokenId}
-									value={formData.mixpanelToken || ""}
-									onChange={(e) =>
-										handleInputChange("mixpanelToken", e.target.value)
-									}
-									placeholder="your-mixpanel-token"
-								/>
-							</div>
-						</div>
-					</div>
-				</Card>
-
-				{/* Payment Settings */}
-				<Card className="p-6">
-					<div className="mb-6">
-						<h2 className="text-xl font-semibold">Payment Settings</h2>
-						<p className="text-sm text-muted-foreground">
-							Stripe configuration for payment processing
-						</p>
-					</div>
-					<div className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<label
-									htmlFor={stripePublishableKeyId}
-									className="text-sm font-medium"
-								>
-									Stripe Publishable Key
-								</label>
-								<Input
-									id={stripePublishableKeyId}
-									value={formData.stripePublishableKey || ""}
-									onChange={(e) =>
-										handleInputChange("stripePublishableKey", e.target.value)
-									}
-									placeholder="pk_live_..."
-								/>
-							</div>
-							<div className="space-y-2">
-								<label
-									htmlFor={stripeSecretKeyId}
-									className="text-sm font-medium"
-								>
-									Stripe Secret Key
-								</label>
-								<Input
-									id={stripeSecretKeyId}
-									type="password"
-									value={formData.stripeSecretKey || ""}
-									onChange={(e) =>
-										handleInputChange("stripeSecretKey", e.target.value)
-									}
-									placeholder="sk_live_..."
-								/>
-							</div>
-						</div>
-					</div>
-				</Card>
-
 				{/* Contact Information */}
 				<Card className="p-6">
 					<div className="mb-6">
@@ -583,31 +382,6 @@ export const AppSettingsForm = () => {
 								}
 								placeholder="https://myapp.com/terms"
 							/>
-						</div>
-					</div>
-				</Card>
-
-				{/* Metadata */}
-				<Card className="p-6">
-					<div className="mb-6">
-						<h2 className="text-xl font-semibold">Metadata</h2>
-						<p className="text-sm text-muted-foreground">
-							Version and update information
-						</p>
-					</div>
-					<div className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<label htmlFor={versionId} className="text-sm font-medium">
-									Version
-								</label>
-								<Input
-									id={versionId}
-									value={formData.version || ""}
-									onChange={(e) => handleInputChange("version", e.target.value)}
-									placeholder="1.0.0"
-								/>
-							</div>
 						</div>
 					</div>
 				</Card>
