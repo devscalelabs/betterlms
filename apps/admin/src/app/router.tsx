@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { ProtectedRoute } from "../components/protected-route";
 import { AppSettingsPageWrapper } from "../pages/app-settings";
 import { ArticlesPage } from "../pages/articles";
+import { ChannelMembersPage } from "../pages/channel-members";
 import { ChannelsPage } from "../pages/channels";
 import { CoursesPage } from "../pages/courses";
 import { CreateArticlePage } from "../pages/create-article";
@@ -130,6 +131,14 @@ export const AppRouter = () => {
 					element={
 						<ProtectedRoute>
 							<ChannelsPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/dashboard/channels/:id/members"
+					element={
+						<ProtectedRoute>
+							<ChannelMembersPage />
 						</ProtectedRoute>
 					}
 				/>

@@ -10,7 +10,7 @@ export const useChannel = ({ id }: UseChannelOptions) => {
 	const { data: channelData, isLoading: isLoadingChannel } = useQuery({
 		queryKey: ["channels", id],
 		queryFn: () => {
-			return api.get<ChannelResponse>(`api/v1/channels/${id}`).json();
+			return api.get<ChannelResponse>(`api/v1/channels/${id}/`).json();
 		},
 		enabled: !!id,
 	});
